@@ -54,7 +54,7 @@
                                 ></v-select>
                             </v-col>
                             <v-col cols="12" md="6">
-                                <v-row class="mt-4" style="width:300px; float:right">
+                                <v-row class="mt-4" style="width:350px; float:right">
                                     <v-col class="text-center">
                                         Today
                                     </v-col>
@@ -73,46 +73,12 @@
                                 item-key="ikey"
                                 activatable
                             >
-                                <template v-slot:append="{ item }">
-                                    <v-row v-if="item.level > 0" style="width: 300px">
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label="Hr"
-                                                @change="setHr($event, item)"
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label="Min"
-                                                @change="setMin($event, item)"
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label=""
-                                                @change="setPct($event, item)"
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label=""
-                                                @change="setTotalPct($event, item)"
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label="Hr"
-                                                disabled
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col class="py-0 my-0">
-                                            <v-text-field
-                                                label="Min"
-                                                disabled
-                                            ></v-text-field>
-                                        </v-col>
-                                    </v-row>
-                                </template>
+                            <template v-slot:append="{ item }">
+                                <InputGroup 
+                                v-bind:item="item"
+                                style="width:350px">
+                                </InputGroup>
+                            </template>
                             </v-treeview>
                         </v-col>
                     </v-row>
@@ -136,8 +102,13 @@
     import api from "@/apis/project.js";
     import client_api from "@/apis/client.js";
     import daily_api from "@/apis/daily.js";
+    import InputGroup from './InputGroup'
 
     export default {
+        components: {
+            InputGroup
+        },
+
         data: () => ({
             wait: false,
             projects: [],
@@ -183,12 +154,13 @@
 
                 this.treeItems = []
                 project.phases.length > 0 && project.phases.forEach(item => {
-                    item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems)
+                    item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems, 1)
                     item.serverItems.length > 0 && item.serverItems.forEach(item1 => {
                         this.treeItems.push(item1)
                     })
                 })
                 
+                console.log("treeItems", this.treeItems)                
                 this.wait = false
             },
 
@@ -196,30 +168,35 @@
                 this.projects = this.allProjects.filter(item => item.prj_name.toUpperCase().includes(event.toUpperCase()))
             },
 
-            setIkeyAndName: function(items) {
+            setIkeyAndName: function(items, ikey) {
                 items.forEach((item, index) => {
                     if (item.level == 0) {
-                        item.ikey = index
+                        item.ikey = ikey
                     }else if (item.level == 1) {
                         item.name = item.TL1_name
-                        item.ikey = 100 + index
+                        item.ikey = ikey
                     } else if (item.level == 2) {
                         item.name = item.TL2_name
-                        item.ikey = 200 + index
+                        item.ikey = ikey
                     } else if (item.level == 3) {
                         item.name = item.TL3_name
-                        item.ikey = 300 + index
+                        item.ikey = ikey
                     } else {
                         item.name = item.TL4_name
                         item.level = 4
-                        item.ikey = 400 + index
+                        item.ikey = ikey
                     }
                     item.hr = ''
                     item.min = ''
                     item.pct = ''
                     item.totalPct = ''
-                    item.children && item.children.length > 0 && this.setIkeyAndName(item.children)
+                    ikey++
+
+                    if (item.children && item.children.length > 0) {
+                        ikey = this.setIkeyAndName(item.children, ikey)
+                    } 
                 })
+                return ikey
             },
 
             saveBtnClicked: async function() {
@@ -263,22 +240,6 @@
                 // console.log("data3", data3)
                 // console.log("data4", data4)
                 this.wait = false
-            },
-
-            setHr: function(event, item) {
-                item.hr = event
-            },
-
-            setMin: function(event, item) {
-                item.min = event
-            },
-
-            setPct: function(event, item) {
-                item.pct = event
-            },
-
-            setTotalPct: function(event, item) {
-                item.totalPct = event
             },
 
             getItemsByLevel(items, data1, data2, data3, data4) {
