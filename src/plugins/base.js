@@ -2,6 +2,10 @@ import Vue from 'vue'
 import upperFirst from 'lodash/upperFirst'
 import camelCase from 'lodash/camelCase'
 
+import VueApexCharts from 'vue-apexcharts'
+Vue.use(VueApexCharts)
+Vue.component('apexchart', VueApexCharts)
+
 const requireComponent = require.context(
   '@/components/base', true, /\.vue$/,
 )

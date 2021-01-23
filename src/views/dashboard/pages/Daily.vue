@@ -11,7 +11,7 @@
                     <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-text-field
                             filled
-                            label="Append"
+                            label="Search"
                             append-icon="mdi-magnify"
                             @change="searchKeyChange($event)"
                         ></v-text-field>
@@ -22,6 +22,14 @@
                                 <v-list-item-content v-on:click="project_listItemClicked(item)">
                                     <v-list-item-title v-text="item.prj_name"></v-list-item-title>
                                 </v-list-item-content>
+                                <!-- <v-list-item-icon>
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="green"
+                                        :width="2"
+                                        :size="24"
+                                    ></v-progress-circular>
+                                </v-list-item-icon> -->
                             </v-list-item>
                         </v-list-item-group>
                     </v-list>
@@ -73,6 +81,13 @@
                                 item-key="ikey"
                                 activatable
                             >
+                            <template v-slot:prepend="{ item }">
+                                <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
+                                <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
+                                <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
+                                <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
+                                <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                            </template>
                             <template v-slot:append="{ item }">
                                 <InputGroup 
                                 v-bind:item="item"
@@ -169,7 +184,7 @@
             },
 
             setIkeyAndName: function(items, ikey) {
-                items.forEach((item, index) => {
+                items.forEach((item) => {
                     if (item.level == 0) {
                         item.ikey = ikey
                     }else if (item.level == 1) {
@@ -192,6 +207,8 @@
                     item.totalPct = ''
                     ikey++
 
+                    item.userAction = "nochange"
+
                     if (item.children && item.children.length > 0) {
                         ikey = this.setIkeyAndName(item.children, ikey)
                     } 
@@ -204,58 +221,58 @@
                 console.log("supervisor", this.supervisor)
                 console.log("performer", this.performer)
 
-                let data1 = [], data2 = [], data3 = [], data4 = []
+                let status = [false, false, false, false]
                 console.log("treeItems", this.treeItems)
                 this.treeItems.length > 0 && this.treeItems.forEach(item => {
-                    this.getItemsByLevel(item, data1, data2, data3, data4)
+                    this.addToServer(item, status)
                 })
 
-                if (data1.length > 0)  {
-                    data1.forEach(async (item) => {
-                        await daily_api.add1(item)
-                    })
-                    await daily_api.update1()
+                if (status[0])  {
+                    // await daily_api.update1()
                 }
-                if (data2.length > 0)  {
-                    data2.forEach(async (item) => {
-                        await daily_api.add2(item)
-                    })
-                    await daily_api.update2()
+                if (status[1])  {
+                    // await daily_api.update2()
                 }
-                if (data3.length > 0)  {
-                    data3.forEach(async (item) => {
-                        await daily_api.add3(item)
-                    })
-                    await daily_api.update3()
+                if (status[2])  {
+                    // await daily_api.update3()
                 }
-                if (data4.length > 0)  {
-                    data4.forEach(async (item) => {
-                        await daily_api.add4(item)
-                    })
-                    await daily_api.update4()
+                if (status[3])  {
+                    // await daily_api.update4()
                 }
-                //getItemsByLevel(this.treeItems, data1, data2, data3)
-                // console.log("data1", data1)
-                // console.log("data2", data2)
-                // console.log("data3", data3)
-                // console.log("data4", data4)
                 this.wait = false
             },
 
-            getItemsByLevel(items, data1, data2, data3, data4) {
-                console.log("items", items)
+            addToServer: async function(items, status) {
+                console.log("item", items)
                 items.supervisor = this.supervisor
                 items.performer = this.performer
 
-                items.level == 1 && data1.push(items)
-                items.level == 2 && data2.push(items)
-                items.level == 3 && data3.push(items)
-                items.level == 4 && data4.push(items)
+                let addStatus = true
+                if (items.level == 1 && items.userAction == "nochange" && this.isFill(items)) {
+                    // addStatus = await daily_api.add1(item)
+                    addStatus && (items.userAction = "modified")
+                    status[0] = true
+                } else if (items.level == 2 && items.userAction == "nochange" && this.isFill(items)) {
+                    // addStatus = await daily_api.add2(item)
+                    addStatus && (items.userAction = "modified")
+                    status[1] = true
+                } else if (items.level == 3 && items.userAction == "nochange" && this.isFill(items)) {
+                    // addStatus = await daily_api.add3(item)
+                    addStatus && (items.userAction = "modified")
+                    status[2] = true
+                } else if (items.level == 4 && items.userAction == "nochange" && this.isFill(items)) {
+                    // addStatus =  await daily_api.add4(item)
+                    addStatus && (items.userAction = "modified")
+                    status[3] = true
+                }
 
                 items.children && items.children.length > 0 && items.children.forEach(item => {
-                    console.log("item", item)
-                    this.getItemsByLevel(item, data1, data2, data3, data4)
+                    this.addToServer(item, status)
                 })
+            },
+
+            isFill: function(item) {
+                return item.hr && item.min && item.pct && item.totalPct
             }
         }
     }

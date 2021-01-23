@@ -72,6 +72,11 @@ export default new Router({
           name: 'Daily Update',
           path: 'pages/daily',
           component: () => import('@/views/dashboard/pages/Daily'),
+        },
+        {
+          name: 'Progress',
+          path: 'pages/progress',
+          component: () => import('@/views/dashboard/pages/CheckProgress'),
         }
         // // Tables
         // {

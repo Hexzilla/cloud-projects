@@ -14,10 +14,12 @@
     "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
+    "apexcharts": "^3.23.1",
     "axios": "^0.21.1",
     "core-js": "^3.6.4",
     "moment": "^2.29.1",
     "vue": "^2.6.11",
+    "vue-apexcharts": "^1.6.0",
     "vue-i18n": "^8.15.3",
     "vue-router": "^3.1.6",
     "vuetify": "^2.2.11",

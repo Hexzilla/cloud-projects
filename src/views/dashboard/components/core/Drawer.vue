@@ -144,6 +144,11 @@
           icon: 'mdi-calendar',
           title: 'Daily Update',
           to: '/pages/daily'
+        },
+        {
+          icon: 'mdi-chart-line',
+          title: 'Progress',
+          to: '/pages/progress'
         }
 
         // {
