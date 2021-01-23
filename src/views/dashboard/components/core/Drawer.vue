@@ -149,6 +149,11 @@
           icon: 'mdi-chart-line',
           title: 'Progress',
           to: '/pages/progress'
+        },
+        {
+          icon: 'mdi-text-account',
+          title: 'Manpower',
+          to: '/pages/manpower'
         }
 
         // {

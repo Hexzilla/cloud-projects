@@ -22,14 +22,13 @@
                                 <v-list-item-content v-on:click="project_listItemClicked(item)">
                                     <v-list-item-title v-text="item.prj_name"></v-list-item-title>
                                 </v-list-item-content>
-                                <!-- <v-list-item-icon>
-                                    <v-progress-circular
-                                        indeterminate
-                                        color="green"
-                                        :width="2"
-                                        :size="24"
-                                    ></v-progress-circular>
-                                </v-list-item-icon> -->
+                                <v-progress-circular
+                                    v-if="waitProject == item"
+                                    indeterminate
+                                    color="teal"
+                                    :width="2"
+                                    :size="24"
+                                ></v-progress-circular>
                             </v-list-item>
                         </v-list-item-group>
                     </v-list>
@@ -136,7 +135,8 @@
             treeItems: [],
             performer: null,
             performers: [],
-            allPerformers: []
+            allPerformers: [],
+            waitProject: null
         }),
         
         created: async function() {
@@ -165,6 +165,7 @@
             project_listItemClicked: async function(project) {
                 this.wait = true
                 this.selectedProject = project
+                this.waitProject = project
                 await api.updateTaskList(project)
 
                 this.treeItems = []
@@ -175,7 +176,8 @@
                     })
                 })
                 
-                console.log("treeItems", this.treeItems)                
+                console.log("treeItems", this.treeItems)       
+                this.waitProject = null         
                 this.wait = false
             },
 

@@ -25,43 +25,50 @@
                             </v-col>
                         </v-row>
                     </v-card-title>
-                        <template v-for="(item, i) in this.phases">
-                            <v-container>
-                                <v-row>
-                                    <v-col>
-                                        <p class="subtitle-1 mb-0" style="color:#1867c0; font-size: 20px !important;"><b>{{ `Phase ${i + 1}` }}</b></p>
-                                        <p class="title mb-0 text--disabled">
-                                            {{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}
-                                        </p>
-                                    </v-col>
-                                </v-row>
-                                <v-row>
-                                    <v-col>
-                                        <v-treeview
-                                            :open="initiallyOpen"
-                                            :items="item.serverItems"
-                                            item-key="ikey"
-                                            activatable
+                    <v-container>
+                        <v-row>
+                            <v-col>
+                                <p class="mb-0" style="color:#1867c0; font-size: 24px; font-weight: bold;">{{ project && project.prj_name }}</p>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <template v-for="(item, i) in this.phases">
+                        <v-container class="ml-3">
+                            <v-row>
+                                <v-col>
+                                    <p class="subtitle-1 mb-0" style="color:#1867c0; font-size: 20px !important;"><b>{{ `Phase ${i + 1}` }}</b></p>
+                                    <p class="title mb-0 text--disabled">
+                                        {{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}
+                                    </p>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col>
+                                    <v-treeview
+                                        :open="initiallyOpen"
+                                        :items="item.serverItems"
+                                        item-key="ikey"
+                                        activatable
+                                    >
+                                    <template v-slot:prepend="{ item }">
+                                        <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
+                                        <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                    </template>
+                                    <template v-slot:append="{ item }">
+                                        <ProgressChart
+                                            v-bind:item = item
+                                            v-if="item.level > 0"
                                         >
-                                        <template v-slot:prepend="{ item }">
-                                            <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                            <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
-                                        </template>
-                                        <template v-slot:append="{ item }">
-                                            <ProgressChart
-                                                v-bind:item = item
-                                                v-if="item.level > 0"
-                                            >
-                                            </ProgressChart>
-                                        </template>
-                                        </v-treeview>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </template>
+                                        </ProgressChart>
+                                    </template>
+                                    </v-treeview>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </template>
                 </v-card>
             </v-col>
         </v-row>

@@ -14,10 +14,10 @@
                 Mins
             </v-col>
             <v-col class="px-0">
-                <apexchart type="pie" width="120" :options="pieOptions" :series="pieSeries"></apexchart>
+                <apexchart type="pie" width="90" :options="pieOptions" :series="pieSeries"></apexchart>
             </v-col>
             <v-col class="px-0">
-                <apexchart type="donut" width="120" :options="doughnutOptions" :series="doughnutSeries"></apexchart>
+                <apexchart type="donut" width="90" :options="doughnutOptions" :series="doughnutSeries"></apexchart>
             </v-col>
         </v-row>
     </v-container>
@@ -31,13 +31,16 @@ export default {
 
     data: () => ({            
         //---- chart
-        pieSeries: [80, 20],
+        pieSeries: [50, 20, 30],
         pieOptions: {
             chart: {
                 width: 100,
                 type: 'pie',
             },
-            labels: ['Progress', 'Remain'],
+            // labels: ['Progress', 'Remain'],
+            dataLabels: {
+                enabled: false
+            },
             legend: {
                 show: false
             }

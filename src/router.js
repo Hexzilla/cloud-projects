@@ -77,6 +77,11 @@ export default new Router({
           name: 'Progress',
           path: 'pages/progress',
           component: () => import('@/views/dashboard/pages/CheckProgress'),
+        },
+        {
+          name: 'ManPower utilization',
+          path: 'pages/manpower',
+          component: () => import('@/views/dashboard/pages/Manpower'),
         }
         // // Tables
         // {
