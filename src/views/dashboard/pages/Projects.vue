@@ -1,8 +1,9 @@
 <template>
     <v-container id="regular-tables" tag="section" fluid>
         <v-progress-linear
+            class="mb-1"
             indeterminate
-            color="teal darken-2"
+            color="green"
             v-if="wait">
         </v-progress-linear>
         <v-row>
@@ -80,7 +81,7 @@
                         </v-row>
                         <v-row>
                             <DatePicker
-                                textName="Date From"
+                                textName="Date To"
                                 :date="phaseToDate"
                                 :submit="(date) => phaseToDate = date"
                                 :startDate="phaseFromDate"
@@ -101,7 +102,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 import api from "@/apis/project.js";
 import client_api from "@/apis/client.js";
 import ProjectDetails from './ProjectDetails'
@@ -137,9 +137,9 @@ export default {
 
     created: async function() {
         this.wait = true
-        this.projects = await api.getProjects()
         this.treeItems = await api.getTree()
         this.clients = await client_api.findAll()
+        this.projects = await api.getProjects()
         this.wait = false
     },
 
@@ -255,7 +255,7 @@ export default {
                 this.phaseDialog = false
                 this.wait = true
 
-                var newPhase =    {
+                var newPhase = {
                     "phase_opendate": this.phaseFromDate,
                     "phase_closedate": this.phaseToDate,
                     "phase_id": 0,
@@ -290,6 +290,25 @@ export default {
                 return Math.max.apply(Math, numbers)
             }
             return 0
+        },
+
+        savePhases: async function() {
+            this.wait = true
+            const project = this.selectedProject
+            const result = await api.phaseSet(project.prj_id, project.phases)
+            if (result) {
+                const updated = await api.getProjectWithPhase(project.prj_code)
+                if (updated && updated.length > 0) {
+                    const addedPhase = updated[0].phases.find(it => it.phaseNumber == number)
+                    if (!addedPhase) {
+                        console.log('Someting wrong [AddPhase]');
+                    }
+                    else {
+                        project.phases.push(addedPhase)
+                    }
+                }
+            }
+            this.wait = false
         },
     },
 };

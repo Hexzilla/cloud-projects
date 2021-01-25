@@ -2,7 +2,8 @@
     <v-container id="regular-tables" tag="section" fluid>
         <v-progress-linear
             indeterminate
-            color="teal darken-2"
+            class="mb-1"
+            color="green"
             v-if="wait">
         </v-progress-linear>
         <v-row>
@@ -38,7 +39,7 @@
                 <v-card class="my-0">
                     <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-row>
-                            <v-col cols="12" md="3">
+                            <v-col cols="12" md="2">
                                 <v-select
                                     v-model="supervisor"
                                     :items="supervisors"
@@ -49,7 +50,7 @@
                                     label="Supervisor"
                                 ></v-select>
                             </v-col>
-                            <v-col cols="12" md="3">
+                            <v-col cols="12" md="2">
                                 <v-select
                                     v-model="performer"
                                     :items="performers"
@@ -58,6 +59,19 @@
                                     item-text="firstname"
                                     item-value="id"
                                     label="Performer"
+                                    @change="performerChanged"
+                                ></v-select>
+                            </v-col>
+                            <v-col cols="12" md="2">
+                                <v-select
+                                    v-model="phase"
+                                    :items="phases"
+                                    attach
+                                    chips
+                                    label="Phase"
+                                    item-text="phaseNumber"
+                                    item-value="phaseNumber"
+                                    @change="phaseChanged"
                                 ></v-select>
                             </v-col>
                             <v-col cols="12" md="6">
@@ -89,6 +103,7 @@
                             </template>
                             <template v-slot:append="{ item }">
                                 <InputGroup 
+                                v-if="item.level > 0"
                                 v-bind:item="item"
                                 style="width:350px">
                                 </InputGroup>
@@ -136,7 +151,9 @@
             performer: null,
             performers: [],
             allPerformers: [],
-            waitProject: null
+            waitProject: null,
+            phase: null,
+            phases: []
         }),
         
         created: async function() {
@@ -166,19 +183,40 @@
                 this.wait = true
                 this.selectedProject = project
                 this.waitProject = project
+                
                 await api.updateTaskList(project)
 
+                // console.log("project", project)
+                this.phases = project.phases
+
                 this.treeItems = []
-                project.phases.length > 0 && project.phases.forEach(item => {
+                this.phases.length > 0 && this.phases.forEach((item) => {
                     item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems, 1)
-                    item.serverItems.length > 0 && item.serverItems.forEach(item1 => {
-                        this.treeItems.push(item1)
-                    })
+                    // item.serverItems.length > 0 && item.serverItems.forEach(item1 => {
+                    //     this.treeItems.push(item1)
+                    // })
+                    // this.treeItems.push(item)
                 })
-                
-                console.log("treeItems", this.treeItems)       
+                console.log("pahses", this.phases)       
+
+                this.performers.length > 0 && this.performers.forEach((item) => {
+                    item.phases = this.phases
+                })                
                 this.waitProject = null         
                 this.wait = false
+            },
+
+            performerChanged: function() {
+                const found = this.performers.find(element => element.id = this.performer)
+                console.log("found", found)
+                // this.phase = this.phases[0].phaseNumber
+                // this.treeItems = found.phases[0].serverItems
+            },
+
+            phaseChanged: function() {
+                if (!this.performer)
+                    return
+                alert(this.phase)
             },
 
             searchKeyChange: function(event) {
@@ -225,21 +263,21 @@
 
                 let status = [false, false, false, false]
                 console.log("treeItems", this.treeItems)
-                this.treeItems.length > 0 && this.treeItems.forEach(item => {
-                    this.addToServer(item, status)
+                this.treeItems.length > 0 && this.treeItems.forEach(async (item) => {
+                    await this.addToServer(item, status)
                 })
 
                 if (status[0])  {
-                    // await daily_api.update1()
+                    await daily_api.update1()
                 }
                 if (status[1])  {
-                    // await daily_api.update2()
+                    await daily_api.update2()
                 }
                 if (status[2])  {
-                    // await daily_api.update3()
+                    await daily_api.update3()
                 }
                 if (status[3])  {
-                    // await daily_api.update4()
+                    await daily_api.update4()
                 }
                 this.wait = false
             },
@@ -251,25 +289,25 @@
 
                 let addStatus = true
                 if (items.level == 1 && items.userAction == "nochange" && this.isFill(items)) {
-                    // addStatus = await daily_api.add1(item)
+                    addStatus = await daily_api.add1(items)
                     addStatus && (items.userAction = "modified")
                     status[0] = true
                 } else if (items.level == 2 && items.userAction == "nochange" && this.isFill(items)) {
-                    // addStatus = await daily_api.add2(item)
+                    addStatus = await daily_api.add2(items)
                     addStatus && (items.userAction = "modified")
                     status[1] = true
                 } else if (items.level == 3 && items.userAction == "nochange" && this.isFill(items)) {
-                    // addStatus = await daily_api.add3(item)
+                    addStatus = await daily_api.add3(items)
                     addStatus && (items.userAction = "modified")
                     status[2] = true
                 } else if (items.level == 4 && items.userAction == "nochange" && this.isFill(items)) {
-                    // addStatus =  await daily_api.add4(item)
+                    addStatus =  await daily_api.add4(items)
                     addStatus && (items.userAction = "modified")
                     status[3] = true
                 }
 
-                items.children && items.children.length > 0 && items.children.forEach(item => {
-                    this.addToServer(item, status)
+                items.children && items.children.length > 0 && items.children.forEach(async (item) => {
+                    await this.addToServer(item, status)
                 })
             },
 

@@ -2,7 +2,8 @@
     <v-container id="regular-tables" tag="section" fluid>
         <v-progress-linear
             indeterminate
-            color="teal darken-2"
+            class="mb-1"
+            color="green"
             v-if="wait">
         </v-progress-linear>
         <v-row>

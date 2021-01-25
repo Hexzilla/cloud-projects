@@ -10,7 +10,7 @@
                 <v-row>
                     <v-col class="pb-0" md="6">
                         <p class="subtitle-1 mb-0"><b>{{ `Phase ${this.phase.phaseNumber}` }}</b></p>
-                        <p class="title mb-0 text--disabled">
+                        <p class="title mb-0 text--disabled" @click="openPhaseEditDialog">
                             {{ `${this.phase.phase_opendate} ~ ${this.phase.phase_closedate}` }}
                         </p>
                     </v-col>
@@ -57,7 +57,8 @@
                         </template>
                         <template v-slot:append="{ item }">
                             <v-icon v-if="item.level > 0"
-                                color="orange"
+                                class="mr-8"
+                                color="purple"
                                 @click="openTaskEditDialog(item)"
                             >mdi-square-edit-outline</v-icon>
                         </template>
@@ -200,6 +201,42 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <!--Edit Phase Date Dialog-->
+        <v-dialog v-model="phaseDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Edit Phase</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <DatePicker
+                                textName="Date From"
+                                :date="phase.phase_opendate"
+                                :submit="(date) => phase.phase_opendate = date"
+                                :endDate="phase.phase_closedate"
+                            ></DatePicker>
+                        </v-row>
+                        <v-row>
+                            <DatePicker
+                                textName="Date To"
+                                :date="phase.phase_closedate"
+                                :submit="(date) => phase.phase_closedate = date"
+                                :startDate="phase.phase_opendate"
+                            ></DatePicker>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closePhaseEditDialog"> Cancel </v-btn>
+                    <v-btn :disabled="phaseValid" color="blue darken-1" text @click="savePhaseEditDialog">
+                        Save
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -207,10 +244,14 @@
 import moment from 'moment'
 import api from "@/apis/project.js"
 import apiTasks from "@/apis/task.js"
+import DatePicker from './DatePicker'
 
 export default {
     name: "ProjectPhase",
     props: ["phase", "treeItems"],
+    components: {
+        DatePicker,
+    },
 
     data: () => ({
         wait: false,
@@ -220,6 +261,7 @@ export default {
         taskFromMenu: false,
         taskToMenu: false,
         taskDialog: false,
+        editPhaseDateDialog: false,
         editTask: null,
         searchName: "1",
         unitOfMeasureItems: ['Nos', 'Item'],
@@ -662,6 +704,18 @@ export default {
             //     console.log('saveTaskByLevel________call_root', tazk.ikey, state, tazk.level)
             //     await api.saveTaskByLevel(tazk, state, tazk.level)
             // }
+        },
+
+        openPhaseEditDialog: function() {
+            this.editPhaseDateDialog = true
+        },
+
+        closePhaseEditDialog: function() {
+            this.editPhaseDateDialog = false
+        },
+
+        savePhaseEditDialog: function() {
+            this.editPhaseDateDialog = false
         }
     }
 };

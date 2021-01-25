@@ -157,12 +157,12 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Add Client" : "Edit Client";
+      return this.editedIndex === -1 ? "Add Role" : "Edit Role";
     },
     nameRules() {
       return [
         (v) => !!v || "Name is required",
-        (v) => v.trim().length > 0 || "Name is required",
+        (v) => (v && v.trim().length > 0) || "Name is required",
         (v) =>
         (v && v.length <= this.maxNameLength) ||
         `Name must be less than ${this.maxNameLength} characters`,

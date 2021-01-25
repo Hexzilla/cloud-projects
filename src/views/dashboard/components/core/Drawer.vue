@@ -6,7 +6,7 @@
     :expand-on-hover="expandOnHover"
     :right="$vuetify.rtl"
     :src="barImage"
-    mobile-break-point="960"
+    mobile-breakpoint="960"
     app
     width="240"
     v-bind="$attrs"
@@ -131,6 +131,16 @@
           to: '/pages/role',
         },
         {
+          icon: 'mdi-account-supervisor-circle',
+          title: 'people',
+          to: '/pages/people',
+        },
+        {
+          icon: 'mdi-account-tie',
+          title: 'associate_person',
+          to: '/pages/associate_person',
+        },
+        {
           icon: 'mdi-file-tree',
           title: 'task',
           to: '/pages/task',
@@ -142,17 +152,17 @@
         },
         {
           icon: 'mdi-calendar',
-          title: 'Daily Update',
+          title: 'daily_update',
           to: '/pages/daily'
         },
         {
           icon: 'mdi-chart-line',
-          title: 'Progress',
+          title: 'progress',
           to: '/pages/progress'
         },
         {
           icon: 'mdi-text-account',
-          title: 'Manpower',
+          title: 'manpower',
           to: '/pages/manpower'
         }
 

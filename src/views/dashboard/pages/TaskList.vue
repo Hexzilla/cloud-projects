@@ -59,6 +59,15 @@
                   label="Name"
                   required
                 ></v-text-field>
+                <v-select
+                  v-if="isLevel1"
+                  :items="roles"
+                  :rules="roleRules"
+                  v-model="selectedRole"
+                  item-text="name"
+                  item-value="id"
+                  label="Role"
+                ></v-select>
               </v-form>
             </v-container>
           </v-card-text>
@@ -99,6 +108,7 @@
 
 <script>
 import api from "@/apis/task.js";
+import roleApi from "@/apis/role.js";
 
 export default {
   data: () => ({
@@ -114,6 +124,8 @@ export default {
     selectedItem: null,
     editName: "",
     valid: false,
+    roles: [],
+    selectedRole: null
   }),
 
   computed: {
@@ -127,18 +139,30 @@ export default {
     nameRules() {
       return [
         (v) => !!v || "Name is required",
-        (v) => v.trim().length > 0 || "Name is required",
+        (v) => (v && v.trim().length > 0) || "Name is required",
         (v) =>
           (v && v.length <= this.maxNameLength) ||
           `Name must be less than ${this.maxNameLength} characters`,
       ];
     },
+    roleRules() {
+      return [(v) => !!v || "Role is required"]
+    },
+    isLevel1() {
+      if (this.selectedItem && this.actionMode === "add_task" && this.selectedItem.level == 0 || this.selectedItem && this.actionMode === "edit_task" && this.selectedItem.level == 1)
+        return true
+      return false
+    }
   },
 
   created: async function () {
     this.items = await api.findAll();
     this.uniqueTreeId = this.setUniqueId(this.items)
     console.log("uniqueTreeId:", this.uniqueTreeId, this.items)
+
+    this.roles = await roleApi.findAll();
+    console.log("roles:", this.roles)
+
     this.loading = false;
   },
 
@@ -154,6 +178,7 @@ export default {
       this.actionMode = "add_task";
       this.editName = "";
       this.selectedItem = item;
+      this.selectedRole = null
       this.openDialog();
     },
 
@@ -163,6 +188,10 @@ export default {
       this.editName = item.name;
       this.selectedItem = item;
       console.log("editTask", this.editName);
+
+      console.log("edit item-------------", item)
+      if(item.level == 1)
+        this.selectedRole = item.roleid
       this.openDialog();
     },
 
@@ -247,7 +276,7 @@ export default {
         children: [],
       };
       if (level == 1) {
-        tazk["roleid"] = 10
+        tazk["roleid"] = this.selectedRole
       }
       return tazk
     },
@@ -257,7 +286,7 @@ export default {
         return
       }
       this.loading = true     
-      const saved = await api.update(this.items);
+      const saved = await api.update(this.itsem);
       if (saved) {
         this.setItemUserActionState(this.items, "nochange")
       }
@@ -269,7 +298,6 @@ export default {
       if (!this.$refs.form.validate()) {
         return;
       }
-      this.close();
 
       if (this.actionMode === "add_category") {
         const category = this.createCategory()
@@ -284,12 +312,18 @@ export default {
       else {
         this.selectedItem.userAction = "modified"
         this.selectedItem.name = this.editName;
+        if (this.selectedItem.level && this.selectedItem.level == 1)
+          this.selectedItem.roleid = this.selectedRole
         console.log("save.edit.tazk", this.selectedItem)
       }
+
+      this.close();
     },
 
     close() {
-      this.dialog = false;
+      this.dialog = false
+      this.selectedItem = null
+      this.selectedRole = null
     },
   },
 };

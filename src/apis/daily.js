@@ -24,7 +24,7 @@ const add1 = async function(data) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/duL1AddOne", jsonData)
+        const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -48,7 +48,7 @@ const add2 = async function(data) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/duL2AddOne", jsonData)
+        const response = await http.post("/effort/duL2AddOne", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -72,7 +72,7 @@ const add3 = async function(data) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/duL3AddOne", jsonData)
+        const response = await http.post("/effort/duL3AddOne", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -96,7 +96,7 @@ const add4 = async function(data) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/duL4AddOne", jsonData)
+        const response = await http.post("/effort/duL4AddOne", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -114,7 +114,7 @@ const update1 = async function() {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L1getUpdatedRecordsByMe", jsonData)
+        const response = await http.post("/effort/L1getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -132,7 +132,7 @@ const update2 = async function() {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L2getUpdatedRecordsByMe", jsonData)
+        const response = await http.post("/effort/L2getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -150,7 +150,7 @@ const update3 = async function() {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L3getUpdatedRecordsByMe", jsonData)
+        const response = await http.post("/effort/L3getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -168,7 +168,7 @@ const update4 = async function() {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L4getUpdatedRecordsByMe", jsonData)
+        const response = await http.post("/effort/L4getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -185,7 +185,7 @@ const remove1 = async function(id) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L1removeOneEntry", jsonData)
+        const response = await http.post("/effort/L1removeOneEntry", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -202,7 +202,7 @@ const remove2 = async function(id) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L2removeOneEntry", jsonData)
+        const response = await http.post("/effort/L2removeOneEntry", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -219,7 +219,7 @@ const remove3 = async function(id) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L3removeOneEntry", jsonData)
+        const response = await http.post("/effort/L3removeOneEntry", jsonData)
         if (response.status == 200) {
             return true
         }
@@ -236,7 +236,7 @@ const remove4 = async function(id) {
     }
 
     try {
-        const response = await http.post("/be/pm/effort/L4removeOneEntry", jsonData)
+        const response = await http.post("/effort/L4removeOneEntry", jsonData)
         if (response.status == 200) {
             return true
         }

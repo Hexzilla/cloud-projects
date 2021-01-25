@@ -42,10 +42,16 @@
   "client": "Client",
   "country": "Country",
   "task": "Task",
+  "people": "People",
+  "associate_person": "Associate",
+  "daily_update": "Daily Update",
   "project": "Project",
   "designation": "Designation",
   "role": "Role",
   "vforms": "Validation Forms",
   "widgets": "Widgets",
-  "wizard": "Wizard"
+  "wizard": "Wizard",
+  "progress": "Progress",
+  "manpower": "Manpower"
+
 }

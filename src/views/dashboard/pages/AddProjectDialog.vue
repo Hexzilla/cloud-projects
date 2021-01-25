@@ -151,7 +151,7 @@ export default {
     projectNameRules() {
       return [
         (v) => !!v || "Name is required",
-        (v) => v.trim().length > 0 || "Name is required",
+        (v) => (v && v.trim().length > 0) || "Name is required",
         (v) =>
           (v && v.length <= this.maxNameLength) ||
           `Name must be less than ${this.Length} characters`,

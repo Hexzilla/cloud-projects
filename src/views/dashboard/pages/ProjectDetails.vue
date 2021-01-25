@@ -3,10 +3,10 @@
     <v-card-title class="px-0 mx-4"> 
       <v-row>
         <v-col>
-          Project Details 
+          <p class="subtitle-1">Project Details</p> 
         </v-col>
         <v-col class="text-right">
-          <v-btn small @click="addPhase" color="teal">Add Phase</v-btn>
+          <v-btn small @click="addPhase" color="green">Add Phase</v-btn>
         </v-col>
       </v-row>
     </v-card-title>

@@ -61,7 +61,7 @@ const updateTasks = async function(tasks, level) {
     for (const i in tasks) {
         const tazk = tasks[i]
         tazk.children = await getTaskByLevel(tazk, level)
-        tazk.level = level - 1
+        tazk.level = level - 1           //TODO
         if (level < 4) {
             if (tazk.children && tazk.children.length > 0) {
                 await updateTasks(tazk.children, level + 1)
@@ -335,7 +335,7 @@ const getTask4 = async function(task3Id) {
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                return data.response.allCarrierRecord
+                return data.response.allCarrierRecord   //TODO
             }
         }
     }
