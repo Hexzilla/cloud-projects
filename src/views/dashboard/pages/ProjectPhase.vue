@@ -203,6 +203,7 @@
         </v-dialog>
 
         <!--Edit Phase Date Dialog-->
+        <!--
         <v-dialog v-model="phaseDialog" max-width="500px">
             <v-card>
                 <v-card-title>
@@ -236,7 +237,7 @@
                     </v-btn>
                 </v-card-actions>
             </v-card>
-        </v-dialog>
+        </v-dialog>-->
     </v-container>
 </template>
 
@@ -273,7 +274,7 @@ export default {
         },
         taskValid() {
             return true;
-        }
+        },
     },
 
     created: function() {

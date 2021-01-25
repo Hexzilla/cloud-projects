@@ -150,6 +150,7 @@
             treeItems: [],
             performer: null,
             performers: [],
+            selectedPerformer: null,
             allPerformers: [],
             waitProject: null,
             phase: null,
@@ -183,7 +184,10 @@
                 this.wait = true
                 this.selectedProject = project
                 this.waitProject = project
-                
+
+                this.performer = null
+                this.phase = null
+
                 await api.updateTaskList(project)
 
                 // console.log("project", project)
@@ -207,16 +211,21 @@
             },
 
             performerChanged: function() {
-                const found = this.performers.find(element => element.id = this.performer)
-                console.log("found", found)
-                // this.phase = this.phases[0].phaseNumber
-                // this.treeItems = found.phases[0].serverItems
+                if (!this.selectedProject)
+                    return
+                console.log("performers", this.performers)
+                this.selectedPerformer = this.performers.find(element => element.id == this.performer)
+                console.log("selected", this.selectedPerformer)
+                this.phase = this.phases[0].phaseNumber
+                this.treeItems = this.selectedPerformer.phases[0].serverItems
             },
 
             phaseChanged: function() {
                 if (!this.performer)
                     return
-                alert(this.phase)
+                let selectedPhase = this.selectedPerformer.phases.find(element => element.phaseNumber == this.phase)
+                console.log("selected phase", selectedPhase)
+                this.treeItems = selectedPhase.serverItems
             },
 
             searchKeyChange: function(event) {

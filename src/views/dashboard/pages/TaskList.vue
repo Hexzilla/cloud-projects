@@ -286,7 +286,7 @@ export default {
         return
       }
       this.loading = true     
-      const saved = await api.update(this.itsem);
+      const saved = await api.update(this.items);
       if (saved) {
         this.setItemUserActionState(this.items, "nochange")
       }
