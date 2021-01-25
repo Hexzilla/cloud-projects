@@ -40,6 +40,7 @@
                 <ProjectDetails 
                     v-on:addPhase="phase_addButtonClicked"
                     v-bind:project="this.selectedProject"
+                    v-bind:clients="this.clients"
                 ></ProjectDetails>
                 <div v-if="this.selectedProject != null">
                     <ProjectPhase
@@ -140,6 +141,8 @@ export default {
         this.treeItems = await api.getTree()
         this.clients = await client_api.findAll()
         this.projects = await api.getProjects()
+
+        console.log("tree", this.treeItems)
         this.wait = false
     },
 

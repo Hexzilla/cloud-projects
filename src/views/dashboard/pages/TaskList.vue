@@ -134,7 +134,7 @@ export default {
     },
     formTitle() {
       if (this.actionMode === "add_category") return "New Category";
-      return this.actionMode === "add_task" ? "New Task" : "Edit Task";
+      return this.actionMode === "add_task" ? this.selectedItem && "New Task (Level " + (this.selectedItem.level + 1) + " )" : "Edit Task";
     },
     nameRules() {
       return [

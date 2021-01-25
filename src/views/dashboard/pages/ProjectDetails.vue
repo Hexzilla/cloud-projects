@@ -20,6 +20,9 @@
           <v-col cols="12" sm="6" md="3">
             <v-text-field readonly label="Code" style="font-size:14px"  v-model="projectCode"/>
           </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-text-field readonly label="Client" style="font-size:14px"  v-model="projectClient"/>
+          </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" sm="6" md="3">
@@ -41,7 +44,7 @@
 <script>
   export default {
     name: 'ProjectDetails',
-    props: ['project'],
+    props: ['project', 'clients'],
 
     data: () => ({
 
@@ -53,6 +56,18 @@
       },
       projectCode: function() {
         return (this.project) ? this.project.prj_code : ''
+      },
+      projectClient: function() {
+        // return (this.project) ? this.project.cl_id : ''
+        console.log("clients", this.clients)
+        let name = ''
+        this.project && this.clients.forEach(client => {
+          if (client.id == this.project.cl_id) {
+            name = client.name
+            return
+          }
+        })
+        return name
       },
       preSalesDateRange() {
         if (this.project == null) return ''

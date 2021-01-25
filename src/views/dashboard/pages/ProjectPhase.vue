@@ -14,10 +14,8 @@
                             {{ `${this.phase.phase_opendate} ~ ${this.phase.phase_closedate}` }}
                         </p>
                     </v-col>
-                    <v-col class="pb-0" md="3">
+                    <v-col class="pb-0 text-right" md="6">
                         <v-btn small @click="openTreeDialog()" color="teal">Add Task</v-btn>
-                    </v-col>
-                    <v-col class="pb-0 text-right" md="3">
                         <v-btn small @click="saveTask()" color="teal">Save Task</v-btn>
                     </v-col>
                 </v-row>
@@ -82,6 +80,8 @@
                                 :items="treeItems"
                                 item-key="ikey"
                                 selectable
+                                selection-type="leaf"
+                                @input="treeSelectChanged"
                             >
                             </v-treeview>
                         </v-form>
@@ -126,7 +126,7 @@
                                 ></v-text-field>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row v-if="editTask.level == 1">
                             <v-col cols="12" sm="12" md="6">
                                 <v-menu
                                     ref="taskFromMenu"
@@ -717,6 +717,11 @@ export default {
 
         savePhaseEditDialog: function() {
             this.editPhaseDateDialog = false
+        },
+
+        treeSelectChanged() {
+            console.log("-----------", this.dialogTreeSelected)
+
         }
     }
 };
