@@ -18,7 +18,7 @@
                                 class="mb-2"
                                 @click="addItem"
                             >
-                                New2
+                                New
                             </v-btn>
                         </div>
                         <div flat tile>
@@ -150,6 +150,173 @@
                             </v-card>
                         </v-dialog>
 		            	<!--Delete Dialog End-->
+
+                        <!--Address Dialog Begin-->
+                        <v-dialog v-model="addressDialog" max-width="600px">
+                            <v-card>
+                                <v-card-title class="headline">Address</v-card-title>
+
+                                <v-tabs>
+                                    <v-tabs-slider></v-tabs-slider>
+
+                                    <v-tabs v-model="tabModel" >
+                                        <v-tab
+                                            v-for="i in 2"
+                                            :key="i"
+                                            :href="`#tab-${i}`">
+                                            {{tabName(i)}}
+                                        </v-tab>
+                                    </v-tabs>
+                                    
+                                    <v-tabs-items v-model="tabModel"> 
+                                        <v-tab-item :value="`tab-1`">
+                                            <v-card flat>
+                                                <v-form ref="form1" lazy-validation>
+                                                    <v-container>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-select
+                                                                    v-model="localAddressItem.countryid"
+                                                                    :items="countries"
+                                                                    attach
+                                                                    item-text="name"
+                                                                    item-value="id"
+                                                                    label="Country"
+                                                                    :rules="addressCountryRule"
+                                                                ></v-select>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.addressLine1"
+                                                                    label="Address Line1"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.addressLine2"
+                                                                    label="Address Line2"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.addressLine3"
+                                                                    label="Address Line3"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.addressLine4"
+                                                                    label="Address Line4"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.zipcode"
+                                                                    label="Zip Code"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="localAddressItem.state_province"
+                                                                    label="Province"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card>
+                                        </v-tab-item>
+                                        <v-tab-item :value="`tab-2`">
+                                            <v-card flat>
+                                                <v-form ref="form2" lazy-validation>
+                                                    <v-container>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-select
+                                                                    v-model="permanentAddressItem.countryid"
+                                                                    :items="countries"
+                                                                    attach
+                                                                    item-text="name"
+                                                                    item-value="id"
+                                                                    label="Country"
+                                                                    :rules="addressCountryRule"
+                                                                ></v-select>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.addressLine1"
+                                                                    label="Address Line1"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.addressLine2"
+                                                                    label="Address Line2"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.addressLine3"
+                                                                    label="Address Line3"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.addressLine4"
+                                                                    label="Address Line4"
+                                                                    :rules="addressLineRule"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.zipcode"
+                                                                    label="Zip Code"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col>
+                                                                <v-text-field
+                                                                    v-model="permanentAddressItem.state_province"
+                                                                    label="Province"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card>
+                                        </v-tab-item>
+                                    </v-tabs-items>                                 
+                                </v-tabs>
+
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="blue darken-1" text @click="closeAddress">
+                                        Cancel
+                                    </v-btn>
+                                    <v-btn :disabled="addressBtnValid" color="blue darken-1" text @click="updateAddress">OK</v-btn>
+                                    <v-spacer></v-spacer>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+                        <!--Address Dialog End-->
                     </v-container>
                 </template>
 
@@ -158,10 +325,15 @@
                 </template>
 
                 <template v-slot:item.actions="{ item }">
-                    <v-icon small class="mr-2" @click="editItem(item)">
+                    <v-icon small class="mr-2" @click="editItem(item)" title="edit">
                         mdi-pencil
                     </v-icon>
-                    <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
+                    <v-icon small class="mr-2" @click="editAddress(item)" title="Address">
+                        mdi-card-bulleted-settings
+                    </v-icon>
+                    <v-icon small disabled @click="deleteItem(item)">
+                        mdi-delete
+                    </v-icon>
                 </template>
 
                 <template v-slot:no-data>
@@ -229,6 +401,22 @@ export default {
             DOB: '',
             COO: 1,
         },
+
+        addressDialog: false,
+        valid1: true,
+        initialAddressItem: {
+            id: 0,
+            addressLine1: "",
+            addressLine2: "",
+            addressLine3: "",
+            addressLine4: "",
+            countryid: 0,
+            zipcode: "",
+            state_province: ""
+        },
+        localAddressItem: {},
+        permanentAddressItem: {},
+        tabModel: null,
     }),
 
     created: async function () {
@@ -280,6 +468,30 @@ export default {
                     `Password must be less than ${this.maxPasswordLength} characters`,
             ]
         },
+        addressCountryRule() {
+            return [
+                v => !!v || 'Country is required'
+            ]
+        },
+        addressLineRule() {
+            return [
+                (v) => !!v || "Address is required",
+                (v) => (v && v.trim().length > 0) || "Address is required",
+                (v) =>
+                    (v && v.length <= 200) ||
+                    `Address must be less than 200 characters`,
+            ];
+        },
+        addressBtnValid() {
+            let addressItem
+            if (this.tabModel == "tab-1") {
+                addressItem = this.localAddressItem
+            } else if (this.tabModel == "tab-2") {
+                addressItem = this.permanentAddressItem
+            }
+
+            return !(addressItem && addressItem.addressLine1 && addressItem.addressLine2 && addressItem.addressLine3 && addressItem.addressLine4 && addressItem.countryid)
+        }
     },
 
     watch: {
@@ -295,6 +507,7 @@ export default {
         async initialize() {
             this.loading = true
             this.people = await people_api.findAll()
+            console.log("people", this.people)
             this.countries = await country_api.findAll()
             this.loading = false;
         },
@@ -309,11 +522,65 @@ export default {
             this.openAddDialog()
         },
         
+        async editAddress(item) {
+            this.loading = true
+            
+            this.editedItem = Object.assign({}, item);
+            let people = await people_api.findOne(item.id)
+            console.log("people", people)
+
+            if (people[0].localAddress[0]) {
+                this.localAddressItem = people[0].localAddress[0]
+                this.permanentAddressItem = people[0].permanentaddress[0]
+            } else {
+                this.localAddressItem = Object.assign({}, this.initialAddressItem)
+                this.permanentAddressItem = Object.assign({}, this.initialAddressItem)
+            }
+            
+            this.loading = false    
+            console.log("localAddressItem   ", this.localAddressItem)
+            console.log("permanentAddressItem", this.permanentAddressItem)
+            this.openAddressDialog()
+        },
+
         openAddDialog() {
             if (this.$refs.form) {
-                    this.$refs.form.resetValidation();
+                this.$refs.form.resetValidation();
             }
             this.dialog = true;
+        },
+
+        openAddressDialog() {
+            if (this.$refs.form1) {
+                this.$refs.form1.resetValidation()
+            }
+            if (this.$refs.form2) {
+                this.$refs.form2.resetValidation()
+            }
+            this.addressDialog = true
+        },
+
+        closeAddress() {
+            this.addressDialog = false
+        },
+
+        async updateAddress() {
+            this.loading = true
+
+            let result
+            if (this.tabModel == "tab-1") {
+                if (!this.$refs.form1.validate()) return
+                this.closeAddress()
+                result = await people_api.updateLocalAddress(this.editedItem.id, this.localAddressItem) 
+                
+            }
+            if (this.tabModel == "tab-2") {
+                if (!this.$refs.form2.validate()) return
+                this.closeAddress()
+                result = await people_api.updatePermanentAddress(this.editedItem.id, this.permanentAddressItem)
+            }
+            console.log("result", result)
+            this.loading = false
         },
 
         deleteItem(item) {
@@ -384,6 +651,11 @@ export default {
                 this.snackText = "Error";
             }
         },
+
+        tabName(i) {
+            if (i == 1) return "LocalAddress"
+            else if (i == 2) return "PermanantAddress"
+        }
     },
 };
 </script>

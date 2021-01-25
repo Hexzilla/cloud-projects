@@ -76,7 +76,7 @@
             <v-spacer></v-spacer>
             <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
             <v-btn :disabled="!valid" color="blue darken-1" text @click="save">
-              Save
+              Save as draft
             </v-btn>
           </v-card-actions>
         </v-card>

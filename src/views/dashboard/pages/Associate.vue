@@ -121,7 +121,7 @@
                         </v-row>
                         <v-row>
                             <DatePicker
-                                textName="Join Date"
+                                textName="Joined Date"
                                 :date="editedItem.joinDate"
                                 :submit="(date) => editedItem.joinDate = date"
                             ></DatePicker>
@@ -162,6 +162,7 @@
                                     :items="roles"
                                     :rules="defaultRules"
                                     attach
+                                    multiple
                                     item-text="name"
                                     item-value="value"
                                     label="Roles"
@@ -232,7 +233,7 @@ export default {
             { text: "Email", value: "email" },
             { text: "Assocation Type", value: "assocationType" },
             { text: "Assocation Status", value: "assocationStatus" },
-            { text: "Join Date", value: "joinDate" },
+            { text: "Joined Date", value: "joinDate" },
             { text: "Actions", align: "right", value: "actions", sortable: false },
         ],
         people: [],

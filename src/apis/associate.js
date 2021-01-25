@@ -17,6 +17,7 @@ const findAll = async function() {
 }
 
 const add = async function(person) {
+    console.log("add person", person)
     try {
         const response = await http.post("/hr/hrAddOne", person)
         if (response.status == 200) {
