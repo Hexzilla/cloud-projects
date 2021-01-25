@@ -61,6 +61,9 @@
                     <v-icon small class="mr-2" @click="editItem(item)">
                         mdi-pencil
                     </v-icon>
+                    <v-icon small class="mr-2" @click="roleEdit(item)">
+                        mdi-account
+                    </v-icon>
                     <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
                 </template>
 
@@ -120,6 +123,35 @@
                             </v-col>
                         </v-row>
                         <v-row>
+                            <v-col>
+                                <v-select
+                                    v-model="editedItem.designation"
+                                    :items="designations"
+                                    :rules="defaultRules"
+                                    attach
+                                    item-text="name"
+                                    item-value="value"
+                                    label="Designation"
+                                    required
+                                ></v-select>
+                            </v-col>
+                            <!--
+                            <v-col cols="12" sm="12" md="6">
+                                <v-select
+                                    v-model="editedItem.role"
+                                    :items="roles"
+                                    :rules="defaultRules"
+                                    attach
+                                    multiple
+                                    item-text="name"
+                                    item-value="value"
+                                    label="Roles"
+                                    required
+                                ></v-select>
+                            </v-col>
+                            -->
+                        </v-row>
+                        <v-row>
                             <DatePicker
                                 textName="Joined Date"
                                 :date="editedItem.joinDate"
@@ -143,33 +175,6 @@
                                 :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
                             ></DatePicker>
                         </v-row>
-                        <v-row>
-                            <v-col cols="12" sm="12" md="6">
-                                <v-select
-                                    v-model="editedItem.designation"
-                                    :items="designations"
-                                    :rules="defaultRules"
-                                    attach
-                                    item-text="name"
-                                    item-value="value"
-                                    label="Designation"
-                                    required
-                                ></v-select>
-                            </v-col>
-                            <v-col cols="12" sm="12" md="6">
-                                <v-select
-                                    v-model="editedItem.role"
-                                    :items="roles"
-                                    :rules="defaultRules"
-                                    attach
-                                    multiple
-                                    item-text="name"
-                                    item-value="value"
-                                    label="Roles"
-                                    required
-                                ></v-select>
-                            </v-col>
-                        </v-row>
                     </v-form>
                 </v-card-text>
 
@@ -182,6 +187,62 @@
         </v-dialog>
         <!--Add Dialog End-->
 
+        <!--Add Role Dialog Begin-->
+        <v-dialog v-model="roleDialog" max-width="700px" >
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Roles</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-form ref="form1" v-model="valid1" lazy-validation>
+                        <v-row>
+                            <v-col cols="12" sm="12" md="12">
+                                <v-select
+                                    :items="roleData"
+                                    attach
+                                    item-text="name"
+                                    item-value="id"
+                                    label="Roles"
+                                    v-model="selectedRoleId"
+                                    multiple
+                                    required
+                                    @change="roleDataChanged"
+                                ></v-select>
+                            </v-col>
+                        </v-row>
+                        <template v-for="(item, i) in selectedRoles">
+                            <v-row :key="i">
+                                <v-col style="display:flex; align-items:center;">
+                                    {{ item.name }}
+                                </v-col>
+                                <v-col>
+                                    <DatePicker
+                                        textName="Date From"
+                                        :date="item.data.effectivefromdate"
+                                        :submit="(date) => item.data.effectivefromdate = date"
+                                    ></DatePicker>
+                                </v-col>
+                                <v-col>
+                                    <DatePicker
+                                        textName="Date To"
+                                        :date="item.data.effectivetodate"
+                                        :submit="(date) => item.data.effectivetodate = date"
+                                    ></DatePicker>
+                                </v-col>
+                            </v-row>
+                        </template>
+                    </v-form>
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeRole"> Cancel </v-btn>
+                    <v-btn color="blue darken-1" text @click="saveRole"> Save </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <!--Add Role Dialog End-->
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
             {{ snackText }}
             <template v-slot:action="{ attrs }">
@@ -260,6 +321,12 @@ export default {
             designation: '',
             role: '',
         },
+        roleDialog: false,
+        valid1: false,
+        roleData: [],
+        selectedRoles: [],
+        selectedRoleId: [],
+        initialRolesId: []
     }),
 
     created: async function () {
@@ -333,7 +400,11 @@ export default {
             this.designations = await designation_api.findAll()
             this.roles = await role_api.findAll()
             this.associates = await associate_api.findAll()
-            this.loading = false;
+
+            this.roleData = associate_api.getRoleWithData(this.roles)
+            console.log("role data", this.roleData)
+
+            this.loading = false
         },
 
         addItem() {
@@ -345,10 +416,40 @@ export default {
             this.editedItem = Object.assign({}, item);
             this.openAddDialog()
         },
+
+        async roleEdit(item) {
+            this.loading = true
+            this.selectedRoles = []
+            this.selectedRoleId = []
+            // this.editedIndex = this.associates.indexOf(item);
+            this.editedItem = Object.assign({}, item);
+            let one = await associate_api.findOne(item.id)
+            let data = one[0].assignedRoles
+            if (data && data.length > 0) {
+                data.forEach(item=> {
+                    // let selected = this.roles.find(element => element.id == item.rolesid)
+                    // item.name = selected.name
+                    // item.recordType = "update"
+                    // this.selectedRoles.push(item.rolesid)
+                    this.roleData.forEach(role=> {
+                        if (role.id == item.rolesid) {
+                            role.data = item
+                            this.selectedRoles.push(role)
+                            this.selectedRoleId.push(role.id)
+                            this.initialRolesId.push(role.id)
+                        }
+                    })
+                })
+            }
+            
+            console.log("selected role", this.selectedRoles)
+            this.roleDialog = true
+            this.loading = false
+        },
         
         openAddDialog() {
             if (this.$refs.form) {
-                    this.$refs.form.resetValidation();
+                this.$refs.form.resetValidation();
             }
             this.dialog = true;
         },
@@ -381,10 +482,7 @@ export default {
         },
 
         async save() {
-            if (!this.$refs.form.validate()) {
-                return;
-            }	
-
+            if (!this.$refs.form.validate()) return
             const selectedIndex = this.editedIndex
             const item = Object.assign({}, this.editedItem)
             this.close();
@@ -421,6 +519,66 @@ export default {
                 this.snackText = "Error";
             }
         },
+
+        closeRole() {
+            this.roleDialog = false
+        },
+        
+        async saveRole() {
+            if (!this.$refs.form1.validate()) return
+
+            this.loading = true
+            this.closeRole()
+            this.setRecordType(this.initialRolesId, this.selectedRoleId)
+            console.log("role data", this.roleData)
+            await associate_api.roleAssign(this.editedItem.id, this.roleData)
+            this.loading = false
+        },
+
+        roleDataChanged() {
+            console.log("selected: ", this.selectedRoleId)
+            this.selectedRoles = []
+            this.selectedRoleId.length > 0 && this.selectedRoleId.forEach(id=> {
+                this.roleData.forEach(role=> {
+                    if (role.id == id) {
+                        this.selectedRoles.push(role)
+                    }
+                })
+            })
+        },
+
+        setRecordType(initalIds, selectedIds) {
+            console.log("initial---------", initalIds)
+            console.log("selected", selectedIds)
+            let addedIds = selectedIds.filter(x => initalIds.indexOf(x) === -1)
+            let removedIds = initalIds.filter(x => selectedIds.indexOf(x) === -1)
+            let updatedIds = selectedIds.filter(x => addedIds.indexOf(x) === -1)
+
+            console.log("added", addedIds)
+            console.log("removed", removedIds)
+            console.log("updated", updatedIds)
+
+            addedIds.length > 0 && this.roleData.forEach(role => {
+                addedIds.forEach(added => {
+                    if (role.id == added)
+                        role.data.recordType = "newLine"
+                })
+            })
+            removedIds.length > 0 && this.roleData.forEach(role => {
+                removedIds.forEach(added => {
+                    if (role.id == added)
+                        role.data.recordType = "removeLine"
+
+                })
+            })
+            updatedIds.length > 0 && this.roleData.forEach(role => {
+                updatedIds.forEach(added => {
+                    if (role.id == added)
+                        role.data.recordType = "update"
+                })
+            })
+
+        }
     },
 };
 </script>
