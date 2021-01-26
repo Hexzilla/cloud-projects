@@ -6,6 +6,8 @@
                     label="Hr"
                     @change="setHr($event)"
                     type="number"
+                    :rules="numRules"
+                    v-model="item.hr"
                 ></v-text-field>
             </v-col>
             <v-col class="py-0 my-0 px-1">
@@ -13,6 +15,8 @@
                     label="Min"
                     @change="setMin($event)"
                     type="number"
+                    :rules="numRules"
+                    v-model="item.min"
                 ></v-text-field>
             </v-col>
             <v-col class="py-0 my-0 px-1">
@@ -20,6 +24,8 @@
                     label=""
                     @change="setPct($event)"
                     type="number"
+                    :rules="pctRules"
+                    v-model="item.pct"
                 ></v-text-field>
             </v-col>
             <v-col class="py-0 my-0 px-1">
@@ -27,6 +33,8 @@
                     label=""
                     @change="setTotalPct($event)"
                     type="number"
+                    :rules="pctRules"
+                    v-model="item.totalPct"
                 ></v-text-field>
             </v-col>
             <v-col class="py-0 my-0 px-1">
@@ -53,6 +61,26 @@ export default {
     data: () => ({
     }),
 
+    created() {
+        console.log("item---", this.item)
+    },
+
+    computed: {
+        numRules() {
+            return [
+                // (v) => !!v || "required",
+                (v) => v > 0 || " > 0"
+            ]
+        },
+        pctRules() {
+            return [
+                // (v) => !!v || "required",
+                (v) => v < 100 || " < 100",
+                (v) => v > 0 || " > 0"
+            ]
+        }
+    },
+    
     methods: {
         setHr: function(event) {
             this.item.hr = event

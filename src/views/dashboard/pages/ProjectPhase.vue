@@ -29,6 +29,7 @@
                         :search="searchName"
                         :filter="filterTreeItems"
                         :open-all="true"
+                        selection-type="independent"
                         item-key="ikey"
                         activatable>
                         <template v-slot:prepend="{ item }">
@@ -80,7 +81,7 @@
                                 :items="treeItems"
                                 item-key="ikey"
                                 selectable
-                                selection-type="leaf"
+                                selection-type="independent"
                                 @input="treeSelectChanged"
                             >
                             </v-treeview>
@@ -278,8 +279,7 @@ export default {
     },
 
     created: function() {
-        
-        
+        console.log("tree", this.treeItems)
         this.initialize()
     },
 
@@ -423,14 +423,14 @@ export default {
             if (keyList.find(it => it == task.ikey)) {
                 return true;
             }
-            const children = task.children
-            if (children && children.length > 0) {
-                for (var i in children) {
-                    if (this.existsInKeyList(children[i], keyList)) {
-                        return true;
-                    }
-                }
-            }
+            // const children = task.children
+            // if (children && children.length > 0) {
+            //     for (var i in children) {
+            //         if (this.existsInKeyList(children[i], keyList)) {
+            //             return true;
+            //         }
+            //     }
+            // }
             return false;
         },
         //----------------------mangae task list -------------------------------------
@@ -441,6 +441,7 @@ export default {
         },
 
         updateInterestedItems: function(tasks, keyList) {
+            console.log("keyList:", keyList)
             for (const i in tasks) {
                 const item = tasks[i]
 
@@ -570,7 +571,9 @@ export default {
         saveTreeDialog: function() {
             this.treeDialog = false
             console.log('saveTreeDialog.selected:', this.dialogTreeSelected);
+
             this.updateInterestedItems(this.phase.tree, this.dialogTreeSelected)
+            console.log("phase", this.phase.tree)
             this.refreshTree()
         },
 
@@ -721,7 +724,37 @@ export default {
 
         treeSelectChanged() {
             console.log("-----------", this.dialogTreeSelected)
+            console.log('tree', this.treeItems)
+            let keys = []
+            this.dialogTreeSelected.forEach(key=>{
+                let level = []
+                this.getLevel(this.treeItems, key, level)
+                console.log('level', level)
+                level.forEach(e=> keys.push(e))
+            })
+            const uniqueKeys = [...new Set(keys)]
+            console.log('uniqueKeys', uniqueKeys)
+            this.dialogTreeSelected = uniqueKeys
+        },
 
+        getLevel(items, key, level) {
+            let result = []
+            items.forEach(item=>{
+                if (item.ikey == key) {
+                    level.push(key)
+                    result.push(key)
+                    return
+                }
+                else if (item.children && item.children.length > 0) {
+                    let ret = this.getLevel(item.children, key, level)
+                    if (ret.length > 0) {
+                        level.push(item.ikey)
+                        result.push(item.ikey)
+                        return
+                    }
+                }
+            })
+            return result
         }
     }
 };

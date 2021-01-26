@@ -153,26 +153,34 @@
                         </v-row>
                         <v-row>
                             <DatePicker
-                                textName="Joined Date"
-                                :date="editedItem.joinDate"
-                                :submit="(date) => editedItem.joinDate = date"
-                            ></DatePicker>
-                            <DatePicker
-                                textName="Separated Date"
-                                :date="editedItem.seperation"
-                                :submit="(date) => editedItem.seperation = date"
-                            ></DatePicker>
-                        </v-row>
-                        <v-row>
-                            <DatePicker
                                 textName="Joining Date"
                                 :date="editedItem.JoinDateForResourcePlanning"
                                 :submit="(date) => editedItem.JoinDateForResourcePlanning = date"
+                                :endDate="editedItem.joinDate"
+                                v-bind:type="`optional`"
                             ></DatePicker>
                             <DatePicker
                                 textName="Separating Date"
                                 :date="editedItem.SeperationDateForResourcePlanning"
                                 :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
+                                :startDate="editedItem.joinDate"
+                                :endDate="editedItem.seperation"
+                                v-bind:type="`optional`"
+                            ></DatePicker>
+                        </v-row>
+                        <v-row>
+                            <DatePicker
+                                textName="Joined Date"
+                                :date="editedItem.joinDate"
+                                :submit="(date) => editedItem.joinDate = date"
+                                :startDate="editedItem.JoinDateForResourcePlanning"
+                                :endDate="editedItem.SeperationDateForResourcePlanning"
+                            ></DatePicker>
+                            <DatePicker
+                                textName="Separated Date"
+                                :date="editedItem.seperation"
+                                :submit="(date) => editedItem.seperation = date"
+                                :startDate="editedItem.SeperationDateForResourcePlanning"
                             ></DatePicker>
                         </v-row>
                     </v-form>
@@ -336,7 +344,7 @@ export default {
 
     computed: {
         formTitle() {
-            return this.editedIndex === -1 ? "Add People" : "Edit People";
+            return this.editedIndex === -1 ? "Associate (Add)" : "Associate (Edit)";
         },
         defaultRules() {
             return [(v) => !!v || 'This field is required']
@@ -395,7 +403,8 @@ export default {
     methods: {
         async initialize() {
             this.loading = true
-            this.people = await people_api.findAll()
+            // this.people = await people_api.findAll()
+            this.people = await people_api.findPeopleToJoin()
             this.countries = await country_api.findAll()
             this.designations = await designation_api.findAll()
             this.roles = await role_api.findAll()

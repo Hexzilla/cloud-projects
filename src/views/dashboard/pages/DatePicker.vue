@@ -49,18 +49,29 @@
 <script>
 export default {
   name: 'DatePicker',
-  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ],
+  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ,'type'],
 
   data: () => ({
     pickerOpened: false,
     selectedDate: '',
   }),
 
+  created() {
+  },
+
   computed: {
     dateRules() {
-      return [
-        (v) => !!v || `${this.textName} is required`
-      ];
+      if (this.type == "birth") {
+        return [
+          (v) => !!v || `${this.textName} is required`,
+          (v) => v < '2005-01-01' || 'age > 15'
+        ]
+
+      } else if (this.type == "optional") {
+        return []        
+      } else {
+        return [(v) => !!v || `${this.textName} is required`]
+      }
     },
   },
 

@@ -94,20 +94,20 @@
                                 item-key="ikey"
                                 activatable
                             >
-                            <template v-slot:prepend="{ item }">
-                                <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
-                            </template>
-                            <template v-slot:append="{ item }">
-                                <InputGroup 
-                                v-if="item.level > 0"
-                                v-bind:item="item"
-                                style="width:350px">
-                                </InputGroup>
-                            </template>
+                                <template v-slot:prepend="{ item }">
+                                    <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
+                                    <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                </template>
+                                <template v-slot:append="{ item }">
+                                    <InputGroup 
+                                        v-if="item.level > 0"
+                                        v-bind:item="item"
+                                        style="width:350px">
+                                    </InputGroup>
+                                </template>
                             </v-treeview>
                         </v-col>
                     </v-row>
@@ -201,11 +201,11 @@
                     // })
                     // this.treeItems.push(item)
                 })
-                console.log("pahses", this.phases)       
+                console.log("phases", this.phases)       
 
                 this.performers.length > 0 && this.performers.forEach((item) => {
-                    item.phases = this.phases
-                })                
+                    item.phases = Object.assign([], this.phases)
+                })               
                 this.waitProject = null         
                 this.wait = false
             },
@@ -213,16 +213,22 @@
             performerChanged: function() {
                 if (!this.selectedProject)
                     return
+                this.treeItems = []
                 console.log("performers", this.performers)
+                
+                console.log("id", this.performer)
                 this.selectedPerformer = this.performers.find(element => element.id == this.performer)
                 console.log("selected", this.selectedPerformer)
+                
                 this.phase = this.phases[0].phaseNumber
                 this.treeItems = this.selectedPerformer.phases[0].serverItems
+                console.log("treeItems",this.treeItems)
             },
 
             phaseChanged: function() {
                 if (!this.performer)
                     return
+                console.log(this.selectedPerformer)
                 let selectedPhase = this.selectedPerformer.phases.find(element => element.phaseNumber == this.phase)
                 console.log("selected phase", selectedPhase)
                 this.treeItems = selectedPhase.serverItems

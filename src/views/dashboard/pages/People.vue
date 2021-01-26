@@ -63,6 +63,7 @@
                                                 <v-select
                                                     v-model="editedItem.gender"
                                                     :items="genderList"
+                                                    :rules="genderRules"
                                                     attach
                                                     item-text="name"
                                                     item-value="value"
@@ -71,12 +72,12 @@
                                             </v-col>
                                             <v-col cols="12" sm="6" md="6">
                                                 <v-select
-                                                    v-model="editedItem.country"
+                                                    v-model="editedItem.COO"
                                                     :items="countries"
                                                     attach
                                                     item-text="name"
                                                     item-value="id"
-                                                    label="Country of Region"
+                                                    label="Country of Origin"
                                                 ></v-select>
                                             </v-col>
                                         </v-row>
@@ -85,6 +86,7 @@
                                                 textName="Date of Birth"
                                                 :date="editedItem.DOB"
                                                 :submit="(date) => editedItem.DOB = date"
+                                                v-bind:type="`birth`"
                                             ></DatePicker>
                                         </v-row>
                                         <v-row>
@@ -109,16 +111,25 @@
                                                     v-model="editedItem.email"
                                                     :rules="emailRules"
                                                     label="Email"
+                                                    :error-messages="emailError"
+                                                    @keydown="emailKeypressed()"
                                                     required
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="6">
                                                 <v-text-field
                                                     v-model="editedItem.pwd"
+                                                    :append-icon="passwordShow ? 'mdi-eye' : 'mdi-eye-off'"
+                                                    :type="passwordShow ? 'text' : 'password'"
+                                                    counter
                                                     :rules="passwordRules"
+                                                    @click:append="passwordShow = !passwordShow"
                                                     label="Password"
-                                                    required
-                                                ></v-text-field>
+                                                    required>
+                                                    <template v-slot:append-outer>
+                                                        <v-icon class="pt-1" @click="generatePassword()">mdi-pencil</v-icon>
+                                                    </template>
+                                                </v-text-field>
                                             </v-col>
                                         </v-row>
                                     </v-form>
@@ -375,7 +386,7 @@ export default {
         search: "",
         dialog: false,
         dialogDelete: false,
-        genderList: [ {name: 'Male', value: 'm'}, { name: 'Female', value: 'w' } ],
+        genderList: [ {name: 'Male', value: 'm'}, { name: 'Female', value: 'f' } ],
         headers: [
             { text: "First Name", align: "start", value: "firstname" },
             { text: "Last Name", value: "lastname" },
@@ -399,7 +410,7 @@ export default {
             email: "",
             pwd: "",
             DOB: '',
-            COO: 1,
+            COO: 0,
         },
 
         addressDialog: false,
@@ -417,6 +428,8 @@ export default {
         localAddressItem: {},
         permanentAddressItem: {},
         tabModel: null,
+        passwordShow: false,
+        emailError: ""
     }),
 
     created: async function () {
@@ -432,25 +445,30 @@ export default {
             return [
                 (v) => !!v || "Code is required",
                 (v) => /[a-zA-Z0-9]+$/.test(v) || 'Code must only contain letters',
-                (v) =>
-                    (v && v.length <= this.maxCodeLength) ||
-                    `Code must be less than ${this.maxCodeLength} characters`,
+                // (v) =>
+                //     (v && v.length <= this.maxCodeLength) ||
+                //     `Code must be less than ${this.maxCodeLength} characters`,
             ];
         },
         nameRules() {
             return [
                 (v) => !!v || "This field is required",
                 (v) => (v && v.trim().length > 0) || "This field is required",
-                (v) =>
-                    (v && v.length <= 200) ||
-                    `This field must be less than 200 characters`,
+                // (v) =>
+                //     (v && v.length <= 200) ||
+                //     `This field must be less than 200 characters`,
             ];
+        },
+        genderRules() {
+            return [
+                (v) => !!v || "This field is required"
+            ]
         },
         emptiableNameRules() {
             return [
-                (v) =>
-                    !v || v.length <= 200 ||
-                    `This field must be less than 200 characters`,
+                // (v) =>
+                //     !v || v.length <= 200 ||
+                //     `This field must be less than 200 characters`,
             ];
         },
         emailRules() {
@@ -463,9 +481,10 @@ export default {
             return [
                 v => !!v || 'Password is required',
                 (v) => (v && v.trim().length > 0) || "Password is required",
-                (v) =>
-                    (v && v.length <= this.maxPasswordLength) ||
-                    `Password must be less than ${this.maxPasswordLength} characters`,
+                (v) => (v && v.length >= 8) || ` > 8 `,
+                // (v) =>
+                //     (v && v.length <= this.maxPasswordLength) ||
+                //     `Password must be less than ${this.maxPasswordLength} characters`,
             ]
         },
         addressCountryRule() {
@@ -477,9 +496,9 @@ export default {
             return [
                 (v) => !!v || "Address is required",
                 (v) => (v && v.trim().length > 0) || "Address is required",
-                (v) =>
-                    (v && v.length <= 200) ||
-                    `Address must be less than 200 characters`,
+                // (v) =>
+                //     (v && v.length <= 200) ||
+                //     `Address must be less than 200 characters`,
             ];
         },
         addressBtnValid() {
@@ -544,6 +563,7 @@ export default {
         },
 
         openAddDialog() {
+            this.emailError = ""
             if (this.$refs.form) {
                 this.$refs.form.resetValidation();
             }
@@ -612,23 +632,41 @@ export default {
 
         async save() {
             if (!this.$refs.form.validate()) {
-                    return;
+                return;
             }	
 
             const selectedIndex = this.editedIndex
             const item = Object.assign({}, this.editedItem)
-            this.close();
 
+            console.log('item', item)
             this.loading = true
             {
+                let emailcheck
                 let success = false
+
                 if (selectedIndex > -1) {
+                    emailcheck = await people_api.checkEmailToBeUpdated(item.email, item.id) 
+                    if (!emailcheck) {
+                        this.emailError = "Email is already exist"
+                        this.loading = false
+                        return
+                    }
+                    this.close()
+
                     success = await people_api.update(item) 
                     if (success) {
                         Object.assign(this.people[selectedIndex], item);
                     }
                 } 
                 else {
+                    emailcheck = await people_api.checkEmailToBeAdded(item.email) 
+                    if (!emailcheck) {
+                        this.emailError = "Email is already exist"
+                        this.loading = false
+                        return
+                    }
+                    this.close()
+
                     const addedItem = await people_api.add(item)
                     if (addedItem) {
                         success = true
@@ -655,6 +693,20 @@ export default {
         tabName(i) {
             if (i == 1) return "LocalAddress"
             else if (i == 2) return "PermanantAddress"
+        },
+
+        generatePassword() {
+            let chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOP1234567890";
+            let pass = "";
+            for (let x = 0; x < 8; x++) {
+                let i = Math.floor(Math.random() * chars.length);
+                pass += chars.charAt(i);
+            }
+            this.editedItem.pwd = pass
+        },
+
+        emailKeypressed: function() {
+            this.emailError = ""
         }
     },
 };
