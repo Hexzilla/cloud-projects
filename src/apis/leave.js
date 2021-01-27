@@ -21,7 +21,7 @@ const getMyLeave = async function(hrId) {
 
 const getNecessaryFromLeave = function(ret) {
     let result = []
-    ret.forEach(item => {
+    ret && ret.length > 0 && ret.forEach(item => {
         let temp = {
             "id":item.LAid,
             "leaveFrom":item.leaveDateFrom,
@@ -168,6 +168,87 @@ const getAllLeave = async function() {
     return []
 }
 
+const allLeaveBalance = async function (date) {
+    let jsonData = {
+        "effectiveDate": date ? date : getCurrentDate()
+    }
+    try {
+        const response = await http.post("/hr/listAllLeaveBalSummary", jsonData)
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                let ret = data.response.allCarrierRecord
+                let result = []
+                ret && ret.length > 0 && ret.forEach(item => {
+                    result.push({
+                        hrid: item.hrid,
+                        name: item.firstname + " " + item.lastname,
+                        leavebal: item.leavebal,
+                        designation: ''
+                    })
+                })
+                return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const getLeaveBalanceDetails = async function (date, hrId) {
+    let jsonData = {
+        "effectiveDate": date ? date : getCurrentDate(),
+        "txn_for_hrid": hrId
+    }
+    try {
+        const response = await http.post("/hr/listSpecififLeaveBalDetails", jsonData)
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                let ret = data.response.allCarrierRecord
+                let result = []
+                ret && ret.length > 0 && ret.forEach(item => {
+                    result.push({
+                        addBalance: item.addBalance,
+                        reduceBalance: item.reduceBalance,
+                        txnEvent: item.txnEvent
+                    })
+                })
+                return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const adjustBalance = async function(data) {
+    let jsonData = {
+        "txn_for_hrid": data.hrId,
+        "effectiveDate": data.date,
+        "addBalance": data.type == "Add" ? data.amount : 0,
+        "reduceBalance": data.type == "Reduce" ? data.amount : 0,
+        "txnEvent": "leave-balance-add-by-hr-team"
+    }
+    try {
+        const response = await http.post("/hr/leaveBalanceAdjust", jsonData)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const getCurrentDate = function () {
+    const date = new Date()
+    return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+}
+
 export default {
     getMyLeave,
     applyLeave,
@@ -176,5 +257,9 @@ export default {
     approveLeaveByHR,
     cancelLeaveByHR,
     getIndividualBalance,
-    getAllLeave
+    getAllLeave,
+    allLeaveBalance,
+    getLeaveBalanceDetails,
+    getCurrentDate,
+    adjustBalance
 }

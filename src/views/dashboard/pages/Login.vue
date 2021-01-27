@@ -95,8 +95,8 @@ export default {
                     this.$router.push('/')
                 }
             } else {
-                this.errorMessageEmail = "No registered eamil"
-                this.errorMessagePassword = "No registered password"
+                this.errorMessageEmail = "Not registered eamil"
+                this.errorMessagePassword = "Not registered password"
             }
         }
     }

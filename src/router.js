@@ -110,6 +110,11 @@ const router = new Router({
           name: 'Leave Manager',
           path: 'pages/leave_m',
           component: () => import('@/views/dashboard/pages/LeaveM'),
+        },
+        {
+          name: 'Leave Balance',
+          path: 'pages/leave_b',
+          component: () => import('@/views/dashboard/pages/LeaveB'),
         }
       ],
     }

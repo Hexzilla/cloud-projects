@@ -54,5 +54,6 @@
   "progress": "Progress",
   "manpower": "Manpower",
   "leavei": "Leave Individual",
-  "leavem": "Leave Manager"
+  "leavem": "Leave Manager",
+  "leaveb": "Leave Balance"
 }
