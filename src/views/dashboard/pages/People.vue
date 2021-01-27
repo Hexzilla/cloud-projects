@@ -32,7 +32,7 @@
                         </div>
                         
 			            <!--Add Dialog Begin-->
-                        <v-dialog v-model="dialog" max-width="500px">
+                        <v-dialog v-model="dialog" max-width="600px">
                             <v-card>
                                 <v-card-title>
                                     <span class="headline">{{ formTitle }}</span>
@@ -85,7 +85,7 @@
                                         <v-row>
                                             <v-col>
                                                 <DatePicker
-                                                    textName="Date of Birth"
+                                                    textName="Date of Birth (yyyy-mm-dd)"
                                                     :date="editedItem.DOB"
                                                     :submit="(date) => editedItem.DOB = date"
                                                     v-bind:type="`birth`"
@@ -106,14 +106,12 @@
                                             <v-col cols="12" sm="6" md="6">
                                                 <v-text-field
                                                     v-model="editedItem.fullNameOfFather"
-                                                    :rules="nameRules"
                                                     label="Father's Full Name"
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="6">
                                                 <v-text-field
                                                     v-model="editedItem.fullNameOfMother"
-                                                    :rules="nameRules"
                                                     label="Mother's Full Name"
                                                 ></v-text-field>
                                             </v-col>

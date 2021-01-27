@@ -70,7 +70,6 @@ export default {
           (v) => !!v || `${this.textName} is required`,
           (v) => v < this.beforeFifteen || 'age > 15'
         ]
-
       } else if (this.type == "optional") {
         return []        
       } else {
@@ -86,6 +85,9 @@ export default {
       this.pickerOpened = false
     },
     allowedDates: function(val) {
+      if (this.type == "birth") {
+        return Date.parse(val) <= Date.parse(this.beforeFifteen)  
+      }
       if (this.startDate) {
         return Date.parse(val) >= Date.parse(this.startDate)
       }

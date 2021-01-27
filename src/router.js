@@ -3,13 +3,21 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'hash',
   base: process.env.BASE_URL,
   routes: [
     {
+      name: "Login",
+      path: '/login',
+      component: () => import('@/views/dashboard/pages/Login'),
+    },
+    {
       path: '/',
       component: () => import('@/views/dashboard/Index'),
+      meta: {
+          requiresAuth: true
+      },
       children: [
         // Dashboard
         {
@@ -103,25 +111,20 @@ export default new Router({
           path: 'pages/leave_m',
           component: () => import('@/views/dashboard/pages/LeaveM'),
         }
-        // // Tables
-        // {
-        //   name: 'Regular Tables',
-        //   path: 'tables/regular-tables',
-        //   component: () => import('@/views/dashboard/tables/RegularTables'),
-        // },
-        // // Maps
-        // {
-        //   name: 'Google Maps',
-        //   path: 'maps/google-maps',
-        //   component: () => import('@/views/dashboard/maps/GoogleMaps'),
-        // },
-        // Upgrade
-        // {
-        //   name: 'Upgrade',
-        //   path: 'upgrade',
-        //   component: () => import('@/views/dashboard/Upgrade'),
-        // },
       ],
-    },
+    }
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (localStorage.getItem('jwt') == null) {
+      next({name: "Login"})
+    } else {
+      next()
+    }
+  }
+  next()
+})
+
+export default router

@@ -164,6 +164,7 @@
                                 :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
                                 :startDate="editedItem.joinDate"
                                 :endDate="editedItem.seperation"
+                                v-bind:type="`optional`"
                             ></DatePicker>
                             <!-- v-bind:type="`optional`" -->
                         </v-row>
@@ -179,7 +180,7 @@
                                 textName="Separated Date"
                                 :date="editedItem.seperation"
                                 :submit="(date) => editedItem.seperation = date"
-                                :startDate="editedItem.SeperationDateForResourcePlanning"
+                                :startDate="editedItem.SeperationDateForResourcePlanning ? editedItem.SeperationDateForResourcePlanning : editedItem.joinDate"
                             ></DatePicker>
                         </v-row>
                     </v-form>

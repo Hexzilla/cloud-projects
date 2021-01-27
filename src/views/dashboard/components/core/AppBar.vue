@@ -30,27 +30,6 @@
 
     <v-spacer />
 
-    <v-text-field
-      :label="$t('search')"
-      color="secondary"
-      hide-details
-      style="max-width: 165px;"
-    >
-      <template
-        v-if="$vuetify.breakpoint.mdAndUp"
-        v-slot:append-outer
-      >
-        <v-btn
-          class="mt-n2"
-          elevation="1"
-          fab
-          small
-        >
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-      </template>
-    </v-text-field>
-
     <div class="mx-3" />
 
     <v-btn
@@ -77,17 +56,7 @@
           v-bind="attrs"
           v-on="on"
         >
-          <v-badge
-            color="red"
-            overlap
-            bordered
-          >
-            <template v-slot:badge>
-              <span>5</span>
-            </template>
-
-            <v-icon>mdi-bell</v-icon>
-          </v-badge>
+          <v-icon>mdi-account</v-icon>
         </v-btn>
       </template>
 
@@ -96,24 +65,16 @@
         nav
       >
         <div>
-          <app-bar-item
-            v-for="(n, i) in notifications"
-            :key="`item-${i}`"
-          >
-            <v-list-item-title v-text="n" />
+          <app-bar-item>
+            <v-list-item-title>
+              <div @click="logout">
+                Log Out <v-icon>mdi-logout</v-icon>
+              </div>
+            </v-list-item-title>
           </app-bar-item>
         </div>
       </v-list>
     </v-menu>
-
-    <v-btn
-      class="ml-2"
-      min-width="0"
-      text
-      to="/pages/user"
-    >
-      <v-icon>mdi-account</v-icon>
-    </v-btn>
   </v-app-bar>
 </template>
 
@@ -178,6 +139,11 @@
       ...mapMutations({
         setDrawer: 'SET_DRAWER',
       }),
+
+      logout: () => {
+        localStorage.clear()
+        window.location.href = "/"
+      }
     },
   }
 </script>
