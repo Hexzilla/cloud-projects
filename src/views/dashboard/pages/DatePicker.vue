@@ -54,9 +54,13 @@ export default {
   data: () => ({
     pickerOpened: false,
     selectedDate: '',
+    beforeFifteen: null
   }),
 
   created() {
+    const date = new Date()
+    date.setFullYear(date.getFullYear() - 15);
+    this.beforeFifteen = (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
   },
 
   computed: {
@@ -64,7 +68,7 @@ export default {
       if (this.type == "birth") {
         return [
           (v) => !!v || `${this.textName} is required`,
-          (v) => v < '2005-01-01' || 'age > 15'
+          (v) => v < this.beforeFifteen || 'age > 15'
         ]
 
       } else if (this.type == "optional") {

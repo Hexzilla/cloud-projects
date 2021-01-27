@@ -29,7 +29,6 @@
                         :search="searchName"
                         :filter="filterTreeItems"
                         :open-all="true"
-                        selection-type="independent"
                         item-key="ikey"
                         activatable>
                         <template v-slot:prepend="{ item }">
@@ -81,7 +80,7 @@
                                 :items="treeItems"
                                 item-key="ikey"
                                 selectable
-                                selection-type="independent"
+                                selection-type="leaf"
                                 @input="treeSelectChanged"
                             >
                             </v-treeview>
@@ -271,8 +270,11 @@ export default {
 
     computed: {
         filterTreeItems() {
-            return (item, search, textKey) => (item.state && item.state != 'remove')
+            return (item, search, textKey) => {
+                return item.state && item.state != 'remove'
+            }
         },
+
         taskValid() {
             return true;
         },
@@ -723,6 +725,7 @@ export default {
         },
 
         treeSelectChanged() {
+            return
             console.log("-----------", this.dialogTreeSelected)
             console.log('tree', this.treeItems)
             let keys = []

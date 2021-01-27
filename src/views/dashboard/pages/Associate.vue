@@ -157,7 +157,6 @@
                                 :date="editedItem.JoinDateForResourcePlanning"
                                 :submit="(date) => editedItem.JoinDateForResourcePlanning = date"
                                 :endDate="editedItem.joinDate"
-                                v-bind:type="`optional`"
                             ></DatePicker>
                             <DatePicker
                                 textName="Separating Date"
@@ -165,8 +164,8 @@
                                 :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
                                 :startDate="editedItem.joinDate"
                                 :endDate="editedItem.seperation"
-                                v-bind:type="`optional`"
                             ></DatePicker>
+                            <!-- v-bind:type="`optional`" -->
                         </v-row>
                         <v-row>
                             <DatePicker
@@ -509,7 +508,8 @@ export default {
                     const addedItem = await associate_api.add(item)
                     if (addedItem) {
                         success = true
-                        this.associates.push(addedItem);
+                        // this.associates.push(addedItem);
+                        this.associates = await associate_api.findAll()
                     }
                 }
                 this.show_snack(success)

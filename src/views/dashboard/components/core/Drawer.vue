@@ -164,6 +164,16 @@
           icon: 'mdi-text-account',
           title: 'manpower',
           to: '/pages/manpower'
+        },
+        {
+          icon: 'mdi-account-clock-outline',
+          title: 'leavei',
+          to: '/pages/leave_i'
+        },
+        {
+          icon: 'mdi-account-clock-outline',
+          title: 'leavem',
+          to: '/pages/leave_m'
         }
 
         // {

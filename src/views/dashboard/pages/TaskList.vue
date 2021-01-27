@@ -6,7 +6,6 @@
           <v-btn
             class="mx-4"
             color="primary"
-            dark
             @click="addCategory"
           >
             New Category
@@ -14,8 +13,8 @@
           <v-btn
             class="px-2"
             color="primary"
-            dark
             @click="saveAll"
+            :disabled="saveBtnStatus"
           >
             Save
           </v-btn>
@@ -103,6 +102,13 @@
         </template>
       </v-treeview>
     </v-card>
+
+    <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        {{ snackText }}
+        <template v-slot:action="{ attrs }">
+            <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
+        </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -125,7 +131,11 @@ export default {
     editName: "",
     valid: false,
     roles: [],
-    selectedRole: null
+    selectedRole: null,
+    snack: false,
+    snackColor: "",
+    snackText: "",
+    saveBtnStatus: true,
   }),
 
   computed: {
@@ -287,8 +297,10 @@ export default {
       }
       this.loading = true     
       const saved = await api.update(this.items);
+      this.show_snack(saved)
       if (saved) {
         this.setItemUserActionState(this.items, "nochange")
+        this.saveBtnStatus = true
       }
       console.log("saveAll", saved);
       this.loading = false
@@ -316,7 +328,7 @@ export default {
           this.selectedItem.roleid = this.selectedRole
         console.log("save.edit.tazk", this.selectedItem)
       }
-
+      this.saveBtnStatus = false
       this.close();
     },
 
@@ -324,6 +336,18 @@ export default {
       this.dialog = false
       this.selectedItem = null
       this.selectedRole = null
+    },
+
+    show_snack(success) {
+        this.snack = true;
+        if (success) {
+            this.snackColor = "success"
+            this.snackText = "Data saved"
+        }
+        else {
+            this.snackColor = "error";
+            this.snackText = "Error";
+        }
     },
   },
 };

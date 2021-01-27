@@ -1,0 +1,257 @@
+<template>
+    <v-container id="regular-tables" tag="section" fluid>
+        <v-card icon="mdi-file-tree" title="Leave" class="px-5 py-2">
+            <v-data-table
+                :headers="headers"
+                :items="leaveData"
+                :search="search"
+                :loading="loading"
+                loading-text="Loading... Please wait"
+                sort-by="id">
+                <template v-slot:top>
+                    <v-container>
+                        <div flat tile>
+                            <v-text-field
+                                v-model="search"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                        </div>
+                        
+                        <!--Add Dialog Begin-->
+                        <v-dialog v-model="dialog" max-width="500px">
+                            <v-card>
+                                <v-card-title>
+                                <span class="headline">Apply Leave</span>
+                                </v-card-title>
+
+                                <v-card-text>
+                                <v-form ref="form" v-model="valid" lazy-validation>
+                                    <v-row>
+                                        <v-col>
+                                            <DatePicker
+                                                textName="Leave From"
+                                                :date="saveData.leaveDateFrom"
+                                                :submit="(date) => saveData.leaveDateFrom = date"
+                                                :endDate="saveData.leaveDateTo"
+                                            ></DatePicker>
+                                        </v-col>
+                                        <v-col>
+                                            <DatePicker
+                                                textName="Leave To"
+                                                :date="saveData.leaveDateTo"
+                                                :submit="(date) => saveData.leaveDateTo = date"
+                                                :startDate="saveData.leaveDateFrom"
+                                            ></DatePicker>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col class="py-0">
+                                            <v-checkbox
+                                            v-model="saveData.fromHalf"
+                                            label="Half Day"
+                                            hide-details
+                                            readonly
+                                            ></v-checkbox>
+                                        </v-col>
+                                        <v-col class="py-0">
+                                            <v-checkbox
+                                            v-model="saveData.toHalf"
+                                            label="Half Day"
+                                            hide-details
+                                            readonly
+                                            ></v-checkbox>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col>
+                                            <v-textarea
+                                            label="Reason"
+                                            v-model="saveData.leaveReason"
+                                            rows="3"
+                                            readonly
+                                            ></v-textarea>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col>
+                                            <v-text-field
+                                                v-model="balance"
+                                                label="Balance as on (Leave from date)"
+                                                readonly
+                                            >
+                                            </v-text-field>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col>
+                                            <v-select
+                                                v-model="saveData.leaveType"
+                                                :items="leaveTypes"
+                                                attach
+                                                item-text="name"
+                                                item-value="value"
+                                                label="Leave Type"
+                                                readonly
+                                            ></v-select>
+                                        </v-col>
+                                    </v-row>
+                                </v-form>
+                                </v-card-text>
+
+                                <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+                                <v-btn color="red darken-1" text @click="reject"> Reject </v-btn>
+                                <v-btn color="blue darken-1" text @click="approve"> Approve </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+                        <!--Add Dialog End-->
+
+                    </v-container>
+                </template>
+
+                <template v-slot:item.action="{ item }">
+                    <template v-if="item.status == `applied`">
+                        <v-btn small color="teal" text title='Approve' @click="approveLeave(item)">
+                            <v-icon>
+                                mdi-check
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                </template>
+            </v-data-table>
+        </v-card>
+
+        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+            {{ snackText }}
+            <template v-slot:action="{ attrs }">
+                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
+            </template>
+        </v-snackbar>
+
+    </v-container>
+</template>
+
+<script>
+    import DatePicker from './DatePicker'
+    import leave_api from "@/apis/leave.js";
+
+    export default {
+        components: {
+            DatePicker,
+        },
+
+        data: () => ({
+            headers: [
+                { text: "Leave From", align: "start", value: "leaveFrom" },
+                { text: "Leave To", align: "start", value: "leaveTo" },
+                { text: "Status", align: "start", value: "status" },
+                { text: "Reason", align: "start", value: "reason", sortable: false },
+                { text: "Action", align: "center", value: "action"}
+            ],
+            leaveData: [],
+            leaveTypes: [{value: 'EL', name: 'Earned Leave'},
+                        {value: 'ML', name: 'Medical Leave'},
+                        {value: 'CL', name: 'Casual Leave'}],
+            search: "",
+            loading: false,
+            dialog: false,
+            valid: false,
+            saveData: {
+                leaveDateFrom: null,
+                leaveDateTo: null,
+                leaveReason: null,
+                leaveType: null,
+                fromHalf: false,
+                toHalf: false,
+            },
+            initialSaveData: {
+                leaveDateFrom: null,
+                leaveDateTo: null,
+                leaveReason: null,
+                leaveType: null,
+                fromHalf: false,
+                toHalf: false
+            },
+            snack: false,
+            snackColor: "",
+            snackText: "",
+            selectedItem: null,
+            balance: null
+        }),
+
+        async created() {
+            this.loading = true
+            this.leaveData = await leave_api.getAllLeave()
+            this.loading = false
+        },
+
+        computed: {
+        },
+
+        methods: {
+            addItem() {
+                if (this.$refs.form) {
+                    this.$refs.form.resetValidation()
+                }
+                this.dialog = true
+            },
+
+            async approve() {
+                this.loading = true
+                this.close()
+                let status = await leave_api.approveLeaveByHR(this.selectedItem.hrId, this.selectedItem.id, this.selectedItem.lastUpdateTimeStamp, this.balance)
+                this.leaveData = await leave_api.getAllLeave()
+                this.show_snack(status)
+                this.loading = false
+            },
+
+            close() {
+                this.dialog = false
+            },
+
+            show_snack(success) {
+                this.snack = true;
+                if (success) {
+                    this.snackColor = "success"
+                    this.snackText = "Data saved"
+                }
+                else {
+                    this.snackColor = "error";
+                    this.snackText = "Error";
+                }
+            },
+
+            async approveLeave(item) {
+                this.loading = true
+                console.log('approve', item)
+                this.dialog = true
+                
+                this.saveData.leaveDateFrom = item.leaveFrom
+                this.saveData.leaveDateTo = item.leaveTo
+                this.saveData.fromHalf = item.fromHalf ? true : false
+                this.saveData.toHalf = item.toHalf ? true : false
+                this.saveData.leaveReason = item.reason
+                this.saveData.leaveType = item.leaveType
+                
+                this.selectedItem = item
+                this.balance = await leave_api.getIndividualBalance(item.leaveFrom, item.hrId)
+                this.loading = false
+            },
+
+            async reject() {
+                this.loading = true
+                this.close()
+                let status = await leave_api.cancelLeaveByHR(this.selectedItem.hrId, this.selectedItem.id, this.selectedItem.lastUpdateTimeStamp)
+                this.leaveData = await leave_api.getAllLeave()
+                this.show_snack(status)
+                this.loading = false
+            }
+        }
+    }
+</script>
+

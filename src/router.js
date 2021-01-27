@@ -92,6 +92,16 @@ export default new Router({
           name: 'ManPower utilization',
           path: 'pages/manpower',
           component: () => import('@/views/dashboard/pages/Manpower'),
+        },
+        {
+          name: 'Leave Individual',
+          path: 'pages/leave_i',
+          component: () => import('@/views/dashboard/pages/LeaveI'),
+        },
+        {
+          name: 'Leave Manager',
+          path: 'pages/leave_m',
+          component: () => import('@/views/dashboard/pages/LeaveM'),
         }
         // // Tables
         // {

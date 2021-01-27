@@ -74,6 +74,7 @@
                                                 <v-select
                                                     v-model="editedItem.COO"
                                                     :items="countries"
+                                                    :rules="countryRules"
                                                     attach
                                                     item-text="name"
                                                     item-value="id"
@@ -82,12 +83,24 @@
                                             </v-col>
                                         </v-row>
                                         <v-row>
-                                            <DatePicker
-                                                textName="Date of Birth"
-                                                :date="editedItem.DOB"
-                                                :submit="(date) => editedItem.DOB = date"
-                                                v-bind:type="`birth`"
-                                            ></DatePicker>
+                                            <v-col>
+                                                <DatePicker
+                                                    textName="Date of Birth"
+                                                    :date="editedItem.DOB"
+                                                    :submit="(date) => editedItem.DOB = date"
+                                                    v-bind:type="`birth`"
+                                                ></DatePicker>
+                                            </v-col>
+                                            <v-col>
+                                                <v-text-field
+                                                    v-model="editedItem.email"
+                                                    :rules="emailRules"
+                                                    label="Email"
+                                                    :error-messages="emailError"
+                                                    @keydown="emailKeypressed()"
+                                                    required
+                                                ></v-text-field>
+                                            </v-col>
                                         </v-row>
                                         <v-row>
                                             <v-col cols="12" sm="6" md="6">
@@ -106,17 +119,7 @@
                                             </v-col>
                                         </v-row>
                                         <v-row>
-                                            <v-col cols="12" sm="6" md="6">
-                                                <v-text-field
-                                                    v-model="editedItem.email"
-                                                    :rules="emailRules"
-                                                    label="Email"
-                                                    :error-messages="emailError"
-                                                    @keydown="emailKeypressed()"
-                                                    required
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="6">
+                                            <v-col cols="12" sm="12" md="12">
                                                 <v-text-field
                                                     v-model="editedItem.pwd"
                                                     :append-icon="passwordShow ? 'mdi-eye' : 'mdi-eye-off'"
@@ -127,7 +130,13 @@
                                                     label="Password"
                                                     required>
                                                     <template v-slot:append-outer>
-                                                        <v-icon class="pt-1" @click="generatePassword()">mdi-pencil</v-icon>
+                                                        <v-btn
+                                                        class="mt-1"
+                                                        color="teal"
+                                                        elevation="2"
+                                                        x-small
+                                                        @click="generatePassword()"
+                                                        >Generate</v-btn>
                                                     </template>
                                                 </v-text-field>
                                             </v-col>
@@ -461,7 +470,12 @@ export default {
         },
         genderRules() {
             return [
-                (v) => !!v || "This field is required"
+                (v) => !!v || "Gender is required"
+            ]
+        },
+        countryRules() {
+            return [
+                (v) => !!v || "Country is required"
             ]
         },
         emptiableNameRules() {

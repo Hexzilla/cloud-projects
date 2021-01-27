@@ -231,6 +231,7 @@ export default {
     async initialize() {
       this.loading = true
       this.clients = await api.findAll()
+      console.log("client", this.clients)
       this.loading = false;
     },
 

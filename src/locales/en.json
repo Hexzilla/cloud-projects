@@ -52,6 +52,7 @@
   "widgets": "Widgets",
   "wizard": "Wizard",
   "progress": "Progress",
-  "manpower": "Manpower"
-
+  "manpower": "Manpower",
+  "leavei": "Leave Individual",
+  "leavem": "Leave Manager"
 }
