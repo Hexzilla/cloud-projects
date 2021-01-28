@@ -52,7 +52,7 @@
                 <v-card class="mt-0">
                     <v-card-title>
                         <div style="text-align: right; width: 100%">
-                            <v-btn small color="teal" @click="addBalance" :disabled="addBtnValid">
+                            <v-btn rounded small color="secondary" @click="addBalance" :disabled="addBtnValid">
                                 Add
                             </v-btn>
                         </div>
@@ -92,7 +92,7 @@
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                <span class="headline">Apply Leave</span>
+                <span class="headline">Add Leave Balance</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -117,6 +117,8 @@
                             <v-col>
                                 <v-text-field
                                     v-model="detailData.amount"
+                                    type="number"
+                                    :rules="amountRule"
                                 >
                                 </v-text-field>
                             </v-col>
@@ -136,7 +138,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
-                    <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
+                    <v-btn :disabled="!valid" color="blue darken-1" text @click="save"> Save </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -198,6 +200,14 @@
             this.loading = false
         },
 
+        computed: {
+            amountRule() {
+                return [
+                    (v) => v > 0 || " > 0",
+                    (v) => v % 0.5 == 0 || "Invaild Number"
+                ]
+            }
+        },
         methods: {
             async showDetail(item) {
                 this.wait = true
@@ -214,6 +224,9 @@
             },
 
             addBalance() {
+                if (this.$refs.form) {
+                    this.$refs.form.resetValidation()
+                }
                 this.dialog = true
                 this.detailData.name = this.selectedItem.name
                 this.detailData.date = this.selectedDate
@@ -221,11 +234,12 @@
             },
 
             async save() {
+                if (!this.$refs.form.validate()) return
                 this.wait = true
                 this.close()
                 let status = await leave_api.adjustBalance(this.detailData)
                 this.show_snack(status)
-                this.leaveDetails = await leave_api.getLeaveBalanceDetails(this.selectedDate, detailData.hrId)
+                this.leaveDetails = await leave_api.getLeaveBalanceDetails(this.selectedDate, this.detailData.hrId)
                 this.wait = false
             },
 

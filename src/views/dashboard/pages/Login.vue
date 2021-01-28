@@ -12,13 +12,21 @@
                 <v-form ref="form" lazy-validation>
                     <v-row>
                         <v-col>
-                            <v-text-field
+                            <!-- <v-text-field
                                 label="Email"
                                 prepend-icon="mdi-email"
                                 :rules="emailRules"
                                 v-model="email"
                                 :error-messages="errorMessageEmail"
                                 @keydown="errorMessageEmail = ''"
+                            ></v-text-field> -->     
+                            <v-text-field
+                                label="Code"
+                                prepend-icon="mdi-language-c"
+                                :rules="codeRules"
+                                v-model="code"
+                                :error-messages="errorMessageCode"
+                                @keydown="errorMessageCode = ''"
                             ></v-text-field>
                         </v-col>
                     </v-row>
@@ -59,6 +67,8 @@ export default {
         password: "",
         errorMessageEmail: "",
         errorMessagePassword: "",
+        code: "",
+        errorMessageCode: "",
     }),
 
     created: function() {
@@ -70,6 +80,12 @@ export default {
                 v => !!v || 'E-mail is required',
                 v => /.+@.+/.test(v) || 'E-mail must be valid',
             ]
+        },
+        codeRules() {
+            return [
+                (v) => !!v || "Code is required",
+                (v) => (v && v.trim().length > 0) || "Code is required",
+            ];
         },
         passwordRules() {
             return [
@@ -86,16 +102,17 @@ export default {
     methods: {
         async onLogin() {
             if (!this.$refs.form.validate()) return
-            let status = await auth_api.login(this.email, this.password)
+            let status = await auth_api.login(this.code, this.password)
             if (status) {
-                localStorage.setItem('email', this.email)
+                localStorage.setItem('code', this.code)
                 localStorage.setItem('jwt', status)
 
                 if (localStorage.getItem('jwt') != null){
-                    this.$router.push('/')
+                    // this.$router.push('/')
+                    window.location.href = "/"
                 }
             } else {
-                this.errorMessageEmail = "Not registered eamil"
+                this.errorMessageCode = "Not registered code"
                 this.errorMessagePassword = "Not registered password"
             }
         }

@@ -14,7 +14,7 @@ const getToday = function() {
 const add1 = async function(data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL1id": data.est_MP_TL1_id,
+        "estimate_MP_taskL1id": data.id,
         "workSupervisor_hrid": data.supervisor,
         "workPerformedBy_hrid": data.performer,
         "L1AdditionalTotHrsToday": data.hr,
@@ -38,7 +38,7 @@ const add1 = async function(data) {
 const add2 = async function(data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL2id": data.est_MP_TL2_id,
+        "estimate_MP_taskL2id": data.id,
         "workSupervisor_hrid": data.supervisor,
         "workPerformedBy_hrid": data.performer,
         "L2AdditionalTotHrsToday": data.hr,
@@ -62,7 +62,7 @@ const add2 = async function(data) {
 const add3 = async function(data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL3id": data.est_MP_TL3_id,
+        "estimate_MP_taskL3id": data.id,
         "workSupervisor_hrid": data.supervisor,
         "workPerformedBy_hrid": data.performer,
         "L3AdditionalTotHrsToday": data.hr,
@@ -86,7 +86,7 @@ const add3 = async function(data) {
 const add4 = async function(data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL4id": data.est_MP_TL4_id,
+        "estimate_MP_taskL4id": data.id,
         "workSupervisor_hrid": data.supervisor,
         "workPerformedBy_hrid": data.performer,
         "L4AdditionalTotHrsToday": data.hr,

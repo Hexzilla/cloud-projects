@@ -485,8 +485,14 @@ export default {
         },
         emailRules() {
             return [
-                v => !!v || 'E-mail is required',
-                v => /.+@.+/.test(v) || 'E-mail must be valid',
+                // v => !!v || 'E-mail is required',
+                v =>  {
+                    if (!v) {
+                        return true
+                    } else if (!/.+@.+/.test(v)) {
+                        return 'E-mail must be valid'
+                    }
+                }
             ]
         },
         passwordRules() {

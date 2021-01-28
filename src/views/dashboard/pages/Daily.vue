@@ -36,91 +36,55 @@
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="my-0">
-                    <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
+                <v-card class="my-0" min-height="300px">
+                    <!-- <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-row>
-                            <v-col cols="12" md="2">
-                                <v-select
-                                    v-model="supervisor"
-                                    :items="supervisors"
-                                    attach
-                                    chips
-                                    item-text="firstname"
-                                    item-value="id"
-                                    label="Supervisor"
-                                ></v-select>
-                            </v-col>
-                            <v-col cols="12" md="2">
-                                <v-select
-                                    v-model="performer"
-                                    :items="performers"
-                                    attach
-                                    chips
-                                    item-text="firstname"
-                                    item-value="id"
-                                    label="Performer"
-                                    @change="performerChanged"
-                                ></v-select>
-                            </v-col>
-                            <v-col cols="12" md="2">
-                                <v-select
-                                    v-model="phase"
-                                    :items="phases"
-                                    attach
-                                    chips
-                                    label="Phase"
-                                    item-text="phaseNumber"
-                                    item-value="phaseNumber"
-                                    @change="phaseChanged"
-                                ></v-select>
-                            </v-col>
-                            <v-col cols="12" md="6">
-                                <v-row class="mt-4" style="width:350px; float:right">
-                                    <v-col class="text-center">
-                                        Today
-                                    </v-col>
-                                    <v-col class="text-center">
-                                        Till Yesterday
-                                    </v-col>
-                                </v-row>
+                            <v-col class="text-right py-8 px-10">
+                                Till Yesterday
                             </v-col>
                         </v-row>
-                    </v-card-title>
-                    <v-row>
-                        <v-col>
-                            <v-treeview
-                                :open="initiallyOpen"
-                                :items="treeItems"
-                                item-key="ikey"
-                                activatable
-                            >
-                                <template v-slot:prepend="{ item }">
-                                    <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                    <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
-                                </template>
-                                <template v-slot:append="{ item }">
-                                    <InputGroup 
-                                        v-if="item.level > 0"
-                                        v-bind:item="item"
-                                        style="width:350px">
-                                    </InputGroup>
-                                </template>
-                            </v-treeview>
-                        </v-col>
-                    </v-row>
-                    <v-row>
-                        <v-col class="text-right">
-                            <v-btn
-                                elevation="2"
-                                color="teal"
-                                :disabled=saveValid
-                                @click="saveBtnClicked"
-                            >Save</v-btn>
-                        </v-col>
-                    </v-row>
+                    </v-card-title> -->
+                    <template 
+                        v-for="(item, i) in phases">
+                        <v-container :key="i">
+                            <v-row>
+                                <v-col>
+                                    <p class="subtitle-1 mb-0" style="color:#1867c0; font-size: 20px !important;"><b>{{ `Phase ${i + 1}` }}</b></p>
+                                    <p class="title mb-0 text--disabled">
+                                        {{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}
+                                    </p>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col>
+                                    <v-treeview
+                                        :open="initiallyOpen"
+                                        :items="item['serverItems']"
+                                        item-key="ikey"
+                                        activatable
+                                    >
+                                        <template v-slot:prepend="{ item }">
+                                            <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
+                                            <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                        </template>
+                                        <template v-slot:append="{ item }">
+                                            <InputGroup 
+                                                v-if="item.level > 0"
+                                                v-bind:item="item"
+                                                v-bind:supervisors="supervisors"
+                                                v-bind:performers="performers"
+                                                v-bind:wait="wait"
+                                                style="width:300px">
+                                            </InputGroup>
+                                        </template>
+                                    </v-treeview>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </template>
                 </v-card>
             </v-col>
         </v-row>
@@ -141,17 +105,13 @@
         data: () => ({
             wait: false,
             projects: [],
-            allProjects: [],
             selectedProject: null,
             supervisor: null,
             supervisors: [],
-            allSupervisors: [],
             initiallyOpen: ["public"],
-            treeItems: [],
             performer: null,
             performers: [],
             selectedPerformer: null,
-            allPerformers: [],
             waitProject: null,
             phase: null,
             phases: []
@@ -159,24 +119,15 @@
         
         created: async function() {
             this.wait = true
-            this.allProjects = await api.getProjects()
-            this.allPerformers = await client_api.findL1Members()
-            this.allSupervisors = await client_api.findSupervisors()
+            this.projects = await api.getProjects()
+            this.performers = await client_api.findL1Members()
+            this.supervisors = await client_api.findSupervisors()
 
-            this.supervisors = this.allSupervisors
-            this.performers = this.allPerformers
-            this.projects = this.allProjects
+            this.projects.forEach(item => item.set = false)
             this.wait = false
         },
 
         computed: {
-            saveValid() {
-                if (this.wait)
-                    return this.wait
-                if (this.selectedProject && this.supervisor && this.performer && this.treeItems)
-                    return false
-                return true
-            }
         },
 
         methods: {
@@ -185,53 +136,27 @@
                 this.selectedProject = project
                 this.waitProject = project
 
-                this.performer = null
-                this.phase = null
-
+                this.phases = null
                 await api.updateTaskList(project)
 
-                // console.log("project", project)
                 this.phases = project.phases
-
-                this.treeItems = []
                 this.phases.length > 0 && this.phases.forEach((item) => {
                     item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems, 1)
-                    // item.serverItems.length > 0 && item.serverItems.forEach(item1 => {
-                    //     this.treeItems.push(item1)
-                    // })
-                    // this.treeItems.push(item)
                 })
-                console.log("phases", this.phases)       
-
-                this.performers.length > 0 && this.performers.forEach((item) => {
-                    item.phases = Object.assign([], this.phases)
-                })               
                 this.waitProject = null         
                 this.wait = false
+
+                console.log("phases", this.phases)
             },
 
-            performerChanged: function() {
-                if (!this.selectedProject)
-                    return
-                this.treeItems = []
-                console.log("performers", this.performers)
-                
-                console.log("id", this.performer)
-                this.selectedPerformer = this.performers.find(element => element.id == this.performer)
-                console.log("selected", this.selectedPerformer)
-                
-                this.phase = this.phases[0].phaseNumber
-                this.treeItems = this.selectedPerformer.phases[0].serverItems
-                console.log("treeItems",this.treeItems)
-            },
-
-            phaseChanged: function() {
-                if (!this.performer)
-                    return
-                console.log(this.selectedPerformer)
-                let selectedPhase = this.selectedPerformer.phases.find(element => element.phaseNumber == this.phase)
-                console.log("selected phase", selectedPhase)
-                this.treeItems = selectedPhase.serverItems
+            cloneTree(items) {
+                return items.map((item) => {
+                    const node = Object.assign({}, item)
+                    if (item.children && item.children.length > 0) {
+                        node.children = this.cloneTree(item.children)
+                    }
+                    return node
+                })
             },
 
             searchKeyChange: function(event) {
@@ -328,7 +253,7 @@
 
             isFill: function(item) {
                 return item.hr && item.min && item.pct && item.totalPct
-            }
+            },
         }
     }
 </script>

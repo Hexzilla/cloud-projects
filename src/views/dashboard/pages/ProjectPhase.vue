@@ -25,7 +25,7 @@
                     <v-treeview
                         class="mt-5"
                         :open="initiallyOpen"
-                        :items="phase.tree"
+                        :items="treeForShow"
                         :search="searchName"
                         :filter="filterTreeItems"
                         :open-all="true"
@@ -80,7 +80,7 @@
                                 :items="treeItems"
                                 item-key="ikey"
                                 selectable
-                                selection-type="leaf"
+                                selection-type="independent"
                                 @input="treeSelectChanged"
                             >
                             </v-treeview>
@@ -124,6 +124,21 @@
                                     prepend-icon="mdi-alpha-d-circle-outline"
                                     label="Description"
                                 ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row v-if="editTask.level == 1">
+                            <v-col>
+                                <v-select
+                                    v-model="editTask.people"
+                                    :items="peoples"
+                                    attach
+                                    label="Peoples"
+                                    multiple
+                                    chips
+                                    item-text="name"
+                                    item-value="id"
+                                    prepend-icon="mdi-account-group"
+                                ></v-select>
                             </v-col>
                         </v-row>
                         <v-row v-if="editTask.level == 1">
@@ -244,7 +259,7 @@
 <script>
 import moment from 'moment'
 import api from "@/apis/project.js"
-import apiTasks from "@/apis/task.js"
+import associate_api from "@/apis/associate.js"
 import DatePicker from './DatePicker'
 
 export default {
@@ -266,6 +281,8 @@ export default {
         editTask: null,
         searchName: "1",
         unitOfMeasureItems: ['Nos', 'Item'],
+        treeForShow: [],
+        peoples: [],
     }),
 
     computed: {
@@ -280,8 +297,8 @@ export default {
         },
     },
 
-    created: function() {
-        console.log("tree", this.treeItems)
+    created: async function() {
+        this.peoples = await api.findPeople()
         this.initialize()
     },
 
@@ -307,6 +324,8 @@ export default {
             this.phase.tree = this.cloneTaskTree(this.treeItems)
             this.phase.tree = this.setDefaultValues(this.phase.tree)
             console.log('initialize_phase_tree:', this.phase.tree)
+
+            this.setShowingTree()
         },
 
         //----------------------mangae task list -------------------------------------
@@ -425,14 +444,14 @@ export default {
             if (keyList.find(it => it == task.ikey)) {
                 return true;
             }
-            // const children = task.children
-            // if (children && children.length > 0) {
-            //     for (var i in children) {
-            //         if (this.existsInKeyList(children[i], keyList)) {
-            //             return true;
-            //         }
-            //     }
-            // }
+            const children = task.children
+            if (children && children.length > 0) {
+                for (var i in children) {
+                    if (this.existsInKeyList(children[i], keyList)) {
+                        return true;
+                    }
+                }
+            }
             return false;
         },
         //----------------------mangae task list -------------------------------------
@@ -550,10 +569,12 @@ export default {
                     subItemKeys = thiz.getKeyList(item.children);                    
                 }
                 if (subItemKeys && subItemKeys.length > 0) {
+                    result.push(item.ikey)
                     result = result.concat(subItemKeys)
                 }
                 else {
-                    result.push(item.ikey)
+                    // result.push(item.ikey)
+                    item.state && result.push(item.ikey)
                 }
             })
             return result
@@ -575,8 +596,9 @@ export default {
             console.log('saveTreeDialog.selected:', this.dialogTreeSelected);
 
             this.updateInterestedItems(this.phase.tree, this.dialogTreeSelected)
-            console.log("phase", this.phase.tree)
             this.refreshTree()
+
+            this.setShowingTree()
         },
 
         refreshTree: function() {
@@ -595,6 +617,7 @@ export default {
         },
 
         saveTaskEditDialog: function() {
+            console.log('edit task', this.editTask)
             this.taskDialog = false;
         },
 
@@ -628,6 +651,7 @@ export default {
                 console.log('saveTask_add_item', item, item.state)
 
                 if (item.state === "newData" || item.state === "modified") {
+                    console.log('-------------item', item)
                     const insertId = await api.addProjectCategory(this.phase.phase_id, item)
                     console.log('Save_Add_Category_Result', item, insertId)
 
@@ -651,6 +675,7 @@ export default {
                 const children = item.children
                 if (children && children.length > 0) {
                     await this.saveTaskByLevel(item, 'newData|modified', 1)
+                    // await this.removeTaskByLevel(item)
                 }
             }
 
@@ -675,6 +700,7 @@ export default {
             }*/
 
             this.resetStates(this.phase.tree)
+            this.setShowingTree()
             this.wait = false;
         },
 
@@ -712,6 +738,33 @@ export default {
             // }
         },
 
+        removeTaskByLevel: async function(tazk) {
+            const pInfo = this.findServerItem(tazk)
+            if (pInfo) {
+                tazk.info = pInfo
+            }
+
+            if (tazk.level > 0 && tazk.state === 'remove') {
+                console.log("---------remove task", tazk)
+                if (tazk.level == 1) {
+                    await api.removeTaskByLevel(tazk.info.est_MP_TL1_id, 1)  
+                } else if (tazk.level == 2) {
+                    await api.removeTaskByLevel(tazk.info.est_MP_TL2_id, 2)  
+                } else if (tazk.level == 3) {
+                    await api.removeTaskByLevel(tazk.info.est_MP_TL3_id, 3)  
+                } else if (tazk.level == 4) {
+                    await api.removeTaskByLevel(tazk.info.est_MP_TL4_id, 4)  
+                }
+            }
+
+            if (tazk.children && tazk.children.length > 0) {
+                for (const i in tazk.children) {
+                    const child = tazk.children[i]
+                    await this.removeTaskByLevel(child)
+                }
+            }
+        },
+
         openPhaseEditDialog: function() {
             this.editPhaseDateDialog = true
         },
@@ -725,7 +778,6 @@ export default {
         },
 
         treeSelectChanged() {
-            return
             console.log("-----------", this.dialogTreeSelected)
             console.log('tree', this.treeItems)
             let keys = []
@@ -758,7 +810,40 @@ export default {
                 }
             })
             return result
+        },
+
+        cloneTree(items) {
+            return items.map((item) => {
+                const node = Object.assign({}, item)
+                if (item.children && item.children.length > 0) {
+                    node.children = this.cloneTree(item.children)
+                }
+                return node
+            })
+        },
+
+        setShowingTree() {
+            let temp = this.cloneTree(this.phase.tree)
+            this.treeForShow = this.makeShowingTree(temp)
+            console.log('treeForShow', this.treeForShow)
+        },
+
+        makeShowingTree(items) {
+            let result = []
+            result = items && items.length > 0 && items.filter(item => item.state && item.state != "remove")
+            if (result && result.length > 0) {
+                for (let i in result) {
+                    if (result[i].children && result[i].children.length > 0)
+                        result[i].children = this.makeShowingTree(result[i].children)
+                }
+            }
+            return result
+        },
+
+        selectPeopleChanged() {
+            
         }
+
     }
 };
 </script>

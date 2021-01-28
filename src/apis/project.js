@@ -75,7 +75,6 @@ const updateTasks = async function(tasks, level) {
 const updateTaskList = async function(project) {
     for (const i in project.phases) {
         const phase = project.phases[i]
-
         if (phase.serverItems) {
             phase.serverItems = await updateTasks(phase.serverItems, 1)
         }
@@ -345,7 +344,9 @@ const getTask4 = async function(task3Id) {
     return []
 }
 
-const saveTaskByLevel = async function(tazk, state, level) {
+const saveTaskByLevel = async function (tazk, state, level) {
+    console.log("------------save task", tazk, state, level)
+
     if (level == 0) return await this.saveTask1(tazk, state)
     if (level == 1) return await this.saveTask2(tazk, state)
     if (level == 2) return await this.saveTask3(tazk, state)
@@ -353,7 +354,8 @@ const saveTaskByLevel = async function(tazk, state, level) {
     return false
 }
 
-const saveTask1 = async function(tazk, state) {
+const saveTask1 = async function (tazk, state) {
+    console.log('saveTask1--1', tazk)
     ////TOOD---console.log('saveTask1--1', tazk)
     for (const i in tazk.children) {
         const child = tazk.children[i]
@@ -402,7 +404,8 @@ const saveTask1 = async function(tazk, state) {
     return null
 }
 
-const saveTask2 = async function(tazk, state) {
+const saveTask2 = async function (tazk, state) {
+    console.log('saveTask2--1', tazk)
     ////TOOD---console.log('saveTask2--1', tazk)
     for (const i in tazk.children) {
         const child = tazk.children[i]
@@ -446,7 +449,8 @@ const saveTask2 = async function(tazk, state) {
     return null
 }
 
-const saveTask3 = async function(tazk, state) {
+const saveTask3 = async function (tazk, state) {
+    console.log('saveTask3--1', tazk)
     ////TOOD---console.log('saveTask3--1', tazk)
     for (const i in tazk.children) {
         const child = tazk.children[i]
@@ -490,7 +494,8 @@ const saveTask3 = async function(tazk, state) {
     return null
 }
 
-const saveTask4 = async function(tazk, state) {
+const saveTask4 = async function (tazk, state) {
+    console.log('saveTask4--1', tazk)
     ////TOOD---console.log('saveTask4--1', tazk)
     for (const i in tazk.children) {
         const child = tazk.children[i]
@@ -534,6 +539,141 @@ const saveTask4 = async function(tazk, state) {
     return null
 }
 
+const removeTaskByLevel = async function(taskId, level) {
+    if (level == 1) return await this.removeTask1(taskId)
+    if (level == 2) return await this.removeTask2(taskId)
+    if (level == 3) return await this.removeTask3(taskId)
+    if (level == 4) return await this.removeTask4(taskId)
+    return false
+}
+
+const removeTask1 = async function(taskId) {
+    const data = {
+        "action": "est_MP_TL1_id-usage",
+        "details": {
+            "est_MP_TL1_id": taskId
+        }
+    }
+    try {
+        const response = await http.post("/plan/projectCheckb4Remove", data)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const removeTask2 = async function(taskId) {
+    const data = {
+        "action": "est_MP_TL2_id-usage",
+        "details": {
+            "est_MP_TL2_id": taskId
+        }
+    }
+    try {
+        const response = await http.post("/plan/projectCheckb4Remove", data)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const removeTask3 = async function(taskId) {
+    const data = {
+        "action": "est_MP_TL3_id-usage",
+        "details": {
+            "est_MP_TL3_id": taskId
+        }
+    }
+    try {
+        const response = await http.post("/plan/projectCheckb4Remove", data)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const removeTask4 = async function(taskId) {
+    const data = {
+        "action": "est_MP_TL4_id-usage",
+        "details": {
+            "est_MP_TL4_id": taskId
+        }
+    }
+    
+    try {
+        const response = await http.post("/plan/projectCheckb4Remove", data)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const allocateResource = async function () {
+    const data = {
+        "action": "est_MP_TL1-ResourceManage",
+        "details": {
+            "est_MP_TL1_id": 4,
+            "inlcudeResource": [
+                {
+                    "hrid": 1
+                },
+                {
+                    "hrid": 2
+                }
+            ],
+            "exlcudeResource": [
+                {
+                    "hrid": 4
+                },
+                {
+                    "hrid": 5
+                }
+            ]
+        }
+    }
+
+    try {
+        const response = await http.post("/plan/projectResourceAllocate", data)
+        return (response.status == 200)
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const findPeople = async function() {
+    try {
+        const response = await http.post("/hr/hrFindAll")
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                let ret = data.response.allCarrierRecord
+                let result = []
+                ret && ret.length > 0 && ret.forEach(item => {
+                    result.push({
+                        id: item.id,
+                        name: item.firstname + " " + item.lastname
+                    })
+                })
+                return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 export default {
     findAll,
     addProject,
@@ -557,5 +697,12 @@ export default {
     getProjectWithPhase,
     getProjects,
     getTree,
-    saveTaskByLevel
+    saveTaskByLevel,
+    removeTask1,
+    removeTask2,
+    removeTask3,
+    removeTask4,
+    removeTaskByLevel,
+    allocateResource,
+    findPeople,
 }

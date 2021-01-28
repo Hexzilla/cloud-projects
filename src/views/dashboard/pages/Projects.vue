@@ -158,7 +158,7 @@ export default {
         submit: function () {},
         
         project_listItemClicked: async function(project) {
-            console.log('listItemClicked', project.updated)
+            console.log('listItemClicked', project)
             if (!project.updated) {
                 this.wait = true
                 this.waitProject = project

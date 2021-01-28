@@ -88,6 +88,7 @@
                                     v-model="editedItem.personid"
                                     :items="people"
                                     :rules="defaultRules"
+                                    v-if="editedIndex == -1"
                                     attach
                                     item-text="firstname"
                                     item-value="id"
@@ -300,6 +301,7 @@ export default {
             { text: "First Name", align: "start", value: "firstname" },
             { text: "Last Name", value: "lastname" },
             { text: "Email", value: "email" },
+            { text: "Code", value: "code" },
             { text: "Assocation Type", value: "assocationType" },
             { text: "Assocation Status", value: "assocationStatus" },
             { text: "Joined Date", value: "joinDate" },
@@ -411,7 +413,6 @@ export default {
             this.associates = await associate_api.findAll()
 
             this.roleData = associate_api.getRoleWithData(this.roles)
-            console.log("role data", this.roleData)
 
             this.loading = false
         },
@@ -421,6 +422,7 @@ export default {
         },
 
         editItem(item) {
+            console.log("selected", item)
             this.editedIndex = this.associates.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.openAddDialog()
