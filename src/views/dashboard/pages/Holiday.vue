@@ -1,0 +1,454 @@
+<template>
+    <v-container id="regular-tables" tag="section" fluid>
+        <v-progress-linear
+            class="mb-1"
+            indeterminate
+            color="teal"
+            v-if="wait">
+        </v-progress-linear>
+        <v-row>
+            <v-col cols="12" md="8">
+                <v-card class="px-2 py-2 mt-0">
+                    <v-card-title>
+                        <div style="width: 100%; text-align: right">
+                            <v-btn small rounded color="secondary" @click="newCalendarClicked">
+                                New Calendar
+                            </v-btn>
+                        </div>
+                    </v-card-title>
+                    <v-data-table
+                        :headers="headers"
+                        :items="calendars"
+                        :search="search"
+                        :loading="loading"
+                        loading-text="Loading... Please wait"
+                        sort-by="id">
+                        <template v-slot:top>
+                            <v-container>
+                                <v-row>
+                                    <v-col>
+                                        <v-text-field
+                                            v-model="search"
+                                            append-icon="mdi-magnify"
+                                            label="Search"
+                                            single-line
+                                            hide-details
+                                        ></v-text-field>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                        </template>
+
+                        <template v-slot:item.sunoff="{ item }">
+                            <v-icon :color=getColor(item.sunoff)>
+                                {{getIcon(item.sunoff)}} 
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.monoff="{ item }">
+                            <v-icon :color=getColor(item.monoff)>
+                                {{getIcon(item.monoff)}} 
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.tueoff="{ item }">
+                            <v-icon :color=getColor(item.tueoff)>
+                                {{getIcon(item.tueoff)}}  
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.wedoff="{ item }">
+                            <v-icon :color=getColor(item.wedoff)>
+                                {{getIcon(item.wedoff)}}  
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.thuoff="{ item }">
+                            <v-icon :color=getColor(item.thuoff)>
+                                {{getIcon(item.thuoff)}}  
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.frioff="{ item }">
+                            <v-icon :color=getColor(item.frioff)>
+                                {{getIcon(item.frioff)}}  
+                            </v-icon>
+                        </template>
+                        <template v-slot:item.satoff="{ item }">
+                            <v-icon :color=getColor(item.satoff)>
+                                {{getIcon(item.satoff)}}  
+                            </v-icon>
+                        </template>
+
+                        <template v-slot:item.edit="{ item }">
+                            <v-btn x-small color="teal" title='Edit' @click="editCalendar(item)">
+                                EDIT
+                            </v-btn>
+                        </template>
+                        <template v-slot:item.detail="{ item }">
+                            <v-btn x-small color="teal" title='More Info' @click="showDetail(item)">
+                                MORE INFO
+                            </v-btn>
+                        </template>
+                    </v-data-table>
+                </v-card>
+            </v-col>
+            <v-col cols="12" md="4">
+                <v-card class="px-2 py-2 mt-0">
+                    <v-card-title>
+                        <div style="width: 100%; text-align: right">
+                            <v-btn small rounded color="teal" @click="newDateClicked" :disabled=dateBtnValid>
+                                New Date
+                            </v-btn>
+                        </div>
+                    </v-card-title>
+                    <v-row>
+                        <v-col>
+                            <v-simple-table>
+                                <template v-slot:default>
+                                <thead>
+                                    <tr>
+                                        <th width="30%" class="text-left">
+                                            Date
+                                        </th>
+                                        <th width="50%" class="text-left">
+                                            Reason
+                                        </th>
+                                        <th width="20%" class="text-center">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, i) in dates" :key="i">
+                                        <td class="px-1">{{ item.dt }}</td>
+                                        <td class="px-1">{{ item.reason }}</td>
+                                        <td class="px-1">
+                                            <v-icon color="teal" class="mr-2" @click="editDate(item)"
+                                                    title="Edit" style="cursor: pointer">
+                                                mdi-square-edit-outline
+                                            </v-icon>
+                                            <v-icon color="red" title="Remove" @click="deleteDate(item)"
+                                                    style="cursor: pointer">
+                                                mdi-tooltip-remove-outline
+                                            </v-icon>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                </template>
+                            </v-simple-table>
+                        </v-col>
+                    </v-row>
+                </v-card>
+            </v-col>
+        </v-row>
+
+        <!-- calendar dialog -->
+        <v-dialog v-model="addCalendarDialog" max-width="800px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Add Calendar</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-form ref="form" v-model="valid" lazy-validation>
+                        <v-row>
+                            <v-col>
+                                <v-text-field
+                                    :rules="nameRules"
+                                    label="Name"
+                                    v-model="calendarName"
+                                    required
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="sunday"
+                                    label="Sunday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="monday"
+                                    label="Monday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="tuesday"
+                                    label="Tuesday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="wednesday"
+                                    label="Wednesday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="thursday"
+                                    label="Thursday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="friday"
+                                    label="Friday"
+                                ></v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="saturday"
+                                    label="Saturday"
+                                ></v-checkbox>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeCalendar"> Cancel </v-btn>
+                    <v-btn :disabled="!valid" color="blue darken-1" text @click="saveCalendar"> Save </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- date dialog -->
+        <v-dialog v-model="addDateDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Add Date</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-form ref="form1" lazy-validation>
+                        <v-row>
+                            <v-col>
+                                <DatePicker
+                                    textName="Date"
+                                    :date="selectedDate"
+                                    :submit="(date) => {selectedDate = date}"
+                                ></DatePicker>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-textarea
+                                :rules="nameRules"
+                                label="Reason"
+                                v-model="reason"
+                                rows="3"
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDate"> Cancel </v-btn>
+                    <v-btn color="blue darken-1" text @click="saveDate"> Save </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+            {{ snackText }}
+            <template v-slot:action="{ attrs }">
+                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
+            </template>
+        </v-snackbar>
+    </v-container>
+</template>
+
+<script>
+    import DatePicker from './DatePicker'
+    import api from "@/apis/calendar.js";
+
+    export default {
+        components: {
+            DatePicker,
+        },
+
+        data: () => ({
+            headers: [
+                { text: "Name", align: "start", value: "name" },
+                { text: "Sun", align: "start", value: "sunoff"},
+                { text: "Mon", align: "start", value: "monoff" },
+                { text: "Tue", align: "start", value: "tueoff" },
+                { text: "Wed", align: "start", value: "wedoff"},
+                { text: "Thu", align: "start", value: "thuoff"},
+                { text: "Fri", align: "start", value: "frioff"},
+                { text: "Sat", align: "start", value: "satoff"},
+                { text: "Edit", align: "center", value: "edit"},
+                { text: "", align: "center", value: "detail"},
+            ],
+            wait:false,
+            calendars:[],
+            search: null,
+            loading: false,
+            addCalendarDialog: false,
+            valid: false,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+            calendarName: null,
+            snack: false,
+            snackColor: "",
+            snackText: "",
+            selectedCalendar: null,
+
+            addDateDialog: false,
+            selectedDate: null,
+            reason: null,
+            dates: [],
+            calId: null,
+            selectedDateItem: null
+        }),
+
+        created: async function() {
+            this.loading = true
+            this.calendars = await api.findAllCalendar()
+            console.log("calendar", this.calendars)
+            this.loading = false
+        },
+
+        computed: {
+            nameRules() {
+                return [
+                    (v) => !!v || "This field is required",
+                    (v) => (v && v.trim().length > 0) || "This field is required",
+                ];
+            },
+            dateBtnValid() {
+                return this.calId == null
+            }
+        },
+
+        methods: {
+            async showDetail(item) {
+                this.wait = true
+                this.calId = item.id
+                this.dates = await api.getHolidayList(this.calId)
+                console.log("dates", this.dates)
+                this.wait = false
+            },
+
+            newCalendarClicked() {
+                if (this.$refs.form) this.$refs.form.resetValidation()
+                this.monday = this.tuesday = this.wednesday = this.thursday = this.friday = this.saturday = this.sunday = false
+                this.calendarName = ""
+                this.selectedCalendar = null
+                this.addCalendarDialog = true
+            },
+
+            getIcon(item) {
+                if (item == 1) return "mdi-sticker-remove-outline"
+                if (item == 0) return "mdi-sticker-check-outline"
+            },
+
+            getColor(item) {
+                if (item == 1) return "red"
+                if (item == 0) return "primary"
+            },
+
+            closeCalendar() {
+                this.addCalendarDialog = false
+            },
+
+            async saveCalendar() {
+                if (!this.$refs.form.validate()) return
+                this.wait = true
+                let day = {
+                    monday: this.monday,
+                    tuesday: this.tuesday,
+                    wednesday: this.wednesday,
+                    thursday: this.thursday,
+                    friday: this.friday,
+                    saturday: this.saturday,
+                    sunday: this.sunday
+                }
+                this.closeCalendar()
+                let status
+                if (!this.selectedCalendar) {
+                    status = await api.addCalendar(this.calendarName, day)
+                } else {
+                    status = await api.editCalendar(this.selectedCalendar.id, this.calendarName, day)
+                }
+                status && (this.calendars = await api.findAllCalendar())
+                this.show_snack(status)
+                this.wait = false
+            },
+            
+            editCalendar(item) {
+                if (this.$refs.form) this.$refs.form.resetValidation()
+                this.monday = !item.monoff
+                this.tuesday = !item.tueoff
+                this.wednesday = !item.wedoff
+                this.thursday = !item.thuoff
+                this.friday = !item.frioff
+                this.saturday = !item.satoff
+                this.sunday = !item.sunoff
+                this.calendarName = item.name
+                this.selectedCalendar = item
+                this.addCalendarDialog = true
+            },
+
+            show_snack(success) {
+                this.snack = true;
+                if (success) {
+                    this.snackColor = "success"
+                    this.snackText = "Data saved"
+                }
+                else {
+                    this.snackColor = "error"
+                    this.snackText = "Error"
+                }
+            },
+
+            newDateClicked() {
+                if (this.$refs.form1) this.$refs.form1.resetValidation()
+                this.selectedDate = null
+                this.reason = null
+                this.selectedDateItem = null
+                this.addDateDialog = true
+            },
+
+            async saveDate() {
+                if (!this.$refs.form1.validate()) return
+                this.wait = true
+                this.closeDate()
+                let status
+                if (this.selectedDateItem != null)
+                    status = await api.updateHoliday(this.selectedDateItem.holidayid, this.reason)
+                else 
+                    status = await api.addHoliday(this.selectedDate, this.reason, this.calId)
+
+                status && (this.dates = await api.getHolidayList(this.calId))
+                this.show_snack(status)
+                this.wait = false
+            },
+
+            closeDate() {
+                this.addDateDialog = false
+            },
+
+            async deleteDate(item) {
+                this.wait = true
+                console.log(item)
+                let status = await api.removeHoliday(item.holidayid)
+                status && (this.dates = await api.getHolidayList(this.calId))
+                this.show_snack(status)
+                this.wait = false
+            },
+
+            editDate(item) {
+                this.selectedDateItem = item
+                this.selectedDate = item.dt
+                this.reason = item.reason
+                this.addDateDialog = true
+            }
+        }
+    }
+</script>

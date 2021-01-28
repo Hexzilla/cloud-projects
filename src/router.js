@@ -115,6 +115,11 @@ const router = new Router({
           name: 'Leave Balance',
           path: 'pages/leave_b',
           component: () => import('@/views/dashboard/pages/LeaveB'),
+        },
+        {
+          name: 'Holiday Calendar',
+          path: 'pages/holiday',
+          component: () => import('@/views/dashboard/pages/Holiday'),
         }
       ],
     }
@@ -123,7 +128,7 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (localStorage.getItem('jwt') == null) {
+    if (localStorage.getItem('pmFE001') == null) {
       next({name: "Login"})
     } else {
       next()

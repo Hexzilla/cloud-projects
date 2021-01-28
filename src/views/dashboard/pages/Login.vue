@@ -105,9 +105,9 @@ export default {
             let status = await auth_api.login(this.code, this.password)
             if (status) {
                 localStorage.setItem('code', this.code)
-                localStorage.setItem('jwt', status)
+                localStorage.setItem('pmFE001', status)
 
-                if (localStorage.getItem('jwt') != null){
+                if (localStorage.getItem('pmFE001') != null){
                     // this.$router.push('/')
                     window.location.href = "/"
                 }

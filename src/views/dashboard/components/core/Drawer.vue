@@ -114,6 +114,11 @@
           to: '/pages/country',
         },
         {
+          icon: 'mdi-calendar-month',
+          title: 'holiday_calendar',
+          to: '/pages/holiday',
+        },
+        {
           icon: 'mdi-order-bool-ascending',
           title: 'designation',
           to: '/pages/designation',
@@ -144,7 +149,7 @@
           to: '/pages/project',
         },
         {
-          icon: 'mdi-calendar',
+          icon: 'mdi-calendar-edit',
           title: 'daily_update',
           to: '/pages/daily'
         },
