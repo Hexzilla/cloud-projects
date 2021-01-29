@@ -249,6 +249,21 @@
             </v-card>
         </v-dialog>
 
+        <!-- delete dialog -->
+        <v-dialog v-model="deleteDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Are you sure?</span>
+                </v-card-title><br>
+                <v-card-actions><br>
+                    <div style="width:100%; text-align:center;">
+                        <v-btn color="blue darken-1" text @click="deleteDateNo"> No </v-btn>
+                        <v-btn color="blue darken-1"  @click="deleteDateYes"> Yes </v-btn>
+                    </div>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
             {{ snackText }}
             <template v-slot:action="{ attrs }">
@@ -304,7 +319,8 @@
             reason: null,
             dates: [],
             calId: null,
-            selectedDateItem: null
+            selectedDateItem: null,
+            deleteDialog: false,
         }),
 
         created: async function() {
@@ -383,23 +399,23 @@
             
             editCalendar(item) {
                 if (this.$refs.form) this.$refs.form.resetValidation()
-                this.monday = !item.monoff
-                this.tuesday = !item.tueoff
-                this.wednesday = !item.wedoff
-                this.thursday = !item.thuoff
-                this.friday = !item.frioff
-                this.saturday = !item.satoff
-                this.sunday = !item.sunoff
+                this.monday = item.monoff
+                this.tuesday = item.tueoff
+                this.wednesday = item.wedoff
+                this.thursday = item.thuoff
+                this.friday = item.frioff
+                this.saturday = item.satoff
+                this.sunday = item.sunoff
                 this.calendarName = item.name
                 this.selectedCalendar = item
                 this.addCalendarDialog = true
             },
 
-            show_snack(success) {
+            show_snack(success, type = 1) {
                 this.snack = true;
                 if (success) {
                     this.snackColor = "success"
-                    this.snackText = "Data saved"
+                    this.snackText = (type == 1 ? "Data saved" : "Deleted")
                 }
                 else {
                     this.snackColor = "error"
@@ -434,13 +450,9 @@
                 this.addDateDialog = false
             },
 
-            async deleteDate(item) {
-                this.wait = true
-                console.log(item)
-                let status = await api.removeHoliday(item.holidayid)
-                status && (this.dates = await api.getHolidayList(this.calId))
-                this.show_snack(status)
-                this.wait = false
+            deleteDate(item) {
+                this.deleteDialog = true
+                this.selectedDateItem = item
             },
 
             editDate(item) {
@@ -448,6 +460,20 @@
                 this.selectedDate = item.dt
                 this.reason = item.reason
                 this.addDateDialog = true
+            },
+
+            async deleteDateYes() {
+                this.wait = true
+                this.deleteDateNo()
+                let status = await api.removeHoliday(this.selectedDateItem.holidayid)
+                status && (this.dates = await api.getHolidayList(this.calId))
+                this.show_snack(status, 2)
+                this.selectedDateItem = null
+                this.wait = false
+            },
+
+            deleteDateNo() {
+                this.deleteDialog = false
             }
         }
     }

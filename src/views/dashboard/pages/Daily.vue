@@ -122,8 +122,7 @@
             this.projects = await api.getProjects()
             this.performers = await client_api.findL1Members()
             this.supervisors = await client_api.findSupervisors()
-
-            this.projects.forEach(item => item.set = false)
+            console.log("projects", this.projects)
             this.wait = false
         },
 

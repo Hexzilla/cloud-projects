@@ -50,6 +50,7 @@
                   :date="this.project.prj_presalesopendate"
                   :submit="(date) => this.project.prj_presalesopendate = date"
                   :endDate="this.project.prj_presalesclosedate"
+                  :type="`optional`"
                 ></DatePicker>
               </v-col>
               <v-col>
@@ -58,6 +59,7 @@
                   :date="this.project.prj_presalesclosedate"
                   :submit="(date) => this.project.prj_presalesclosedate = date"
                   :startDate="this.project.prj_presalesopendate"
+                  :type="`optional`"
                 ></DatePicker>
               </v-col>
             </v-row>
@@ -86,6 +88,7 @@
                   :date="this.project.prj_warrantyopendate"
                   :submit="(date) => this.project.prj_warrantyopendate = date"
                   :endDate="this.project.prj_warrantyclosedate"
+                  :type="`optional`"
                 ></DatePicker>
               </v-col>
               <v-col>
@@ -94,6 +97,7 @@
                   :date="this.project.prj_warrantyclosedate"
                   :submit="(date) => this.project.prj_warrantyclosedate = date"
                   :startDate="this.project.prj_warrantyopendate"
+                  :type="`optional`"
                 ></DatePicker>
               </v-col>
             </v-row>
@@ -144,6 +148,10 @@ export default {
     })
   },
 
+  created() {
+    this.reset()
+  },
+
   computed: {
     formTitle() {
       return (this.edit) ? 'Edit Project' : 'Add Project'
@@ -175,7 +183,7 @@ export default {
 
   methods: {
     reset: function() {
-      this.$refs.projectForm.resetValidation();
+      if(this.$refs.projectForm) this.$refs.projectForm.resetValidation();
     },
 
     save: function() {

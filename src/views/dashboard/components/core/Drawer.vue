@@ -104,80 +104,108 @@
           to: '/',
         },
         {
-          icon: 'mdi-account',
-          title: 'client',
-          to: '/pages/client',
+          title: 'common',
+          children: [
+          {
+            icon: 'mdi-account',
+            title: 'client',
+            to: '/pages/client',
+          },
+          {
+            icon: 'mdi-map-marker',
+            title: 'country',
+            to: '/pages/country',
+          },
+          {
+            icon: 'mdi-calendar-month',
+            title: 'holiday_calendar',
+            to: '/pages/holiday',
+          }]
         },
         {
-          icon: 'mdi-map-marker',
-          title: 'country',
-          to: '/pages/country',
+          title: 'people_practice',
+          children: [
+          {
+            icon: 'mdi-order-bool-ascending',
+            title: 'designation',
+            to: '/pages/designation',
+          },
+          {
+            icon: 'mdi-orbit',
+            title: 'role',
+            to: '/pages/role',
+          },
+          {
+            icon: 'mdi-account-supervisor-circle',
+            title: 'people',
+            to: '/pages/people',
+          },
+          {
+            icon: 'mdi-account-tie',
+            title: 'associate_person',
+            to: '/pages/associate_person',
+          }]
         },
         {
-          icon: 'mdi-calendar-month',
-          title: 'holiday_calendar',
-          to: '/pages/holiday',
-        },
-        {
-          icon: 'mdi-order-bool-ascending',
-          title: 'designation',
-          to: '/pages/designation',
-        },
-        {
-          icon: 'mdi-orbit',
-          title: 'role',
-          to: '/pages/role',
-        },
-        {
-          icon: 'mdi-account-supervisor-circle',
-          title: 'people',
-          to: '/pages/people',
-        },
-        {
-          icon: 'mdi-account-tie',
-          title: 'associate_person',
-          to: '/pages/associate_person',
-        },
-        {
-          icon: 'mdi-file-tree',
-          title: 'task',
-          to: '/pages/task',
-        },
-        {
-          icon: 'mdi-semantic-web',
           title: 'project',
-          to: '/pages/project',
+          children: [
+            {
+              icon: 'mdi-file-tree',
+              title: 'task',
+              to: '/pages/task',
+            },
+            {
+              icon: 'mdi-semantic-web',
+              title: 'project',
+              to: '/pages/project',
+            },
+          ]
         },
         {
-          icon: 'mdi-calendar-edit',
-          title: 'daily_update',
-          to: '/pages/daily'
+          title: 'update',
+          children: [
+            {
+              icon: 'mdi-calendar-edit',
+              title: 'daily_update',
+              to: '/pages/daily'
+            }
+          ]
         },
         {
-          icon: 'mdi-chart-line',
-          title: 'progress',
-          to: '/pages/progress'
+          title: 'report',
+          children: [
+            {
+              icon: 'mdi-chart-line',
+              title: 'progress',
+              to: '/pages/progress'
+            },
+            {
+              icon: 'mdi-text-account',
+              title: 'manpower',
+              to: '/pages/manpower'
+            },
+          ]
         },
         {
-          icon: 'mdi-text-account',
-          title: 'manpower',
-          to: '/pages/manpower'
+          title: 'leave',
+          children: [
+            {
+              icon: 'mdi-account-clock-outline',
+              title: 'leavei',
+              to: '/pages/leave_i'
+            },
+            {
+              icon: 'mdi-account-clock',
+              title: 'leavem',
+              to: '/pages/leave_m'
+            },
+            {
+              icon: 'mdi-alarm-panel',
+              title: 'leaveb',
+              to: '/pages/leave_b'
+            }
+          ]
         },
-        {
-          icon: 'mdi-account-clock-outline',
-          title: 'leavei',
-          to: '/pages/leave_i'
-        },
-        {
-          icon: 'mdi-account-clock',
-          title: 'leavem',
-          to: '/pages/leave_m'
-        },
-        {
-          icon: 'mdi-alarm-panel',
-          title: 'leaveb',
-          to: '/pages/leave_b'
-        }
       ],
     }),
 

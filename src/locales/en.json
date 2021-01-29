@@ -56,5 +56,10 @@
   "leavei": "Leave Individual",
   "leavem": "Leave Manager",
   "leaveb": "Leave Balance",
-  "holiday_calendar": "Holiday Calendar"
+  "holiday_calendar": "Holiday Calendar",
+  "common": "Common",
+  "people_practice": "People Practice",
+  "leave": "Leave",
+  "report": "Report",
+  "update": "Update"
 }

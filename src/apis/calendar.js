@@ -19,13 +19,13 @@ const findAllCalendar = async function() {
 const addCalendar = async function (name, day) {
     let jsonData = {
         "name": name,
-        "monoff": !day.monday,
-        "tueoff": !day.tuesday,
-        "wedoff": !day.wednesday,
-        "thuoff": !day.thursday,
-        "frioff": !day.friday,
-        "satoff": !day.saturday,
-        "sunoff": !day.sunday 
+        "monoff": day.monday,
+        "tueoff": day.tuesday,
+        "wedoff": day.wednesday,
+        "thuoff": day.thursday,
+        "frioff": day.friday,
+        "satoff": day.saturday,
+        "sunoff": day.sunday 
     }
     try {
         const response = await http.post("/hr/holidayCalAdd", jsonData)
@@ -44,13 +44,13 @@ const editCalendar = async function (calId, name, day) {
     let jsonData = {
         "holidayCalid": calId,
         "name": name,
-        "monoff":!day.monday,
-        "tueoff":!day.tuesday,
-        "wedoff":!day.wednesday,
-        "thuoff":!day.thursday,
-        "frioff":!day.friday,
-        "satoff":!day.saturday,
-        "sunoff":!day.sunday 
+        "monoff": day.monday,
+        "tueoff": day.tuesday,
+        "wedoff": day.wednesday,
+        "thuoff": day.thursday,
+        "frioff": day.friday,
+        "satoff": day.saturday,
+        "sunoff": day.sunday 
     }
     try {
         const response = await http.post("/hr/holidayCalEdit", jsonData)

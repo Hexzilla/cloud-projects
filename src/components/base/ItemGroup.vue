@@ -79,7 +79,7 @@
       children () {
         return this.item.children.map(item => ({
           ...item,
-          to: !item.to ? undefined : `${this.item.group}/${item.to}`,
+          // to: !item.to ? undefined : `${this.item.group}/${item.to}`,
         }))
       },
       computedText () {

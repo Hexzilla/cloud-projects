@@ -345,8 +345,6 @@ const getTask4 = async function(task3Id) {
 }
 
 const saveTaskByLevel = async function (tazk, state, level) {
-    console.log("------------save task", tazk, state, level)
-
     if (level == 0) return await this.saveTask1(tazk, state)
     if (level == 1) return await this.saveTask2(tazk, state)
     if (level == 2) return await this.saveTask3(tazk, state)
@@ -368,6 +366,10 @@ const saveTask1 = async function (tazk, state) {
         }
         const datefrom = child.datefrom || moment().format("YYYY-MM-DD")
         const dateto = child.dateto || moment().format("YYYY-MM-DD")
+
+        if (child.people && child.people.length) {
+            allocateResource(child.info.est_MP_TL1_id, child.people)
+        }
 
         return {
             "action": child.state,
@@ -394,6 +396,7 @@ const saveTask1 = async function (tazk, state) {
         const response = await http.post("/plan/projectL1TaskSave", jsonData)
         if (response.status == 200) {
             if (response.data && response.data.success) {
+                console.log(response)
                 return true
             }
         }
@@ -539,15 +542,36 @@ const saveTask4 = async function (tazk, state) {
     return null
 }
 
-const removeTaskByLevel = async function(taskId, level) {
-    if (level == 1) return await this.removeTask1(taskId)
-    if (level == 2) return await this.removeTask2(taskId)
-    if (level == 3) return await this.removeTask3(taskId)
-    if (level == 4) return await this.removeTask4(taskId)
+const checkRemoveTaskByLevel = async function(taskId, level) {
+    if (level == 1) return await this.checkRemoveTask1(taskId)
+    if (level == 2) return await this.checkRemoveTask2(taskId)
+    if (level == 3) return await this.checkRemoveTask3(taskId)
+    if (level == 4) return await this.checkRemoveTask4(taskId)
     return false
 }
 
-const removeTask1 = async function(taskId) {
+const checkRemoveCategory = async function (phaseId) {
+    const data = {
+        "action": "phaseid-usage",
+            "details": {
+            "phase_id": phaseId
+        }
+    }
+    try {
+        const response = await http.post("/plan/projectCheckb4Remove", data)
+        if (response.status == 200) {
+            if (response.data.response.allCarrierRecord[0]._count == 0) {
+                return true
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const checkRemoveTask1 = async function(taskId) {
     const data = {
         "action": "est_MP_TL1_id-usage",
         "details": {
@@ -556,7 +580,11 @@ const removeTask1 = async function(taskId) {
     }
     try {
         const response = await http.post("/plan/projectCheckb4Remove", data)
-        return (response.status == 200)
+        if (response.status == 200) {
+            if (response.data.response.allCarrierRecord[0]._count == 0) {
+                return true
+            }
+        }
     }
     catch (error) {
         console.log(error)
@@ -564,7 +592,7 @@ const removeTask1 = async function(taskId) {
     return false
 }
 
-const removeTask2 = async function(taskId) {
+const checkRemoveTask2 = async function(taskId) {
     const data = {
         "action": "est_MP_TL2_id-usage",
         "details": {
@@ -573,7 +601,11 @@ const removeTask2 = async function(taskId) {
     }
     try {
         const response = await http.post("/plan/projectCheckb4Remove", data)
-        return (response.status == 200)
+        if (response.status == 200) {
+            if (response.data.response.allCarrierRecord[0]._count == 0) {
+                return true
+            }
+        }
     }
     catch (error) {
         console.log(error)
@@ -581,7 +613,7 @@ const removeTask2 = async function(taskId) {
     return false
 }
 
-const removeTask3 = async function(taskId) {
+const checkRemoveTask3 = async function(taskId) {
     const data = {
         "action": "est_MP_TL3_id-usage",
         "details": {
@@ -590,7 +622,11 @@ const removeTask3 = async function(taskId) {
     }
     try {
         const response = await http.post("/plan/projectCheckb4Remove", data)
-        return (response.status == 200)
+        if (response.status == 200) {
+            if (response.data.response.allCarrierRecord[0]._count == 0) {
+                return true
+            }
+        }
     }
     catch (error) {
         console.log(error)
@@ -598,7 +634,7 @@ const removeTask3 = async function(taskId) {
     return false
 }
 
-const removeTask4 = async function(taskId) {
+const checkRemoveTask4 = async function(taskId) {
     const data = {
         "action": "est_MP_TL4_id-usage",
         "details": {
@@ -608,7 +644,11 @@ const removeTask4 = async function(taskId) {
     
     try {
         const response = await http.post("/plan/projectCheckb4Remove", data)
-        return (response.status == 200)
+        if (response.status == 200) {
+            if (response.data.response.allCarrierRecord[0]._count == 0) {
+                return true
+            }
+        }
     }
     catch (error) {
         console.log(error)
@@ -616,32 +656,24 @@ const removeTask4 = async function(taskId) {
     return false
 }
 
-const allocateResource = async function () {
-    const data = {
+const allocateResource = async function (id, include, exclude) {
+    let include_data = []
+    include.forEach(e => {
+        include_data.push({
+            "hrid": e
+        })
+    })
+    const jsonData = {
         "action": "est_MP_TL1-ResourceManage",
         "details": {
-            "est_MP_TL1_id": 4,
-            "inlcudeResource": [
-                {
-                    "hrid": 1
-                },
-                {
-                    "hrid": 2
-                }
-            ],
-            "exlcudeResource": [
-                {
-                    "hrid": 4
-                },
-                {
-                    "hrid": 5
-                }
-            ]
+            "est_MP_TL1_id": id,
+            "inlcudeResource": include_data,
+            "exlcudeResource": []
         }
     }
 
     try {
-        const response = await http.post("/plan/projectResourceAllocate", data)
+        const response = await http.post("/plan/projectResourceAllocate", jsonData)
         return (response.status == 200)
     }
     catch (error) {
@@ -698,11 +730,11 @@ export default {
     getProjects,
     getTree,
     saveTaskByLevel,
-    removeTask1,
-    removeTask2,
-    removeTask3,
-    removeTask4,
-    removeTaskByLevel,
+    checkRemoveTask1,
+    checkRemoveTask2,
+    checkRemoveTask3,
+    checkRemoveTask4,
+    checkRemoveTaskByLevel,
     allocateResource,
     findPeople,
 }

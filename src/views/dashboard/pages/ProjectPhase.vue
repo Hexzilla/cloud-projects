@@ -11,7 +11,7 @@
                     <v-col class="pb-0" md="6">
                         <p class="subtitle-1 mb-0"><b>{{ `Phase ${this.phase.phaseNumber}` }}</b></p>
                         <p class="title mb-0 text--disabled" @click="openPhaseEditDialog">
-                            {{ `${this.phase.phase_opendate} ~ ${this.phase.phase_closedate}` }}
+                            {{ `${this.phase.phase_opendate} ~ ${this.phase.phase_closedate}` }} 
                         </p>
                     </v-col>
                     <v-col class="pb-0 text-right" md="6">
@@ -47,8 +47,11 @@
                                     </p>
                                 </v-col>
                                 <v-col cols="12" sm="12" md="4">
-                                    <p v-if="item.level == 1" class="title mb-0 text--disabled">
-                                        {{ `${item.info.est_MP_TL1_datefrom} ~ ${item.info.est_MP_TL1_dateto}` }}
+                                    <p v-if="item.level == 1" class="title mb-0 text--disabled text-right mr-10">
+                                        {{ `${item.datefrom} ~ ${item.dateto}` }}
+                                    </p>
+                                    <p v-if="item.level > 0" class="title mb-0 text--disabled text-right mr-10">
+                                        {{ item.quantity * 1 || 0 }}
                                     </p>
                                 </v-col>
                             </v-row>
@@ -103,7 +106,7 @@
         <v-dialog v-model="taskDialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Task Date</span>
+                    <span class="headline">Task Information</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container v-if="editTask != null">
@@ -197,6 +200,17 @@
                                         <v-btn text color="primary" @click="$refs.taskToMenu.save(editTask.dateto)">OK</v-btn>
                                     </v-date-picker>
                                 </v-menu>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-text-field
+                                    v-model="editTask.quantity"
+                                    prepend-icon="mdi-numeric"
+                                    label="Quantity"
+                                    type="number"
+                                    :rules="qtyRules"
+                                ></v-text-field>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -295,6 +309,16 @@ export default {
         taskValid() {
             return true;
         },
+        
+        qtyRules() {
+        return [
+            (v) => {
+                if (!v) return true
+                else if  (v && v%1 != 0) return "input valid number"
+                return true
+            }
+            ]
+        },
     },
 
     created: async function() {
@@ -318,12 +342,15 @@ export default {
                 this.phase.serverItems = []
             }
 
-            console.log('initialize_phase:', this.phase)
-            console.log('initialize_phase_serverItems:', this.phase.serverItems)
-            
+            // console.log('initialize_phase:', this.phase)
+            // console.log('initialize_phase_serverItems:', this.phase.serverItems)
+            // console.log('intial_tree', this.treeItems)
+
             this.phase.tree = this.cloneTaskTree(this.treeItems)
             this.phase.tree = this.setDefaultValues(this.phase.tree)
-            console.log('initialize_phase_tree:', this.phase.tree)
+            this.setInfo(this.phase.tree)
+
+            // console.log('initialize_phase_tree:', this.phase.tree)
 
             this.setShowingTree()
         },
@@ -345,6 +372,7 @@ export default {
                     children: [],
                 }
                 const serverItem = this.findServerItem(item)
+
                 if (serverItem) {
                     node.state = "nochange"
                 }
@@ -462,7 +490,6 @@ export default {
         },
 
         updateInterestedItems: function(tasks, keyList) {
-            console.log("keyList:", keyList)
             for (const i in tasks) {
                 const item = tasks[i]
 
@@ -548,7 +575,8 @@ export default {
                 else {
                     const children = item.children
                     if (children && children.length > 0) {
-                        return this.findServerItemEx(children, subject, level + 1)
+                        let ret = this.findServerItemEx(children, subject, level + 1)
+                        if (ret) return ret
                     }
                 }
             }
@@ -617,7 +645,8 @@ export default {
         },
 
         saveTaskEditDialog: function() {
-            console.log('edit task', this.editTask)
+            this.editTask.state = "modified"
+            this.updatePhaseTree(this.editTask)
             this.taskDialog = false;
         },
 
@@ -644,7 +673,6 @@ export default {
 
         saveTask: async function(index) {
             this.wait = true
-
             const items = this.getUpdatedItems('NoFilter')
             for (const i in items) {
                 const item = items[i]
@@ -670,58 +698,42 @@ export default {
                             console.log('Save_Update_Server_Category', serverItem)
                         }
                     }
-                }
+                } 
 
                 const children = item.children
                 if (children && children.length > 0) {
                     await this.saveTaskByLevel(item, 'newData|modified', 1)
-                    // await this.removeTaskByLevel(item)
-                }
-            }
-
-            // Update removed items.
-            /*for (const i in items) {
-                const item = items[i]
-                console.log('saveTask_remove_item', item, item.state)
-
-                const children = item.children
-                console.log('saveTask_remove_item_children', children)
-                if (children && children.length > 0) {
-                    await this.saveTaskByLevel(item, 'remove', 1)
+                    await this.removeTaskByLevel(item, 'remove', 1)
                 }
 
-                if (item.state == "removed") {
-                    const result = await api.removeProjectCategory(this.phase.phase_id, item)
-                    if (result) {
-                        const updateItem = this.findTaskByKey(this.phase.tree, item.ikey)
-                        updateItem.state = null
+                if (item.state === "remove") {
+                    console.log("item removeing", item)
+                    const removeResult = await api.removeProjectCategory(this.phase.phase_id, item)
+                    if (removeResult) {
+                        this.removeCategoryInPhaseTree(this.phase.tree, item)
                     }
                 }
-            }*/
+            }            
+            // this.phase.tree = this.cloneTaskTree(this.treeItems)
+            // this.phase.tree = this.setDefaultValues(this.phase.tree)
 
-            this.resetStates(this.phase.tree)
-            this.setShowingTree()
+            // this.resetStates(this.phase.tree)
+            // this.setShowingTree()
+            this.initialize()
             this.wait = false;
         },
 
         saveTaskByLevel: async function(tazk, state, level) {
-            const pInfo = this.findServerItem(tazk)
-            console.log('saveTaskByLevel________info', this.phase.serverItems, tazk, pInfo)
-            if (pInfo) {
-                tazk.info = pInfo
-            }
-            else {
-                tazk.info = this.getDefaultTask(level)
-            }
+            this.setInfo(tazk)
 
             const insertId = await api.saveTaskByLevel(tazk, state, tazk.level)
             if (insertId) {
-                console.log('saveTaskByLevel________inserted', insertId, tazk)
+                // console.log('saveTaskByLevel________inserted', insertId, tazk)
                 const children = await api.getTaskByKeyInfo(tazk, tazk.level)
                 if (children) {
                     const projItem = this.findServerItem(tazk)
                     projItem.children = children
-                    console.log('saveTaskByLevel________serverItems', this.phase.serverItems)
+                    // console.log('saveTaskByLevel________serverItems', this.phase.serverItems)
                 }
             }
 
@@ -731,37 +743,25 @@ export default {
                     await this.saveTaskByLevel(child, state, level+1)
                 }
             }
-
-            // if (state === 'remove') {
-            //     console.log('saveTaskByLevel________call_root', tazk.ikey, state, tazk.level)
-            //     await api.saveTaskByLevel(tazk, state, tazk.level)
-            // }
         },
 
-        removeTaskByLevel: async function(tazk) {
-            const pInfo = this.findServerItem(tazk)
-            if (pInfo) {
-                tazk.info = pInfo
-            }
+        removeTaskByLevel: async function(tazk, state, level) {
+            this.setInfo(tazk)
 
-            if (tazk.level > 0 && tazk.state === 'remove') {
-                console.log("---------remove task", tazk)
-                if (tazk.level == 1) {
-                    await api.removeTaskByLevel(tazk.info.est_MP_TL1_id, 1)  
-                } else if (tazk.level == 2) {
-                    await api.removeTaskByLevel(tazk.info.est_MP_TL2_id, 2)  
-                } else if (tazk.level == 3) {
-                    await api.removeTaskByLevel(tazk.info.est_MP_TL3_id, 3)  
-                } else if (tazk.level == 4) {
-                    await api.removeTaskByLevel(tazk.info.est_MP_TL4_id, 4)  
+            for (const i in tazk.children) {
+                const child = tazk.children[i]
+                if (child.children && child.children.length > 0) {
+                    await this.removeTaskByLevel(child, state, level+1)
                 }
             }
 
-            if (tazk.children && tazk.children.length > 0) {
-                for (const i in tazk.children) {
-                    const child = tazk.children[i]
-                    await this.removeTaskByLevel(child)
-                }
+            let status = await api.saveTaskByLevel(tazk, state, tazk.level)
+            if (status) {
+                const children = await api.getTaskByKeyInfo(tazk, tazk.level)
+                let projItem = this.findServerItem(tazk)
+                projItem.children = children
+
+                // this.updateChildren(this.phase.tree, tazk, children)
             }
         },
 
@@ -824,6 +824,7 @@ export default {
 
         setShowingTree() {
             let temp = this.cloneTree(this.phase.tree)
+            console.log('pahse tree', this.phase.tree)
             this.treeForShow = this.makeShowingTree(temp)
             console.log('treeForShow', this.treeForShow)
         },
@@ -842,8 +843,75 @@ export default {
 
         selectPeopleChanged() {
             
-        }
+        },
 
+        updatePhaseTree(item) {
+            this.findModifiedItem(this.phase.tree, item)
+        },
+
+        findModifiedItem(items, item) {
+            items && items.length > 0 && items.forEach(e => {
+                if (e.ikey == item.ikey) {
+                    e.description = item.description
+                    e.state != 'newData' && (e.state = item.state)
+                    e.datefrom = item.datefrom
+                    e.dateto = item.dateto
+                    e.quantity = item.quantity
+                    e.level == 1 && (e.people = item.people)
+                    return
+                }
+                e.children && e.children.length > 0 && this.findModifiedItem(e.children, item)
+            })
+        },
+
+        setInfo(tree) {
+            tree && tree.length > 0 && tree.forEach( e => {
+                const pInfo = this.findServerItem(e)
+                if (pInfo) {
+                    e.info = pInfo
+                    if (e.level == 1)  {
+                        e.dateto = pInfo.est_MP_TL1_dateto
+                        e.datefrom = pInfo.est_MP_TL1_datefrom
+                        e.quantity = pInfo.est_MP_TL1_qty
+                        e.description = pInfo.est_MP_TL1_level1taskDesc
+                    } else if (e.level == 2) {
+                        e.quantity = pInfo.est_MP_TL2_qty
+                        e.description = pInfo.est_MP_TL2_level2taskDesc
+                    } else if (e.level == 3) {
+                        e.quantity = pInfo.est_MP_TL3_qty
+                        e.description = pInfo.est_MP_TL3_level3taskDesc
+                    } else if (e.level == 4) {
+                        e.quantity = pInfo.est_MP_TL4_qty
+                        e.description = pInfo.est_MP_TL4_level4taskDesc
+                    }
+                }
+                else {
+                    e.info = this.getDefaultTask(e.level)
+                }
+
+                e.children && e.children.length > 0 && this.setInfo(e.children)
+            })
+        },
+
+        removeCategoryInPhaseTree(items, item) {
+            items && items.length > 0 && items.forEach( (e, i) => {
+                if (e.ikey == item.ikey) {
+                    this.phase.tree.splice(i, 1)
+                    return
+                }
+            })
+        },
+
+        updatechildren(items, task, children) {
+            items && items.length > 0 && items.forEach( (e, i) => {
+                if (e.ikey == item.ikey) {
+                    e.children = []
+                    return
+                }
+
+                e.children && e.children.length > 0 && this.updatechildren(e.children, task, children)
+            })
+        }
     }
 };
 </script>
