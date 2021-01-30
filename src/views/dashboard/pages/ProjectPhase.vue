@@ -17,7 +17,7 @@
                     <v-col class="pb-0 text-right" md="6">
                         <v-btn small @click="openPhaseEditDialog()" color="cyan">Change Date</v-btn>
                         <v-btn small @click="openTreeDialog()" color="teal">Add Task</v-btn>
-                        <v-btn small @click="saveTask()" color="teal">Save Task</v-btn>
+                        <v-btn small @click="saveTask()" color="teal" :disabled="saveBtnStatus()">Save Task</v-btn>
                     </v-col>
                 </v-row>
             </v-card-title>
@@ -205,6 +205,17 @@
                         </v-row>
                         <v-row>
                             <v-col>
+                                <v-select
+                                    v-model="editTask.unitOfMeasure"
+                                    :items="units"
+                                    attach
+                                    label="Unit"
+                                    prepend-icon="mdi-menu-right"
+                                ></v-select>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
                                 <v-text-field
                                     v-model="editTask.quantity"
                                     prepend-icon="mdi-numeric"
@@ -308,6 +319,7 @@ export default {
         snack: false,
         snackColor: "",
         snackText: "",
+        units: ["Item", "Nos"]
     }),
 
     computed: {
@@ -330,6 +342,7 @@ export default {
             }
             ]
         },
+
     },
 
     created: async function() {
@@ -353,15 +366,15 @@ export default {
                 this.phase.serverItems = []
             }
 
-            console.log('initialize_phase:', this.phase)
-            console.log('initialize_phase_serverItems:', this.phase.serverItems)
+            // console.log('initialize_phase:', this.phase)
+            // console.log('initialize_phase_serverItems:', this.phase.serverItems)
             // console.log('intial_tree', this.treeItems)
 
             this.phase.tree = this.cloneTaskTree(this.treeItems)
             this.phase.tree = this.setDefaultValues(this.phase.tree)
             this.setAllInfo(this.phase.tree)
 
-            // console.log('initialize_phase_tree:', this.phase.tree)
+            console.log('initialize_phase_tree:', this.phase.tree)
 
             this.setShowingTree()
         },
@@ -742,9 +755,11 @@ export default {
 
         modifyTaskByLevel: async function(tazk, state, level) {
             this.setInfo(tazk)
+
             const insertId = await api.saveTaskByLevel(tazk, state, tazk.level)
             if (insertId) {
                 let children = await api.getTaskByKeyInfo(tazk, tazk.level)
+                console.log('---------childre', children)
                 if (children) {
                     let projItem = this.findServerItem(tazk)
                     for(let i in children) {
@@ -889,10 +904,6 @@ export default {
             return result
         },
 
-        selectPeopleChanged() {
-            
-        },
-
         updatePhaseTree(item) {
             this.findModifiedItem(this.phase.tree, item)
         },
@@ -905,6 +916,7 @@ export default {
                     e.datefrom = item.datefrom
                     e.dateto = item.dateto
                     e.quantity = item.quantity
+                    e.unitOfMeasure = item.unitOfMeasure
                     e.level == 1 && (e.people = item.people)
                     return
                 }
@@ -916,21 +928,32 @@ export default {
             tree && tree.length > 0 && tree.forEach( e => {
                 const pInfo = this.findServerItem(e)
                 if (pInfo) {
+                    console.log("----------------info---------", pInfo)
                     e.info = pInfo
                     if (e.level == 1)  {
                         e.dateto = pInfo.est_MP_TL1_dateto
                         e.datefrom = pInfo.est_MP_TL1_datefrom
                         e.quantity = pInfo.est_MP_TL1_qty
                         e.description = pInfo.est_MP_TL1_level1taskDesc
+                        e.unitOfMeasure = pInfo.est_MP_TL1_unitOfMeasure
+                        e.people = []
+                        e.initial = []
+                        pInfo.inlcudedResources && pInfo.inlcudedResources.length > 0 && pInfo.inlcudedResources.forEach(e1 => {
+                            e.people.push(e1.hrid)
+                            e.initial.push(e1.hrid)
+                        })
                     } else if (e.level == 2) {
                         e.quantity = pInfo.est_MP_TL2_qty
                         e.description = pInfo.est_MP_TL2_level2taskDesc
+                        e.unitOfMeasure = pInfo.est_MP_TL2_unitOfMeasure
                     } else if (e.level == 3) {
                         e.quantity = pInfo.est_MP_TL3_qty
                         e.description = pInfo.est_MP_TL3_level3taskDesc
+                        e.unitOfMeasure = pInfo.est_MP_TL3_unitOfMeasure
                     } else if (e.level == 4) {
                         e.quantity = pInfo.est_MP_TL4_qty
                         e.description = pInfo.est_MP_TL4_level4taskDesc
+                        e.unitOfMeasure = pInfo.est_MP_TL4_unitOfMeasure
                     }
                 }
 
@@ -959,6 +982,33 @@ export default {
                 this.snackText = "Error";
             }
         },
+        
+        saveBtnStatus() {
+            if (this.phase.tree && this.phase.tree.length > 0) {
+                const result = this.isThereRemoveOrModify(this.phase.tree)
+                return !result
+            } else {
+                return true
+            }
+        },
+
+        isThereRemoveOrModify(items) {
+            let result = false
+            items && items.length > 0 && items.forEach( e => {
+                if (e.state == "remove" || e.state == "modified" || e.state == "newData") {
+                    result = true
+                    return
+                }
+                e.children && e.children.length > 0 && e.children.forEach( e1 => {
+                    let ret = this.isThereRemoveOrModify(e.children)
+                    if (ret) {
+                        result = true
+                        return
+                    }
+                })
+            })
+            return result
+        }
     }
 };
 </script>

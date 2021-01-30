@@ -368,7 +368,7 @@ const saveTask1 = async function (tazk, state) {
         const datefrom = child.datefrom || moment().format("YYYY-MM-DD")
         const dateto = child.dateto || moment().format("YYYY-MM-DD")
 
-        child.info.est_MP_TL1_id && child.people && child.people.length && allocateResource(child.info.est_MP_TL1_id, child.people)
+        child.info.est_MP_TL1_id && child.people && child.people.length && allocateResource(child.info.est_MP_TL1_id, child.people, child.initial)
         child.people && child.people.length && peoples.push(child.people)
         
         return {
@@ -398,7 +398,7 @@ const saveTask1 = async function (tazk, state) {
             if (response.data && response.data.success) {
                 let ids = response.data.response.allCarrierRecord
                 ids && ids.length > 0 && ids.forEach( (e, i) => {
-                    e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i])
+                    e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i], [])
                 })
                 return true
             }
@@ -659,10 +659,21 @@ const checkRemoveTask4 = async function(taskId) {
     return false
 }
 
-const allocateResource = async function (id, include, exclude) {
-    let include_data = []
-    include && include.forEach(e => {
+
+const allocateResource = async function (id, current, initial) {
+    if (Object.is(current, initial)) return
+    
+    let include = current.length > 0 && current.filter(x => initial.indexOf(x) === -1)
+    let exclude = initial.length > 0 && initial.filter(x => current.indexOf(x) === -1)
+    let include_data = [], exclude_data = []
+
+    include && include.length > 0 && include.forEach(e => {
         include_data.push({
+            "hrid": e
+        })
+    })
+    exclude && exclude.length > 0 && exclude.forEach(e => {
+        exclude_data.push({
             "hrid": e
         })
     })
@@ -671,7 +682,7 @@ const allocateResource = async function (id, include, exclude) {
         "details": {
             "est_MP_TL1_id": id,
             "inlcudeResource": include_data,
-            "exlcudeResource": []
+            "exlcudeResource": exclude_data
         }
     }
 

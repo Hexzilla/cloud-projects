@@ -361,6 +361,9 @@
                     item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems, 1)
                 })
                 this.waitProject = null         
+
+                this.selectedItem = null
+
                 this.wait = false
 
                 console.log("phases", this.phases)
