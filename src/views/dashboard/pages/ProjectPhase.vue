@@ -10,11 +10,12 @@
                 <v-row>
                     <v-col class="pb-0" md="6">
                         <p class="subtitle-1 mb-0"><b>{{ `Phase ${this.phase.phaseNumber}` }}</b></p>
-                        <p class="title mb-0 text--disabled" @click="openPhaseEditDialog">
+                        <p class="title mb-0" @click="openPhaseEditDialog">
                             {{ `${this.phase.phase_opendate} ~ ${this.phase.phase_closedate}` }} 
                         </p>
                     </v-col>
                     <v-col class="pb-0 text-right" md="6">
+                        <v-btn small @click="openPhaseEditDialog()" color="cyan">Change Date</v-btn>
                         <v-btn small @click="openTreeDialog()" color="teal">Add Task</v-btn>
                         <v-btn small @click="saveTask()" color="teal">Save Task</v-btn>
                     </v-col>
@@ -96,7 +97,7 @@
                         Cancel
                     </v-btn>
                     <v-btn color="blue darken-1" text @click="saveTreeDialog">
-                        Save
+                        Add to phase
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -225,18 +226,17 @@
                         text
                         @click="saveTaskEditDialog"
                     >
-                        Save
+                        SAVE
                     </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
 
         <!--Edit Phase Date Dialog-->
-        <!--
-        <v-dialog v-model="phaseDialog" max-width="500px">
+        <v-dialog v-model="editPhaseDateDialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Edit Phase</span>
+                    <span class="headline">Edit Phase Date</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
@@ -246,6 +246,7 @@
                                 :date="phase.phase_opendate"
                                 :submit="(date) => phase.phase_opendate = date"
                                 :endDate="phase.phase_closedate"
+                                :startDate="previousPhaseDate"
                             ></DatePicker>
                         </v-row>
                         <v-row>
@@ -261,12 +262,19 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="closePhaseEditDialog"> Cancel </v-btn>
-                    <v-btn :disabled="phaseValid" color="blue darken-1" text @click="savePhaseEditDialog">
+                    <v-btn color="blue darken-1" text @click="savePhaseEditDialog">
                         Save
                     </v-btn>
                 </v-card-actions>
             </v-card>
-        </v-dialog>-->
+        </v-dialog>
+
+        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+            {{ snackText }}
+            <template v-slot:action="{ attrs }">
+                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
+            </template>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -278,7 +286,7 @@ import DatePicker from './DatePicker'
 
 export default {
     name: "ProjectPhase",
-    props: ["phase", "treeItems"],
+    props: ["phase", "treeItems", "projectId", "previousPhaseDate"],
     components: {
         DatePicker,
     },
@@ -297,6 +305,9 @@ export default {
         unitOfMeasureItems: ['Nos', 'Item'],
         treeForShow: [],
         peoples: [],
+        snack: false,
+        snackColor: "",
+        snackText: "",
     }),
 
     computed: {
@@ -342,13 +353,13 @@ export default {
                 this.phase.serverItems = []
             }
 
-            // console.log('initialize_phase:', this.phase)
-            // console.log('initialize_phase_serverItems:', this.phase.serverItems)
+            console.log('initialize_phase:', this.phase)
+            console.log('initialize_phase_serverItems:', this.phase.serverItems)
             // console.log('intial_tree', this.treeItems)
 
             this.phase.tree = this.cloneTaskTree(this.treeItems)
             this.phase.tree = this.setDefaultValues(this.phase.tree)
-            this.setInfo(this.phase.tree)
+            this.setAllInfo(this.phase.tree)
 
             // console.log('initialize_phase_tree:', this.phase.tree)
 
@@ -486,7 +497,7 @@ export default {
 
         //----------------------phase.tree state -------------------------------------
         getInterestedItems: function() {
-            return this.phase.tree.filter(it => it.state && it.state != 'remove')
+            return this.phase.tree && this.phase.tree.filter(it => it.state && it.state != 'remove')
         },
 
         updateInterestedItems: function(tasks, keyList) {
@@ -591,7 +602,7 @@ export default {
         getKeyList: function(tasks) {
             const thiz = this
             let result = []
-            tasks.forEach(function(item) {
+            tasks && tasks.length > 0 && tasks.forEach(function(item) {
                 let subItemKeys = null
                 if (item.children && item.children.length > 0) {
                     subItemKeys = thiz.getKeyList(item.children);                    
@@ -676,10 +687,10 @@ export default {
             const items = this.getUpdatedItems('NoFilter')
             for (const i in items) {
                 const item = items[i]
+                // this.setAllInfo(item)
                 console.log('saveTask_add_item', item, item.state)
 
                 if (item.state === "newData" || item.state === "modified") {
-                    console.log('-------------item', item)
                     const insertId = await api.addProjectCategory(this.phase.phase_id, item)
                     console.log('Save_Add_Category_Result', item, insertId)
 
@@ -702,15 +713,21 @@ export default {
 
                 const children = item.children
                 if (children && children.length > 0) {
-                    await this.saveTaskByLevel(item, 'newData|modified', 1)
+                    await this.modifyTaskByLevel(item, 'modified', 1)
+                    await this.saveTaskByLevel(item, 'newData', 1)
                     await this.removeTaskByLevel(item, 'remove', 1)
                 }
 
                 if (item.state === "remove") {
-                    console.log("item removeing", item)
                     const removeResult = await api.removeProjectCategory(this.phase.phase_id, item)
                     if (removeResult) {
-                        this.removeCategoryInPhaseTree(this.phase.tree, item)
+                        let serverItem = this.findServerItem(item)
+                        this.phase.serverItems.forEach( (e, i) => {
+                            if (e.est_MP_categ_id == serverItem.est_MP_categ_id) {
+                                this.phase.serverItems.splice(i, 1)
+                                return
+                            }
+                        })
                     }
                 }
             }            
@@ -723,13 +740,35 @@ export default {
             this.wait = false;
         },
 
+        modifyTaskByLevel: async function(tazk, state, level) {
+            this.setInfo(tazk)
+            const insertId = await api.saveTaskByLevel(tazk, state, tazk.level)
+            if (insertId) {
+                let children = await api.getTaskByKeyInfo(tazk, tazk.level)
+                if (children) {
+                    let projItem = this.findServerItem(tazk)
+                    for(let i in children) {
+                        children[i].children = projItem.children[i].children && projItem.children[i].children
+                        projItem.children[i] = children[i]
+                    }
+                }
+            }
+
+            for (const i in tazk.children) {
+                const child = tazk.children[i]
+                if (child.children && child.children.length > 0) {
+                    await this.modifyTaskByLevel(child, state, level+1)
+                }
+            }
+        },
+
         saveTaskByLevel: async function(tazk, state, level) {
             this.setInfo(tazk)
-
             const insertId = await api.saveTaskByLevel(tazk, state, tazk.level)
             if (insertId) {
                 // console.log('saveTaskByLevel________inserted', insertId, tazk)
                 const children = await api.getTaskByKeyInfo(tazk, tazk.level)
+                // console.log('children_______', children)
                 if (children) {
                     const projItem = this.findServerItem(tazk)
                     projItem.children = children
@@ -746,7 +785,7 @@ export default {
         },
 
         removeTaskByLevel: async function(tazk, state, level) {
-            this.setInfo(tazk)
+            this.setAllInfo(tazk)
 
             for (const i in tazk.children) {
                 const child = tazk.children[i]
@@ -761,7 +800,6 @@ export default {
                 let projItem = this.findServerItem(tazk)
                 projItem.children = children
 
-                // this.updateChildren(this.phase.tree, tazk, children)
             }
         },
 
@@ -773,8 +811,18 @@ export default {
             this.editPhaseDateDialog = false
         },
 
-        savePhaseEditDialog: function() {
+        savePhaseEditDialog: async function() {
+            this.wait = true
             this.editPhaseDateDialog = false
+            let phaseData = [{
+                "phase_id": this.phase.phase_id,
+                "phaseNumber": this.phase.phaseNumber,
+                "phase_opendate": this.phase.phase_opendate,
+                "phase_closedate": this.phase.phase_closedate,
+            }]
+            let status = await api.phaseSet(this.projectId, phaseData)
+            this.show_snack(status)
+            this.wait = false
         },
 
         treeSelectChanged() {
@@ -813,7 +861,7 @@ export default {
         },
 
         cloneTree(items) {
-            return items.map((item) => {
+            return items && items.length > 0 && items.map((item) => {
                 const node = Object.assign({}, item)
                 if (item.children && item.children.length > 0) {
                     node.children = this.cloneTree(item.children)
@@ -864,7 +912,7 @@ export default {
             })
         },
 
-        setInfo(tree) {
+        setAllInfo(tree) {
             tree && tree.length > 0 && tree.forEach( e => {
                 const pInfo = this.findServerItem(e)
                 if (pInfo) {
@@ -885,33 +933,32 @@ export default {
                         e.description = pInfo.est_MP_TL4_level4taskDesc
                     }
                 }
-                else {
-                    e.info = this.getDefaultTask(e.level)
-                }
 
-                e.children && e.children.length > 0 && this.setInfo(e.children)
+                e.children && e.children.length > 0 && this.setAllInfo(e.children)
             })
         },
 
-        removeCategoryInPhaseTree(items, item) {
-            items && items.length > 0 && items.forEach( (e, i) => {
-                if (e.ikey == item.ikey) {
-                    this.phase.tree.splice(i, 1)
-                    return
-                }
+        setInfo(task) {
+            const pInfo = this.findServerItem(task)
+            if (pInfo) {
+                task.info = pInfo
+            }
+            task.children && task.children.length > 0 && task.children.forEach( e => {
+                this.setInfo(e)
             })
         },
 
-        updatechildren(items, task, children) {
-            items && items.length > 0 && items.forEach( (e, i) => {
-                if (e.ikey == item.ikey) {
-                    e.children = []
-                    return
-                }
-
-                e.children && e.children.length > 0 && this.updatechildren(e.children, task, children)
-            })
-        }
+        show_snack(success) {
+            this.snack = true;
+            if (success) {
+                this.snackColor = "success"
+                this.snackText = "Data saved"
+            }
+            else {
+                this.snackColor = "error";
+                this.snackText = "Error";
+            }
+        },
     }
 };
 </script>

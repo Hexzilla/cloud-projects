@@ -44,15 +44,16 @@
                 ></ProjectDetails>
                 <div v-if="this.selectedProject != null">
                     <ProjectPhase
-                        v-for="phase in this.selectedProject.phases"
-                        :key="phase.phase_id"
+                        v-for="(phase, i) in this.selectedProject.phases" :key="phase.phase_id"
                         v-bind:phase="phase"
                         v-bind:treeItems="treeItems"
+                        v-bind:projectId="selectedProject.prj_id"
+                        v-bind:previousPhaseDate="selectedProject.phases[i-1] && selectedProject.phases[i-1].phase_closedate && selectedProject.phases[i-1].phase_closedate"
                     ></ProjectPhase>
                 </div>
             </v-col>
         </v-row>
-        
+
         <!--Add project dialog-->
         <v-dialog v-model="addDialog" max-width="500px">
             <AddProjectDialog 
@@ -77,6 +78,7 @@
                                 textName="Date From"
                                 :date="phaseFromDate"
                                 :submit="(date) => phaseFromDate = date"
+                                :startDate="maxPhaseDate && maxPhaseDate"
                                 :endDate="phaseToDate"
                             ></DatePicker>
                         </v-row>
@@ -134,6 +136,7 @@ export default {
         phaseFromMenu: false,
         phaseToDate: '',
         phaseToMenu: false,
+        maxPhaseDate: null
     }),
 
     created: async function() {
@@ -167,6 +170,8 @@ export default {
                 this.waitProject = null
             }
             this.selectedProject = project
+            this.setMaxPhaseDate()
+            console.log("selectedProject", this.selectedProject)
         },
 
         project_addButtonClicked: function() {
@@ -257,14 +262,15 @@ export default {
                 this.phaseDialog = false
                 this.wait = true
 
-                var newPhase = {
+                let newPhase = {
                     "phase_opendate": this.phaseFromDate,
                     "phase_closedate": this.phaseToDate,
                     "phase_id": 0,
                     "phaseNumber": number,
                     "serverItems": []
                 }
-                const tempPhases = [...this.selectedProject.phases, newPhase]
+                const tempPhases = [newPhase]
+                // [...this.selectedProject.phases, newPhase]
                 const result = await api.phaseSet(this.selectedProject.prj_id, tempPhases)
                 if (result) {
                     const updated = await api.getProjectWithPhase(this.selectedProject.prj_code)
@@ -278,6 +284,7 @@ export default {
                         }
                     }
                 }
+                this.setMaxPhaseDate()
                 this.wait = false
             }
         },
@@ -312,6 +319,11 @@ export default {
             }
             this.wait = false
         },
+
+        setMaxPhaseDate () {
+            if (this.selectedProject.phases.length > 0 && this.selectedProject.phases[this.selectedProject.phases.length - 1].phase_closedate)            
+                this.maxPhaseDate = this.selectedProject.phases[this.selectedProject.phases.length - 1].phase_closedate
+        }
     },
 };
 </script>

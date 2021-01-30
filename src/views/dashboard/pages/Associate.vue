@@ -95,6 +95,7 @@
                                     label="Person"
                                     required
                                 ></v-select>
+                                <p v-if="editedIndex > -1" style="font-size: 18px" class="text-center font-weight-bold"> {{ this.editedItem && (this.editedItem.firstname + ' ' + this.editedItem.lastname) }}</p>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -134,23 +135,13 @@
                                     item-value="value"
                                     label="Designation"
                                     required
+                                    dense
                                 ></v-select>
                             </v-col>
-                            <!--
-                            <v-col cols="12" sm="12" md="6">
-                                <v-select
-                                    v-model="editedItem.role"
-                                    :items="roles"
-                                    :rules="defaultRules"
-                                    attach
-                                    multiple
-                                    item-text="name"
-                                    item-value="value"
-                                    label="Roles"
-                                    required
-                                ></v-select>
+                        </v-row>
+                        <v-row>
+                            <v-col style="height: 50px">
                             </v-col>
-                            -->
                         </v-row>
                         <v-row>
                             <DatePicker
@@ -182,7 +173,12 @@
                                 :date="editedItem.seperation"
                                 :submit="(date) => editedItem.seperation = date"
                                 :startDate="editedItem.SeperationDateForResourcePlanning ? editedItem.SeperationDateForResourcePlanning : editedItem.joinDate"
+                                v-bind:type="`optional`"
                             ></DatePicker>
+                        </v-row>
+                        <v-row>
+                            <v-col style="height: 50px">
+                            </v-col>
                         </v-row>
                     </v-form>
                 </v-card-text>
@@ -336,7 +332,7 @@ export default {
         roleData: [],
         selectedRoles: [],
         selectedRoleId: [],
-        initialRolesId: []
+        initialRolesId: [],
     }),
 
     created: async function () {
@@ -413,7 +409,8 @@ export default {
             this.associates = await associate_api.findAll()
 
             this.roleData = associate_api.getRoleWithData(this.roles)
-
+            
+            console.log("associates", this.associates)
             this.loading = false
         },
 

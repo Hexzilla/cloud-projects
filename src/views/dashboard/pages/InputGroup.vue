@@ -19,13 +19,13 @@
                     disabled
                 ></v-text-field>
             </v-col>
-            <v-col class="py-0 my-0" style="display:flex; align-items: center;">
+            <!-- <v-col class="py-0 my-0" style="display:flex; align-items: center;">
                 <v-btn color='secondary' rounded small @click="btnClicked">
                     <v-icon dark>
                         mdi-pencil
                     </v-icon>
                 </v-btn>
-            </v-col>
+            </v-col> -->
         </v-row>
 
         <!--Add Dialog Begin-->

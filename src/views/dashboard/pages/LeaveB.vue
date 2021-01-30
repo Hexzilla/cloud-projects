@@ -3,7 +3,7 @@
         <v-progress-linear
             class="mb-1"
             indeterminate
-            color="teal"
+            color="primary"
             v-if="wait">
         </v-progress-linear>
         <v-row>
@@ -52,7 +52,7 @@
                 <v-card class="mt-0">
                     <v-card-title>
                         <div style="text-align: right; width: 100%">
-                            <v-btn rounded small color="secondary" @click="addBalance" :disabled="addBtnValid">
+                            <v-btn rounded small color="primary" @click="addBalance" :disabled="addBtnValid">
                                 Add
                             </v-btn>
                         </div>
@@ -239,6 +239,7 @@
                 this.close()
                 let status = await leave_api.adjustBalance(this.detailData)
                 this.show_snack(status)
+                this.leaveBalances = await leave_api.allLeaveBalance(this.selectedDate)
                 this.leaveDetails = await leave_api.getLeaveBalanceDetails(this.selectedDate, this.detailData.hrId)
                 this.wait = false
             },

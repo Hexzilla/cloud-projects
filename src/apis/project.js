@@ -196,7 +196,7 @@ const phaseSet = async function(projectId, phases) {
     try {
         const response = await http.post("/plan/projectPhaseSet", jsonData)
         if (response.status == 200) {
-            return true
+            return response.data.success
         }
     }
     catch (error) {
@@ -242,7 +242,7 @@ const removeProjectCategory = async function(phaseId, category) {
             "phase_id": phaseId,
             "removingCategoryid": category.info.est_MP_categ_taskCategoryID
         }
-    };
+    }
     const result = await projectCategory(jsonData)
     return result && result.success
 }
@@ -360,6 +360,7 @@ const saveTask1 = async function (tazk, state) {
         child.info.est_MP_TL1_level1taskid = child.id
     }
     
+    let peoples = []
     const data = tazk.children.map((child) => {
         if (state.indexOf(child.state) < 0) {
             return null
@@ -367,10 +368,9 @@ const saveTask1 = async function (tazk, state) {
         const datefrom = child.datefrom || moment().format("YYYY-MM-DD")
         const dateto = child.dateto || moment().format("YYYY-MM-DD")
 
-        if (child.people && child.people.length) {
-            allocateResource(child.info.est_MP_TL1_id, child.people)
-        }
-
+        child.info.est_MP_TL1_id && child.people && child.people.length && allocateResource(child.info.est_MP_TL1_id, child.people)
+        child.people && child.people.length && peoples.push(child.people)
+        
         return {
             "action": child.state,
             "est_MP_TL1_id": child.info.est_MP_TL1_id,
@@ -396,7 +396,10 @@ const saveTask1 = async function (tazk, state) {
         const response = await http.post("/plan/projectL1TaskSave", jsonData)
         if (response.status == 200) {
             if (response.data && response.data.success) {
-                console.log(response)
+                let ids = response.data.response.allCarrierRecord
+                ids && ids.length > 0 && ids.forEach( (e, i) => {
+                    e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i])
+                })
                 return true
             }
         }
@@ -658,7 +661,7 @@ const checkRemoveTask4 = async function(taskId) {
 
 const allocateResource = async function (id, include, exclude) {
     let include_data = []
-    include.forEach(e => {
+    include && include.forEach(e => {
         include_data.push({
             "hrid": e
         })

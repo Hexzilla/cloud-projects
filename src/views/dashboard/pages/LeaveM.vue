@@ -101,7 +101,7 @@
                                 </v-form>
                                 </v-card-text>
 
-                                <v-card-actions>
+                                <v-card-actions v-if="getStatus">
                                 <v-spacer></v-spacer>
                                 <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
                                 <v-btn color="red darken-1" text @click="reject"> Reject </v-btn>
@@ -119,6 +119,13 @@
                         <v-btn small color="teal" text title='Approve' @click="approveLeave(item)">
                             <v-icon>
                                 mdi-check
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                    <template v-else>
+                        <v-btn small color="primary" text title='Approve' @click="approveLeave(item)">
+                            <v-icon>
+                                mdi-eye
                             </v-icon>
                         </v-btn>
                     </template>
@@ -187,10 +194,16 @@
         async created() {
             this.loading = true
             this.leaveData = await leave_api.getAllLeave()
+            console.log("leaveData", this.leaveData)
             this.loading = false
         },
 
         computed: {
+            getStatus() {
+                if (this.selectedItem && this.selectedItem.status != 'applied')
+                    return false
+                return true
+            }
         },
 
         methods: {
@@ -228,7 +241,6 @@
 
             async approveLeave(item) {
                 this.loading = true
-                console.log('approve', item)
                 this.dialog = true
                 
                 this.saveData.leaveDateFrom = item.leaveFrom

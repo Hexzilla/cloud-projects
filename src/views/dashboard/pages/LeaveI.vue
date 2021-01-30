@@ -74,15 +74,6 @@
                                     </v-row>
                                     <v-row>
                                         <v-col>
-                                            <v-textarea
-                                            label="Reason"
-                                            v-model="saveData.leaveReason"
-                                            rows="3"
-                                            ></v-textarea>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col>
                                             <v-select
                                                 v-model="saveData.leaveType"
                                                 :items="leaveTypes"
@@ -92,6 +83,17 @@
                                                 item-value="value"
                                                 label="Leave Type"
                                             ></v-select>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col>
+                                            <v-textarea
+                                            label="Reason"
+                                            v-model="saveData.leaveReason"
+                                            :rules="reasonRules"
+                                            rows="3"
+                                            counter
+                                            ></v-textarea>
                                         </v-col>
                                     </v-row>
                                 </v-form>
@@ -137,6 +139,18 @@
                         <!--Cancel Dialog End-->
                     </v-container>
                 </template>
+
+                <template v-slot:item.status="{ item }">
+                    <template v-if="item.status == 'applied'">
+                        {{ item.status }}
+                    </template>
+                    <template v-else>
+                        <v-icon :color=getColor(item.status)>
+                            {{getIcon(item.status)}} 
+                        </v-icon>
+                    </template>
+                </template>
+
                 <template v-slot:item.actions="{ item }">
                     <template v-if="item.status == `applied`">
                         <v-btn small color="teal" text title='Modify' @click="modifyLeave(item)">
@@ -166,8 +180,8 @@
 
 <script>
     import DatePicker from './DatePicker'
-    import leave_api from "@/apis/leave.js";
-
+    import leave_api from "@/apis/leave.js"
+    import auth_api from "@/apis/auth.js";
     export default {
         components: {
             DatePicker,
@@ -213,12 +227,16 @@
             cancelDialog: false,
             cancelReason: "",
             valid1: false,
-            hrId: 1
+            hrId: null
         }),
 
         async created() {
             this.loading = true
-            this.leaveData = await leave_api.getMyLeave(1)
+            // this.hrId = await auth_api.getOwnId()
+            this.hrId = 1
+            console.log("hrId", this.hrId)
+            this.leaveData = await leave_api.getMyLeave(this.hrId)
+            console.log("leaveData", this.leaveData)
             this.loading = false
         },
 
@@ -226,6 +244,14 @@
             typeRules() {
                 return [
                     (v) => !!v || "Type is required",
+                ]
+            },
+            reasonRules() {
+                return [
+                    (v) => !!v || "Reason is required",
+                    (v) =>
+                        (v && v.length <= 200) ||
+                        `This field must be less than 200 characters`,
                 ]
             }
         },
@@ -309,7 +335,17 @@
                 status && (this.selectedItem.status = "cancelled-by-me")
                 this.show_snack(status)
                 this.loading = false
-            }
+            },
+
+            getIcon(item) {
+                if (item == "cancelled-by-me") return "mdi-sticker-remove-outline"
+                if (item == "approved-by-hr" || "rejected-by-hr") return "mdi-sticker-check-outline"
+            },
+
+            getColor(item) {
+                if (item == "cancelled-by-me") return "red"
+                if (item == "approved-by-hr" || "rejected-by-hr") return "primary"
+            },
         }
     }
 </script>

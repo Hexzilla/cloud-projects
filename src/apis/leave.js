@@ -41,7 +41,7 @@ const getNecessaryFromLeave = function(ret) {
 
 const applyLeave = async function(hrId, data) {
     let jsonData = {
-        "hrid": 1,
+        "hrid": hrId,
         "leaveType": data.leaveType,
         "leaveDateFrom": data.leaveDateFrom,
         "leaveDateFrom_halfDayLeave": data.fromHalf ? 1 : 0,

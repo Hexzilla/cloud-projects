@@ -11,7 +11,7 @@
                 <v-card class="px-2 py-2 mt-0">
                     <v-card-title>
                         <div style="width: 100%; text-align: right">
-                            <v-btn small rounded color="secondary" @click="newCalendarClicked">
+                            <v-btn small rounded color="primary" @click="newCalendarClicked">
                                 New Calendar
                             </v-btn>
                         </div>
@@ -257,8 +257,8 @@
                 </v-card-title><br>
                 <v-card-actions><br>
                     <div style="width:100%; text-align:center;">
-                        <v-btn color="blue darken-1" text @click="deleteDateNo"> No </v-btn>
-                        <v-btn color="blue darken-1"  @click="deleteDateYes"> Yes </v-btn>
+                        <v-btn color="blue darken-1"  @click="deleteDateNo"> No </v-btn>
+                        <v-btn color="blue darken-1" text @click="deleteDateYes"> Yes </v-btn>
                     </div>
                 </v-card-actions>
             </v-card>

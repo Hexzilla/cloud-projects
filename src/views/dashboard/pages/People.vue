@@ -492,6 +492,7 @@ export default {
                     } else if (!/.+@.+/.test(v)) {
                         return 'E-mail must be valid'
                     }
+                    return true
                 }
             ]
         },

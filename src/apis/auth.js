@@ -22,6 +22,21 @@ const login = async function (code, password) {
     return false
 }
 
+const getOwnId = async function () {
+    try {
+        const response = await http.post("/hr/getMyHRid")
+
+        if (response.status == 200) {
+            return response.data.hrid
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
 export default {
     login,
+    getOwnId
 }

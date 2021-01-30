@@ -34,8 +34,10 @@
                         <v-col>
                             <v-text-field
                                 label="Password"
+                                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                                :type="show1 ? 'text' : 'password'"
+                                @click:append="show1 = !show1"
                                 prepend-icon="mdi-account-lock"
-                                type="password"
                                 :rules="passwordRules"
                                 v-model="password"
                                 :error-messages="errorMessagePassword"
@@ -69,6 +71,7 @@ export default {
         errorMessagePassword: "",
         code: "",
         errorMessageCode: "",
+        show1: false,
     }),
 
     created: function() {

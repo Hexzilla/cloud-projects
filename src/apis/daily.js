@@ -11,12 +11,12 @@ const getToday = function() {
     return today
 }
 
-const add1 = async function(data) {
+const add1 = async function(taskId, supervisor, data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL1id": data.id,
-        "workSupervisor_hrid": data.supervisor,
-        "workPerformedBy_hrid": data.performer,
+        "estimate_MP_taskL1id": taskId,
+        "workSupervisor_hrid": supervisor,
+        "workPerformedBy_hrid": data.id,
         "L1AdditionalTotHrsToday": data.hr,
         "L1AdditionalTotMinsToday": data.min,
         "L1AdditionalPctToday": data.pct,
@@ -26,6 +26,7 @@ const add1 = async function(data) {
     try {
         const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
+            console.log("response----------------", response)
             return true
         }
     }
@@ -35,12 +36,12 @@ const add1 = async function(data) {
     return false
 }
 
-const add2 = async function(data) {
+const add2 = async function(taskId, supervisor, data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL2id": data.id,
-        "workSupervisor_hrid": data.supervisor,
-        "workPerformedBy_hrid": data.performer,
+        "estimate_MP_taskL2id": taskId,
+        "workSupervisor_hrid": supervisor,
+        "workPerformedBy_hrid": data.id,
         "L2AdditionalTotHrsToday": data.hr,
         "L2AdditionalTotMinsToday": data.min,
         "L2AdditionalPctToday": data.pct,
@@ -59,12 +60,12 @@ const add2 = async function(data) {
     return false
 }
 
-const add3 = async function(data) {
+const add3 = async function(taskId, supervisor, data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL3id": data.id,
-        "workSupervisor_hrid": data.supervisor,
-        "workPerformedBy_hrid": data.performer,
+        "estimate_MP_taskL3id": taskId,
+        "workSupervisor_hrid": supervisor,
+        "workPerformedBy_hrid": data.id,
         "L3AdditionalTotHrsToday": data.hr,
         "L3AdditionalTotMinsToday": data.min,
         "L3AdditionalPctToday": data.pct,
@@ -83,12 +84,12 @@ const add3 = async function(data) {
     return false
 }
 
-const add4 = async function(data) {
+const add4 = async function(taskId, supervisor, data) {
     const jsonData = {
         "effortdate": getToday(),
-        "estimate_MP_taskL4id": data.id,
-        "workSupervisor_hrid": data.supervisor,
-        "workPerformedBy_hrid": data.performer,
+        "estimate_MP_taskL4id": taskId,
+        "workSupervisor_hrid": supervisor,
+        "workPerformedBy_hrid": data.id,
         "L4AdditionalTotHrsToday": data.hr,
         "L4AdditionalTotMinsToday": data.min,
         "L4AdditionalPctToday": data.pct,
