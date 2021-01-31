@@ -9,7 +9,8 @@ const getMyLeave = async function(hrId) {
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                return getNecessaryFromLeave(data.response.allCarrierRecord)
+                let ret = await getNecessaryFromLeave(data.response.allCarrierRecord)
+                return ret
             }
         }
     }
@@ -19,9 +20,12 @@ const getMyLeave = async function(hrId) {
     return []
 }
 
-const getNecessaryFromLeave = function(ret) {
+const getNecessaryFromLeave = async function(ret) {
     let result = []
+    let persons = await getPerson()
+
     ret && ret.length > 0 && ret.forEach(item => {
+        let hrId = item.LAhrid ? item.LAhrid : 0
         let temp = {
             "id":item.LAid,
             "leaveFrom":item.leaveDateFrom,
@@ -32,10 +36,17 @@ const getNecessaryFromLeave = function(ret) {
             "reason":item.leaveReason,
             "leaveType": item.leaveType,
             "lastUpdateTimeStamp": item.lastUpdateTimeStamp,
-            "hrId": item.LAhrid ? item.LAhrid : 0
+            "hrId": hrId
+        }
+        if (hrId) {
+            const person = persons.find(e => e.id == hrId)
+            temp.name = person.firstname + ' ' + person.lastname
         }
         result.push(temp)
     })
+
+    // result.sort((a, b) => (a.leaveFrom > b.leaveFrom) ? 1 : -1)
+    // console.log("----------------result", result)
     return result
 }
 
@@ -158,7 +169,8 @@ const getAllLeave = async function() {
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                return getNecessaryFromLeave(data.response.allCarrierRecord)
+                let ret = await getNecessaryFromLeave(data.response.allCarrierRecord)
+                return ret
             }
         }
     }
@@ -247,6 +259,25 @@ const adjustBalance = async function(data) {
 const getCurrentDate = function () {
     const date = new Date()
     return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+}
+
+
+const getPerson = async function () {
+    let associates = []
+    try {
+        const response = await http.post("/hr/hrFindAll")
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                associates = data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    
+    return associates
 }
 
 export default {

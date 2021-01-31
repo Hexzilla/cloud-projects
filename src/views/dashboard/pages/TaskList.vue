@@ -143,8 +143,10 @@ export default {
       return undefined;
     },
     formTitle() {
+      let parent
+      this.items && this.items.length > 0 && this.selectedItem && (parent = this.findParent(this.items))
       if (this.actionMode === "add_category") return "New Category";
-      return this.actionMode === "add_task" ? this.selectedItem && "New Task (Level " + (this.selectedItem.level + 1) + " )" : (this.selectedItem && this.selectedItem.level == 0 ? "Edit Category" : "Edit Task");
+      return this.actionMode === "add_task" ? this.selectedItem && "New Task (Level " + (this.selectedItem.level + 1) + " )" : (this.selectedItem && this.selectedItem.level == 0 ? "Edit Category" : parent && parent.name);
     },
     nameRules() {
       return [
@@ -199,7 +201,6 @@ export default {
       this.selectedItem = item;
       console.log("editTask", this.editName);
 
-      console.log("edit item-------------", item)
       if(item.level == 1)
         this.selectedRole = item.roleid
       this.openDialog();
@@ -349,6 +350,31 @@ export default {
             this.snackText = "Error";
         }
     },
+
+    findParent(items) {
+      if (this.selectedItem && items && items.length > 0) {
+        for (const i in items) {
+          const result = this.searchChildren(items[i])
+          if (result) {
+            return result
+          } else {
+            const ret = this.findParent(items[i].children)
+            if (ret) {
+              return ret
+            }
+          }
+        }
+      }
+      return null
+    },
+
+    searchChildren(item) {
+      let result = null
+      item.children && item.children.length > 0 && (result = item.children.find( e => e.ikey == this.selectedItem.ikey))
+      if (result)
+        return item
+      return result
+    }
   },
 };
 </script>

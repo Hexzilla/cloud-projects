@@ -1,19 +1,27 @@
 import http from "./http.js";
 
-const findAll = async function() {
+const findAll = async function () {
+    let associates = []
     try {
         const response = await http.post("/hr/hrFindAll")
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                return data.response.allCarrierRecord
+                associates = data.response.allCarrierRecord
             }
         }
     }
     catch (error) {
         console.log(error)
     }
-    return []
+    associates && associates.length > 0 && associates.forEach(async e => {
+        let info = await findOne(e.id)
+        e.info = info
+        e.initialDesignation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
+        e.designation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
+    })
+    
+    return associates
 }
 
 const findOne = async function(id) {
@@ -41,9 +49,11 @@ const add = async function(person) {
         const response = await http.post("/hr/hrAddOne", person)
         if (response.status == 200) {
             const data = response.data;
-            console.log("api.addCountry", data.response)
             if (data.success) {
-                return data.response
+                const hrId = data.response.data.insertId
+                const ret = await addDesignation(hrId, person.designation, 0)
+                // return data.response
+                return ret
             }
         }
     }
@@ -54,9 +64,13 @@ const add = async function(person) {
 }
 
 const update = async function(person) {
+    console.log("update person", person)
     try {
         const response = await http.post("/hr/hrUpdateOne", person)
-        return (response.status == 200);
+        if (response.status == 200) {
+            const ret = await addDesignation(person.id, person.designation, person.initialDesignation ? person.initialDesignation : 0)
+            return ret
+        }
     }
     catch (error) {
         console.log(error)
@@ -75,7 +89,6 @@ const roleAssign = async function(hrId ,data) {
         "hrid": hrId,
         "roleAction": roleAction
     }
-    console.log("jsonData", jsonData)
     try {
         const response = await http.post("/hr/hrRolesAssign", jsonData)
         return (response.status == 200);
@@ -103,11 +116,35 @@ const getRoleWithData = function (roles) {
     return store
 }
 
+const addDesignation = async function(hrId, designationId, hrDesignationId) {
+    let jsonData = {
+        "hrid": hrId,
+        "effectivefromdate": getCurrentDate(),
+        "designationid": designationId,
+        "closingdesignation_hrDesignationid": hrDesignationId
+    }
+    try {
+        const response = await http.post("/hr/hrAddNewDesignation", jsonData)
+        console.log("designation response", response)
+        return (response.status == 200);
+    }
+    catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const getCurrentDate = function () {
+    const date = new Date()
+    return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+}
+
 export default {
     findAll,
     findOne,
     add,
     update,
     getRoleWithData,
-    roleAssign
+    roleAssign,
+    addDesignation
 }

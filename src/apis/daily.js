@@ -26,7 +26,6 @@ const add1 = async function(taskId, supervisor, data) {
     try {
         const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
-            console.log("response----------------", response)
             return true
         }
     }

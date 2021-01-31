@@ -75,7 +75,7 @@
       },
       billingDateRange() {
         if (this.project == null) return ''
-        return (this.project.prj_executionopendate || '') + ' ~ ' + (this.project.prj_executionopendate || '')
+        return (this.project.prj_executionopendate || '') + ' ~ ' + (this.project.prj_executionclosedate || '')
       },
       warrantyDateRange() {
         if (this.project == null) return ''

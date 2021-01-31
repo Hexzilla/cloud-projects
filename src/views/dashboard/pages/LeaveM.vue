@@ -25,26 +25,42 @@
                             <v-card>
                                 <v-card-title>
                                 <span class="headline">Apporve Leave</span>
+                                <br>
+                                <p class="mb-0 text-left">{{ saveData.name }}</p>
                                 </v-card-title>
 
                                 <v-card-text>
                                 <v-form ref="form" v-model="valid" lazy-validation>
                                     <v-row>
                                         <v-col>
+                                        <!--
                                             <DatePicker
                                                 textName="Leave From"
                                                 :date="saveData.leaveDateFrom"
                                                 :submit="(date) => saveData.leaveDateFrom = date"
                                                 :endDate="saveData.leaveDateTo"
                                             ></DatePicker>
+                                            -->
+                                            <v-text-field
+                                                label="Leave From"
+                                                v-model="saveData.leaveDateFrom"
+                                                readonly
+                                            />
                                         </v-col>
                                         <v-col>
+                                        <!--
                                             <DatePicker
                                                 textName="Leave To"
                                                 :date="saveData.leaveDateTo"
                                                 :submit="(date) => saveData.leaveDateTo = date"
                                                 :startDate="saveData.leaveDateFrom"
                                             ></DatePicker>
+                                            -->
+                                            <v-text-field
+                                                label="Leave To"
+                                                v-model="saveData.leaveDateTo"
+                                                readonly
+                                            />
                                         </v-col>
                                     </v-row>
                                     <v-row>
@@ -157,6 +173,7 @@
                 { text: "Leave From", align: "start", value: "leaveFrom" },
                 { text: "Leave To", align: "start", value: "leaveTo" },
                 { text: "Status", align: "start", value: "status" },
+                { text: "Name", align: "center", value: "name"},
                 { text: "Reason", align: "start", value: "reason", sortable: false },
                 { text: "Action", align: "center", value: "action"}
             ],
@@ -175,6 +192,7 @@
                 leaveType: null,
                 fromHalf: false,
                 toHalf: false,
+                name: ''
             },
             initialSaveData: {
                 leaveDateFrom: null,
@@ -182,7 +200,8 @@
                 leaveReason: null,
                 leaveType: null,
                 fromHalf: false,
-                toHalf: false
+                toHalf: false,
+                name: ''
             },
             snack: false,
             snackColor: "",
@@ -249,7 +268,8 @@
                 this.saveData.toHalf = item.toHalf ? true : false
                 this.saveData.leaveReason = item.reason
                 this.saveData.leaveType = item.leaveType
-                
+                this.saveData.name = item.name
+
                 this.selectedItem = item
                 this.balance = await leave_api.getIndividualBalance(item.leaveFrom, item.hrId)
                 this.loading = false

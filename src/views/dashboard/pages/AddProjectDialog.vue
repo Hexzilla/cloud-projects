@@ -141,7 +141,7 @@ export default {
   mounted: function() {
     this.clientList = this.clients.map((it) => {
       return {
-        text: it.code,
+        text: it.code + " - " + it.name,
         value: it.id,
         disabled: false,
       }

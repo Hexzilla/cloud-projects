@@ -368,9 +368,11 @@ const saveTask1 = async function (tazk, state) {
         const datefrom = child.datefrom || moment().format("YYYY-MM-DD")
         const dateto = child.dateto || moment().format("YYYY-MM-DD")
 
-        child.info.est_MP_TL1_id && child.people && child.people.length && allocateResource(child.info.est_MP_TL1_id, child.people, child.initial)
-        child.people && child.people.length && peoples.push(child.people)
-        
+        if (state != 'remove') {
+            child.info.est_MP_TL1_id && allocateResource(child.info.est_MP_TL1_id, child.people, child.initial)
+            child.people && child.people.length && peoples.push(child.people)
+        }
+
         return {
             "action": child.state,
             "est_MP_TL1_id": child.info.est_MP_TL1_id,
@@ -397,6 +399,7 @@ const saveTask1 = async function (tazk, state) {
         if (response.status == 200) {
             if (response.data && response.data.success) {
                 let ids = response.data.response.allCarrierRecord
+                console.log("------------------&&&&&&&&&&-----------", ids, peoples)
                 ids && ids.length > 0 && ids.forEach( (e, i) => {
                     e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i], [])
                 })
@@ -661,6 +664,8 @@ const checkRemoveTask4 = async function(taskId) {
 
 
 const allocateResource = async function (id, current, initial) {
+    console.log("++++++++++++++++++++++++++++++++id, people, initial", id, current, initial)
+
     if (Object.is(current, initial)) return
     
     let include = current.length > 0 && current.filter(x => initial.indexOf(x) === -1)

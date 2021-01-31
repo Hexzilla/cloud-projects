@@ -279,6 +279,7 @@
         data: () => ({
             wait: false,
             projects: [],
+            allProjects: [],
             selectedProject: null,
             supervisor: null,
             supervisors: [],
@@ -295,15 +296,19 @@
             snack: false,
             snackColor: "",
             snackText: "",
-            updateLoading: false
+            updateLoading: false,
+
+            alert: true,
+            alertMessage: "Ok"
         }),
         
         created: async function() {
             this.wait = true
-            this.projects = await api.getProjects()
+            this.allProjects = await api.getProjects()
             this.performers = await client_api.findL1Members()
             this.supervisors = await client_api.findSupervisors()
             
+            this.projects = this.allProjects
             this.performers.forEach( e => {
                 e.hr = ""
                 e.min = ""

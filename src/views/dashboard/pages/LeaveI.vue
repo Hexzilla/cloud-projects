@@ -6,8 +6,7 @@
                 :items="leaveData"
                 :search="search"
                 :loading="loading"
-                loading-text="Loading... Please wait"
-                sort-by="id">
+                loading-text="Loading... Please wait">
                 <template v-slot:top>
                     <v-container>
                         <div class="d-flex flex-row-reverse" flat tile>
@@ -92,7 +91,7 @@
                                             v-model="saveData.leaveReason"
                                             :rules="reasonRules"
                                             rows="3"
-                                            counter
+                                            counter="200"
                                             ></v-textarea>
                                         </v-col>
                                     </v-row>
@@ -232,9 +231,7 @@
 
         async created() {
             this.loading = true
-            // this.hrId = await auth_api.getOwnId()
-            this.hrId = 1
-            console.log("hrId", this.hrId)
+            this.hrId = await auth_api.getOwnId()
             this.leaveData = await leave_api.getMyLeave(this.hrId)
             console.log("leaveData", this.leaveData)
             this.loading = false

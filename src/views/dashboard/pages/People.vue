@@ -45,6 +45,7 @@
                                                 <v-text-field
                                                     v-model="editedItem.firstname"
                                                     :rules="nameRules"
+                                                    :counter="maxNameLength"
                                                     label="First Name"
                                                     required
                                                 ></v-text-field>
@@ -53,6 +54,7 @@
                                                 <v-text-field
                                                     v-model="editedItem.lastname"
                                                     :rules="nameRules"
+                                                    :counter="maxNameLength"
                                                     label="Last Name"
                                                     required
                                                 ></v-text-field>
@@ -107,11 +109,15 @@
                                                 <v-text-field
                                                     v-model="editedItem.fullNameOfFather"
                                                     label="Father's Full Name"
+                                                    :counter="maxNameLength"
+                                                    maxlength="100"
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="6">
                                                 <v-text-field
                                                     v-model="editedItem.fullNameOfMother"
+                                                    :counter="maxNameLength"
+                                                    maxlength="100"
                                                     label="Mother's Full Name"
                                                 ></v-text-field>
                                             </v-col>
@@ -122,7 +128,7 @@
                                                     v-model="editedItem.pwd"
                                                     :append-icon="passwordShow ? 'mdi-eye' : 'mdi-eye-off'"
                                                     :type="passwordShow ? 'text' : 'password'"
-                                                    counter
+                                                    :counter="maxNameLength"
                                                     :rules="passwordRules"
                                                     @click:append="passwordShow = !passwordShow"
                                                     label="Password"
@@ -385,7 +391,7 @@ export default {
         snackColor: "",
 	    snackText: "",
         valid: true,
-        maxNameLength: 200,
+        maxNameLength: 100,
         maxCodeLength: 20,
         maxPasswordLength: 200,
         inlineEditedCode: "",
@@ -461,9 +467,9 @@ export default {
             return [
                 (v) => !!v || "This field is required",
                 (v) => (v && v.trim().length > 0) || "This field is required",
-                // (v) =>
-                //     (v && v.length <= 200) ||
-                //     `This field must be less than 200 characters`,
+                (v) =>
+                    (v && v.length <= this.maxNameLength) ||
+                    `This field must be less than ${this.maxNameLength} characters`,
             ];
         },
         genderRules() {
@@ -501,9 +507,9 @@ export default {
                 v => !!v || 'Password is required',
                 (v) => (v && v.trim().length > 0) || "Password is required",
                 (v) => (v && v.length >= 8) || ` > 8 `,
-                // (v) =>
-                //     (v && v.length <= this.maxPasswordLength) ||
-                //     `Password must be less than ${this.maxPasswordLength} characters`,
+                (v) =>
+                    (v && v.length <= this.maxNameLength) ||
+                    `Password must be less than ${this.maxNameLength} characters`,
             ]
         },
         addressCountryRule() {
@@ -664,11 +670,13 @@ export default {
                 let success = false
 
                 if (selectedIndex > -1) {
-                    emailcheck = await people_api.checkEmailToBeUpdated(item.email, item.id) 
-                    if (!emailcheck) {
-                        this.emailError = "Email is already exist"
-                        this.loading = false
-                        return
+                    if (item.email) {
+                        emailcheck = await people_api.checkEmailToBeUpdated(item.email, item.id) 
+                        if (!emailcheck) {
+                            this.emailError = "Email is already exist"
+                            this.loading = false
+                            return
+                        }
                     }
                     this.close()
 
@@ -678,13 +686,15 @@ export default {
                     }
                 } 
                 else {
-                    emailcheck = await people_api.checkEmailToBeAdded(item.email) 
-                    if (!emailcheck) {
-                        this.emailError = "Email is already exist"
-                        this.loading = false
-                        return
+                    if (item.email) {
+                        emailcheck = await people_api.checkEmailToBeAdded(item.email) 
+                        if (!emailcheck) {
+                            this.emailError = "Email is already exist"
+                            this.loading = false
+                            return
+                        }
                     }
-                    this.close()
+                    this.close()    
 
                     const addedItem = await people_api.add(item)
                     if (addedItem) {

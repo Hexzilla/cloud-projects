@@ -144,6 +144,16 @@
             icon: 'mdi-account-tie',
             title: 'associate_person',
             to: '/pages/associate_person',
+          },
+          {
+            icon: 'mdi-account-clock',
+            title: 'leavem',
+            to: '/pages/leave_m'
+          },
+          {
+            icon: 'mdi-alarm-panel',
+            title: 'leaveb',
+            to: '/pages/leave_b'
           }]
         },
         {
@@ -191,18 +201,8 @@
           children: [
             {
               icon: 'mdi-account-clock-outline',
-              title: 'leavei',
+              title: 'leavea',
               to: '/pages/leave_i'
-            },
-            {
-              icon: 'mdi-account-clock',
-              title: 'leavem',
-              to: '/pages/leave_m'
-            },
-            {
-              icon: 'mdi-alarm-panel',
-              title: 'leaveb',
-              to: '/pages/leave_b'
             }
           ]
         },

@@ -132,7 +132,7 @@
                                     :rules="defaultRules"
                                     attach
                                     item-text="name"
-                                    item-value="value"
+                                    item-value="id"
                                     label="Designation"
                                     required
                                     dense
@@ -411,6 +411,7 @@ export default {
             this.roleData = associate_api.getRoleWithData(this.roles)
             
             console.log("associates", this.associates)
+            console.log("designations", this.designations)
             this.loading = false
         },
 
@@ -432,6 +433,9 @@ export default {
             // this.editedIndex = this.associates.indexOf(item);
             this.editedItem = Object.assign({}, item);
             let one = await associate_api.findOne(item.id)
+
+            console.log("one", one)
+
             let data = one[0].assignedRoles
             if (data && data.length > 0) {
                 data.forEach(item=> {
