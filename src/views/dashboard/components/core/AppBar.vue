@@ -68,7 +68,7 @@
           <app-bar-item>
             <v-list-item-title>
               <div @click="logout">
-                Log Out <v-icon>mdi-logout</v-icon>
+                ({{ getCode }})&nbsp;&nbsp;&nbsp;Log Out <v-icon>mdi-logout</v-icon>
               </div>
             </v-list-item-title>
           </app-bar-item>
@@ -133,6 +133,9 @@
 
     computed: {
       ...mapState(['drawer']),
+      getCode() {
+        return localStorage.getItem('code')
+      }
     },
 
     methods: {

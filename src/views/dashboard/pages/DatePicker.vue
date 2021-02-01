@@ -26,7 +26,6 @@
         :allowed-dates="allowedDates"
         no-title
         scrollable
-        readonly
       >
         <v-spacer></v-spacer>
         <v-btn

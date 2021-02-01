@@ -147,13 +147,12 @@ const getIndividualBalance = async function(date, hrId) {
         "asOnDate": date,
         "hrid": hrId
     }
-    console.log("balance", jsonData)
     try {
         const response = await http.post("/hr/hrTxn", jsonData)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                return data.response.allCarrierRecord.indi_balance
+                return data.response.allCarrierRecord[0].indi_balance
             }
         }
     }
@@ -191,14 +190,17 @@ const allLeaveBalance = async function (date) {
             if (data.success) {
                 let ret = data.response.allCarrierRecord
                 let result = []
-                ret && ret.length > 0 && ret.forEach(item => {
-                    result.push({
-                        hrid: item.hrid,
-                        name: item.firstname + " " + item.lastname,
-                        leavebal: item.leavebal,
-                        designation: ''
-                    })
-                })
+                if (ret && ret.length > 0) {
+                    for (var i in ret) {
+                        let item = ret[i]
+                        result.push({
+                            hrid: item.hrid,
+                            name: item.firstname + " " + item.lastname,
+                            leavebal: item.leavebal,
+                            designation: item.designationname
+                        })
+                    }
+                }
                 return result
             }
         }
@@ -222,10 +224,12 @@ const getLeaveBalanceDetails = async function (date, hrId) {
                 let ret = data.response.allCarrierRecord
                 let result = []
                 ret && ret.length > 0 && ret.forEach(item => {
+                    console.log("-------------item", item)
                     result.push({
                         addBalance: item.addBalance,
                         reduceBalance: item.reduceBalance,
-                        txnEvent: item.txnEvent
+                        txnEvent: item.txnEvent,
+                        date: item.effectiveDate
                     })
                 })
                 return result
@@ -248,6 +252,7 @@ const adjustBalance = async function(data) {
     }
     try {
         const response = await http.post("/hr/leaveBalanceAdjust", jsonData)
+        console.log("response", response)
         return (response.status == 200)
     }
     catch (error) {
@@ -260,7 +265,6 @@ const getCurrentDate = function () {
     const date = new Date()
     return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
 }
-
 
 const getPerson = async function () {
     let associates = []
@@ -278,6 +282,25 @@ const getPerson = async function () {
     }
     
     return associates
+}
+
+const getOnePerson = async function(id) {
+    let data = {
+        id: id
+    }
+    try {
+        const response = await http.post("/hr/hrFindOne", data)
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                return data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
 }
 
 export default {

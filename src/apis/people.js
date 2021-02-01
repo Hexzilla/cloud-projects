@@ -172,15 +172,53 @@ const findPeopleToJoin = async function() {
             const data = response.data
             if (data.success)
                 return data.response.allCarrierRecord
-            else
-                return []
         }
     }
     catch (error) {
         console.log(error)
-        return []
     }
     return []
+}
+
+
+const getManPower = async function (from, to) {
+    let jsonData = {
+        fromdate: from,
+        todate: to
+    }
+    console.log("-----------jsonData", jsonData)
+    try {
+        const response = await http.post("/reports/mpForcast", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                let result = []
+                let ret = data.response.allCarrierRecord[0]
+                ret && ret.length > 0 && ret.forEach(item => {
+                    result.push({
+                        name: item.firstname + ' ' + item.lastname,
+                        total: item.Workingdays,
+                        medLeave: item.MedicalLeaves,
+                        casLeave: item.CasualLeave,
+                        vacation: item.Vacations,
+                        unOccDays: item.UnOccDays
+                    })
+                })
+                return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const dateToString = function (dataObj) {
+    let month = (dataObj.getMonth()+1);
+    let monthStr = month<10? ('0' + month): month;
+    let dateStr = dataObj.getDate()< 10? ('0' + dataObj.getDate()): dataObj.getDate();
+    return dataObj.getFullYear() + "-" + monthStr + "-" + dateStr;
 }
 
 export default {
@@ -192,5 +230,7 @@ export default {
     updateLocalAddress,
     checkEmailToBeAdded,
     checkEmailToBeUpdated,
-    findPeopleToJoin
+    findPeopleToJoin,
+    getManPower,
+    dateToString
 }

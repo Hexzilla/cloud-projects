@@ -45,6 +45,13 @@
                                 Detail
                             </v-btn>
                         </template>
+                        <template v-slot:item.rowSelected="{ item }">
+                            <template v-if="item == selectedItem">
+                                <v-icon color="red accent-4">
+                                    mdi-check
+                                </v-icon>
+                            </template>
+                        </template>
                     </v-data-table>
                 </v-card>
             </v-col>
@@ -70,6 +77,9 @@
                             <th class="text-center">
                                 Transaction Details
                             </th>
+                            <th class="text-center">
+                                Date
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,6 +90,7 @@
                             <td class="text-center">{{ item.addBalance }}</td>
                             <td class="text-center">{{ item.reduceBalance }}</td>
                             <td class="text-center">{{ item.txnEvent }}</td>
+                            <td class="text-center">{{ item.date }}</td>
                         </tr>
                     </tbody>
                     </template>
@@ -166,8 +177,9 @@
             headers: [
                 { text: "Name", align: "start", value: "name" },
                 { text: "Designation", align: "start", value: "designation" },
-                { text: "Value", align: "start", value: "leavebal" },
-                { text: "Detail", align: "center", value: "detail"}
+                { text: "Leave Balance", align: "start", value: "leavebal" },
+                { text: "Detail", align: "center", value: "detail"},
+                { text: "", align: "center", value: "rowSelected"}
             ],
             loading: true,
             wait: false,
@@ -197,6 +209,7 @@
             this.loading = true
             this.selectedDate = leave_api.getCurrentDate()
             this.leaveBalances = await leave_api.allLeaveBalance(this.selectedDate)
+            console.log("balances", this.leaveBalances)
             this.loading = false
         },
 
@@ -212,7 +225,9 @@
             async showDetail(item) {
                 this.wait = true
                 this.selectedItem = item
+                this.leaveDetails = []
                 this.leaveDetails = await leave_api.getLeaveBalanceDetails(this.selectedDate, item.hrid)
+                console.log("detail", this.leaveDetails)
                 this.addBtnValid = false
                 this.wait = false
             },

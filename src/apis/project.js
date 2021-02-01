@@ -399,7 +399,6 @@ const saveTask1 = async function (tazk, state) {
         if (response.status == 200) {
             if (response.data && response.data.success) {
                 let ids = response.data.response.allCarrierRecord
-                console.log("------------------&&&&&&&&&&-----------", ids, peoples)
                 ids && ids.length > 0 && ids.forEach( (e, i) => {
                     e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i], [])
                 })
@@ -664,8 +663,6 @@ const checkRemoveTask4 = async function(taskId) {
 
 
 const allocateResource = async function (id, current, initial) {
-    console.log("++++++++++++++++++++++++++++++++id, people, initial", id, current, initial)
-
     if (Object.is(current, initial)) return
     
     let include = current.length > 0 && current.filter(x => initial.indexOf(x) === -1)
@@ -725,6 +722,33 @@ const findPeople = async function() {
     return []
 }
 
+const getProgress = async function (id, date, code) {
+    let jsonData = {
+        "projectid": id,
+        "uptoDate": getCurrentDate()
+    }
+    let result = []
+    try {
+        const response = await http.post("/reports/projectprogress001", jsonData)
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                let ret = data.response.allCarrierRecord[0]
+                ret && ret.length > 0 && (result = ret.filter( e => e.clientcode == code))
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return result
+}
+
+const getCurrentDate = function () {
+    const date = new Date()
+    return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+}
+
 export default {
     findAll,
     addProject,
@@ -756,4 +780,5 @@ export default {
     checkRemoveTaskByLevel,
     allocateResource,
     findPeople,
+    getProgress
 }

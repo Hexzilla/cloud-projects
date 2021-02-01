@@ -23,6 +23,7 @@ const add1 = async function(taskId, supervisor, data) {
         "L1TotPctMarkToday": data.totalPct
     }
 
+    console.log("jsonData", jsonData)
     try {
         const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
@@ -107,76 +108,80 @@ const add4 = async function(taskId, supervisor, data) {
     return false
 }
 
-const update1 = async function() {
+const getUpdate1 = async function(hrId) {
     const jsonData = {
         "effortdate": getToday(),
-        "dataUpdated_hrid": 1
+        "dataUpdated_hrid": hrId
     }
 
     try {
         const response = await http.post("/effort/L1getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response.allCarrierRecord
         }
     }
     catch (error) {
         console.log(error)
     }
-    return false
+    return []
 }
 
-const update2 = async function() {
+const getUpdate2 = async function(hrId) {
     const jsonData = {
         "effortdate": getToday(),
-        "dataUpdated_hrid": 1
+        "dataUpdated_hrid": hrId
     }
 
     try {
         const response = await http.post("/effort/L2getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response.allCarrierRecord
         }
     }
     catch (error) {
         console.log(error)
     }
-    return false
+    return []
 }
 
-const update3 = async function() {
+const getUpdate3 = async function(hrId) {
     const jsonData = {
         "effortdate": getToday(),
-        "dataUpdated_hrid": 1
+        "dataUpdated_hrid": hrId
     }
 
     try {
         const response = await http.post("/effort/L3getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response.allCarrierRecord
         }
     }
     catch (error) {
         console.log(error)
     }
-    return false
+    return []
 }
 
-const update4 = async function() {
+const getUpdate4 = async function(hrId) {
     const jsonData = {
         "effortdate": getToday(),
-        "dataUpdated_hrid": 1
+        "dataUpdated_hrid": hrId
     }
 
     try {
         const response = await http.post("/effort/L4getUpdatedRecordsByMe", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response.allCarrierRecord
         }
     }
     catch (error) {
         console.log(error)
     }
-    return false
+    return []
 }
 
 const remove1 = async function(id) {
@@ -252,10 +257,10 @@ export default {
     add2,
     add3,
     add4,
-    update1,
-    update2,
-    update3,
-    update4,
+    getUpdate1,
+    getUpdate2,
+    getUpdate3,
+    getUpdate4,
     remove1,
     remove2,
     remove3,

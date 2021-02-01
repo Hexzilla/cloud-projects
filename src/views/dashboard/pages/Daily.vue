@@ -36,7 +36,7 @@
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="my-0" min-height="300px">
+                <v-card class="my-0" min-height="250px" v-show="!showUpdate">
                     <!-- <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-row>
                             <v-col class="text-right py-8 px-10">
@@ -79,14 +79,17 @@
                                                         </v-icon>
                                                     </v-btn>
                                                 </v-col>
+                                                <!--
                                                 <v-col>
                                                     <InputGroup 
                                                         v-bind:item="item"
                                                         v-bind:supervisors="supervisors"
                                                         v-bind:performers="performers"
+                                                        v-bind:task="getTaskByLevel(item)"
                                                         style="width:200px">
                                                     </InputGroup>
                                                 </v-col>
+                                                -->
                                             </v-row>
                                         </template>
                                     </v-treeview>
@@ -96,11 +99,21 @@
                     </template>
                 </v-card>
                 <template v-if="selectedProject && selectedItem">
-                    <v-container class="px-0 py-0">
+                    <v-container class="px-0 py-0" v-show="showUpdate" >
                         <v-form ref="form" lazy-validation>
-                            <v-card :loading="updateLoading">
+                            <v-card :loading="updateLoading" class="my-0">
                                 <v-card-title>
-                                    <span class="headline" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Update ( <span style="font-size: 18px">{{this.selectedItem.name}}</span> )</span>
+                                    <v-row>
+                                        <v-col>
+                                            <v-btn small text color="red accent-2" @click="backBtnClicked">
+                                                <v-icon>
+                                                    mdi-arrow-left-bold-outline
+                                                </v-icon>
+                                                back
+                                            </v-btn><br>
+                                            <span class="headline" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Update ( <span style="font-size: 18px">{{this.selectedItem.name}}</span> )</span>
+                                        </v-col>
+                                    </v-row>
                                 </v-card-title>
                                 <v-card-text>
                                     <v-row>
@@ -189,55 +202,60 @@
                                                     color="indigo"
                                                 >
                                                     <template v-for="(item, i) in performers">
-                                                    <v-divider
-                                                        v-if="!item"
-                                                        :key="`divider-${i}`"
-                                                    ></v-divider>
+                                                        <v-divider
+                                                            v-if="!item"
+                                                            :key="`divider-${i}`"
+                                                        ></v-divider>
 
-                                                    <v-list-item
-                                                        v-else
-                                                        :key="`item-${i}`"
-                                                        :value="item"
-                                                        active-class="text--accent-4"
-                                                    >
-                                                        <template v-slot:default="{ active }">
-                                                            <v-list-item-content>
-                                                                <v-list-item-title v-text="``"></v-list-item-title>
-                                                            </v-list-item-content>
+                                                        <v-list-item
+                                                            v-else
+                                                            :key="`item-${i}`"
+                                                            :value="item"
+                                                            active-class="text--accent-4"
+                                                        >
+                                                            <template v-slot:default="{ active }">
+                                                                <v-list-item-content>
+                                                                    <v-list-item-title v-text="``"></v-list-item-title>
+                                                                </v-list-item-content>
 
-                                                            <v-list-item-action>
-                                                                <v-row>
-                                                                    <v-col cols="12" md="4" class="py-0 my-0">
-                                                                        <v-text-field
-                                                                            label="Hr"
-                                                                            type="number"
-                                                                            :rules="hrRules"
-                                                                            v-model="item.hr"
-                                                                            v-if="checkPerformer(item)"
-                                                                        ></v-text-field>
-                                                                    </v-col>
-                                                                    <v-col cols="12" md="4" class="py-0 my-0">
-                                                                        <v-text-field
-                                                                            label="Min"
-                                                                            type="number"
-                                                                            :rules="minRules"
-                                                                            v-model="item.min"
-                                                                            v-if="checkPerformer(item)"
-                                                                        ></v-text-field>
-                                                                    </v-col>
-                                                                    <v-col cols="12" md="4" class="py-0 my-0">
-                                                                        <v-text-field
-                                                                            label="Percent"
-                                                                            type="number"
-                                                                            :rules="pctRules"
-                                                                            v-model="item.pct"
-                                                                            v-if="checkPerformer(item)"
-                                                                        ></v-text-field>
-                                                                    </v-col>
-                                                                </v-row>
-                                                            </v-list-item-action>
-                                                        </template>
-                                                    </v-list-item>
+                                                                <v-list-item-action>
+                                                                    <v-row>
+                                                                        <v-col class="py-0 my-0 px-1">
+                                                                            <v-text-field
+                                                                                label="Hr"
+                                                                                :rules="hrRules"
+                                                                                v-model="item.hr"
+                                                                                v-if="checkPerformer(item)"
+                                                                            ></v-text-field>
+                                                                        </v-col>
+                                                                        <v-col class="py-0 my-0 px-1">
+                                                                            <v-text-field
+                                                                                label="Min"
+                                                                                :rules="minRules"
+                                                                                v-model="item.min"
+                                                                                v-if="checkPerformer(item)"
+                                                                            ></v-text-field>
+                                                                        </v-col>
+                                                                        <v-col class="py-0 my-0 px-1">
+                                                                            <v-text-field
+                                                                                label="Today"
+                                                                                :rules="pctRules"
+                                                                                v-model="item.pct"
+                                                                                v-if="checkPerformer(item)"
+                                                                            ></v-text-field>
+                                                                        </v-col>
+                                                                        <v-col class="py-0 my-0 px-1">
+                                                                            <v-text-field
+                                                                                label="Total"
+                                                                                :rules="pctRules"
+                                                                                v-model="item.totalPct"
+                                                                                v-if="checkPerformer(item)"
+                                                                            ></v-text-field>
+                                                                        </v-col>
+                                                                    </v-row>
+                                                                </v-list-item-action>
+                                                            </template>
+                                                        </v-list-item>
                                                     </template>
                                                 </v-list-item-group>
                                             </v-list>
@@ -254,6 +272,22 @@
                 </template>
             </v-col>
         </v-row>
+        <v-dialog v-model="confirmDialog" max-width="500px">
+            <v-card>
+                <v-card-title class="headline">
+                    Are you sure?<br>
+                    <p style="font-size:14px">Update Data is already exist.</p>
+                </v-card-title>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" @click="closeConfirm">
+                        No
+                    </v-btn>
+                    <v-btn color="blue darken-1" text @click="saveConfirm">Yes</v-btn>
+                    <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
             {{ snackText }}
             <template v-slot:action="{ attrs }">
@@ -267,13 +301,12 @@
     import api from "@/apis/project.js";
     import client_api from "@/apis/client.js";
     import daily_api from "@/apis/daily.js";
+    import auth_api from "@/apis/auth.js";
     import InputGroup from './InputGroup'
-    import DailyUpdate from './DailyUpdate'
 
     export default {
         components: {
             InputGroup,
-            DailyUpdate,
         },
 
         data: () => ({
@@ -298,8 +331,13 @@
             snackText: "",
             updateLoading: false,
 
-            alert: true,
-            alertMessage: "Ok"
+            hrId: null,
+            task1Update: [],
+            task2Update: [],
+            task3Update: [],
+            task4Update: [],
+            confirmDialog: false,
+            showUpdate: false
         }),
         
         created: async function() {
@@ -307,15 +345,22 @@
             this.allProjects = await api.getProjects()
             this.performers = await client_api.findL1Members()
             this.supervisors = await client_api.findSupervisors()
-            
+            this.hrId = await auth_api.getOwnId()
+
+            this.task1Update = await daily_api.getUpdate1(this.hrId)
+            this.task2Update = await daily_api.getUpdate2(this.hrId)
+            this.task3Update = await daily_api.getUpdate3(this.hrId)
+            this.task4Update = await daily_api.getUpdate4(this.hrId)
+
             this.projects = this.allProjects
-            this.performers.forEach( e => {
-                e.hr = ""
-                e.min = ""
-                e.pct = ""
-                e.totalPct = 50
-            })
+            this.clearPerformer()
             this.wait = false
+
+            console.log("hrId", this.hrId)
+            console.log("task1", this.task1Update)
+            console.log("task2", this.task2Update)
+            console.log("task3", this.task3Update)
+            console.log("task4", this.task4Update)
         },
 
         computed: {
@@ -332,27 +377,44 @@
             hrRules() {
                 return [
                     (v) => !!v || "required",
-                    (v) => v > 0 || " > 0",
+                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
+                    (v) => v >= 0 || " >= 0",
                     (v) => v < 24 || " < 24",
                 ]
             },
             minRules() {
                 return [
                     (v) => !!v || "required",
-                    (v) => v > 0 || " > 0",
+                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
+                    (v) => v >= 0 || " >= 0",
                     (v) => v < 60 || " < 60",
                 ]
             },
             pctRules() {
                 return [
                     (v) => !!v || "required",
+                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
                     (v) => v < 100 || " < 100",
                     (v) => v > 0 || " > 0"
                 ]
+            },
+            saveBtnStatus() {
+                if (this.selectedItem && this.selectedItem.userAction == "saved")
+                    return true
+                return false
             }
         },
 
         methods: {
+            clearPerformer() {
+                this.performers.forEach( e => {
+                    e.hr = ""
+                    e.min = ""
+                    e.pct = ""
+                    e.totalPct = ""
+                })
+            },
+
             project_listItemClicked: async function(project) {
                 this.wait = true
                 this.selectedProject = project
@@ -366,9 +428,8 @@
                     item.serverItems.length > 0 && this.setIkeyAndName(item.serverItems, 1)
                 })
                 this.waitProject = null         
-
                 this.selectedItem = null
-
+                this.showUpdate = false
                 this.wait = false
 
                 console.log("phases", this.phases)
@@ -391,30 +452,32 @@
 
             setIkeyAndName: function(items, ikey) {
                 items.forEach((item) => {
+                    let found = null
                     if (item.level == 0) {
                         item.ikey = ikey
                     }else if (item.level == 1) {
                         item.name = item.TL1_name
                         item.ikey = ikey
+                        this.task1Update && (found = this.task1Update.find( e => e.estimate_MP_taskL1id == item.est_MP_TL1_id))
                     } else if (item.level == 2) {
                         item.name = item.TL2_name
                         item.ikey = ikey
+                        this.task2Update && (found = this.task2Update.find( e => e.estimate_MP_taskL2id == item.est_MP_TL2_id))
                     } else if (item.level == 3) {
                         item.name = item.TL3_name
                         item.ikey = ikey
+                        this.task3Update && (found = this.task3Update.find( e => e.estimate_MP_taskL3id == item.est_MP_TL3_id))
                     } else {
                         item.name = item.TL4_name
                         item.level = 4
                         item.ikey = ikey
+                        this.task4Update && (found = this.task4Update.find( e => e.estimate_MP_taskL4id == item.est_MP_TL4_id))
                     }
-                    item.hr = ''
-                    item.min = ''
-                    item.pct = ''
-                    item.totalPct = ''
+                    if (found)
+                        item.userAction = "saved"
+                    else 
+                        item.userAction = "none"
                     ikey++
-
-                    item.userAction = "nochange"
-
                     if (item.children && item.children.length > 0) {
                         ikey = this.setIkeyAndName(item.children, ikey)
                     } 
@@ -424,15 +487,16 @@
 
             btnClicked(item) {
                 this.selectedItem = item
+                this.clearPerformer()
                 this.performer = []
                 this.supervisor = []
-
+                this.showUpdate = true
                 if (this.$refs.form) {
                     this.$refs.form.resetValidation()
                 }
             },
             
-            async save() {
+            save() {
                 if (!this.supervisor || this.supervisor.length == 0) {
                     this.show_error("Please select supervisor")
                     return
@@ -444,6 +508,11 @@
                 if (!this.$refs.form.validate()) {
                     return
                 }
+                this.selectedItem.userAction != "saved" && this.saveDaily()
+                this.selectedItem.userAction == "saved" && (this.confirmDialog = true)
+            },
+
+            async saveDaily() {
                 this.updateLoading = true
                 console.log("supervisor", this.supervisor)
                 console.log("selectedItem", this.selectedItem)
@@ -479,40 +548,41 @@
                     for (let i in this.performer)
                         status = await daily_api.add4(this.getId(), this.supervisor.id, this.performer[i])
                 }
+                this.selectedItem.userAction = "saved"
 
                 this.show_snack(status)
             },
 
-            setSaveData() {
-                if (!this.selectedPerformer) {
-                    this.saveData = []
-                    return
-                }
+            // setSaveData() {
+            //     if (!this.selectedPerformer) {
+            //         this.saveData = []
+            //         return
+            //     }
 
-                if (this.selectedPerformer.length < this.saveData.length) {
-                    let filter = this.saveData.filter(e => this.selectedPerformer.includes(e.performer))
-                    this.saveData = []
-                    this.saveData = filter
-                    return
-                }
+            //     if (this.selectedPerformer.length < this.saveData.length) {
+            //         let filter = this.saveData.filter(e => this.selectedPerformer.includes(e.performer))
+            //         this.saveData = []
+            //         this.saveData = filter
+            //         return
+            //     }
 
-                this.selectedPerformer.length > 0 && this.selectedPerformer.forEach(item => {
-                    if (this.saveData.find(e => e.performer == item)) return
+            //     this.selectedPerformer.length > 0 && this.selectedPerformer.forEach(item => {
+            //         if (this.saveData.find(e => e.performer == item)) return
 
-                    let temp = {
-                        id: this.itemId,
-                        supervisor: this.selectedSupervisor,
-                        performer: item,
-                        hr: '',
-                        min: '',
-                        pct: '',
-                        totalPct: 60 //todo
-                    }
-                    this.saveData.push(temp)
-                })
+            //         let temp = {
+            //             id: this.itemId,
+            //             supervisor: this.selectedSupervisor,
+            //             performer: item,
+            //             hr: '',
+            //             min: '',
+            //             pct: '',
+            //             totalPct: ''
+            //         }
+            //         this.saveData.push(temp)
+            //     })
 
-                console.log("saveData", this.saveData)
-            },
+            //     console.log("saveData", this.saveData)
+            // },
 
             getPerformerName(item) {
                 let id = item.performer
@@ -545,6 +615,32 @@
                 return true
             },
 
+            getTaskByLevel(item) {
+                let result = []
+                if (item.level == 1) {
+                    this.task1Update && (result = this.task1Update.find( e => e.estimate_MP_taskL1id == item.est_MP_TL1_id))
+                } else if (item.level == 2) {
+                    this.task2Update && (result = this.task2Update.find( e => e.estimate_MP_taskL2id == item.est_MP_TL2_id))
+                } else if (item.level == 3) {
+                    this.task3Update && (result = this.task3Update.find( e => e.estimate_MP_taskL3id == item.est_MP_TL3_id))
+                } else if (item.level == 4) {
+                    this.task4Update && (result = this.task4Update.find( e => e.estimate_MP_taskL4id == item.est_MP_TL4_id))
+                }
+                return result
+            },
+
+            closeConfirm() {
+                this.confirmDialog = false
+            },
+
+            saveConfirm() {
+                this.closeConfirm()
+                this.saveDaily()
+            },
+
+            backBtnClicked() {
+                this.showUpdate = false 
+            }
         }
     }
 </script>
