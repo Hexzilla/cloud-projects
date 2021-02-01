@@ -38,17 +38,14 @@
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="px-2 py-2 my-0" style="min-height: 500px">
-                    <v-container>
-                        <v-row>
-                            <v-col>
-                                <p class="mb-0" style="color:#1867c0; font-size: 24px; font-weight: bold;">{{ project && project.prj_name}}</p>
-                                    <p class="title mb-0 text--disabled">
-                                        {{ clientName }}
-                                    </p>
-                            </v-col>
-                        </v-row>
-                    </v-container>
+                <v-card class="my-0" style="min-height: 500px">
+                    <v-toolbar flat color="teal" dark>
+                        <v-toolbar-title>{{ project ? project.prj_name : "Project Progress"}}</v-toolbar-title><br>
+                    </v-toolbar>
+                    <p class="title mb-0 text--disabled" style="color:white">
+                        {{ clientName }}
+                    </p>
+                    <!--
                     <template v-for="(item, i) in this.phases">
                         <v-container class="ml-3">
                             <v-row>
@@ -87,6 +84,54 @@
                             </v-row>
                         </v-container>
                     </template>
+                    -->
+                    <template v-for="(item, i) in phases">
+                        <v-list-group
+                        :value="false"
+                        :key="i"
+                        no-action
+                        prepend-icon="mdi-layers">
+                            <template v-slot:activator>
+                                <v-list-item-content>
+                                    <v-list-item-title style="font-size:15px; font-weight:bold">
+                                        {{ `Phase ${i + 1}` }}
+                                        <span class="text--disabled ml-10" style="font-size:13px; font-weight:normal">{{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}</span>
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item>
+                                <v-row>
+                                    <v-col>
+                                        <v-treeview
+                                            :open="initiallyOpen"
+                                            :items="item.serverItems"
+                                            item-key="ikey"
+                                            activatable
+                                            open-on-click
+                                        >
+                                            <template v-slot:prepend="{ item }">
+                                                <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
+                                                <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                            </template>
+                                            <template v-slot:label="{ item }">
+                                                <span style="font-weight: bold;">{{ item.name }}</span>
+                                                <ProgressChart
+                                                    v-bind:item = item
+                                                    v-bind:progresses = progress
+                                                    v-if="item.level > 0"
+                                                >
+                                                </ProgressChart>
+                                            </template>
+                                        </v-treeview>
+                                    </v-col>
+                                </v-row>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-divider inset></v-divider>
+                    </template>
                 </v-card>
             </v-col>
         </v-row>
@@ -124,7 +169,7 @@
         computed: {
             clientName() {
                 if (this.project)
-                    return this.project.cl_name.length > 50 ? this.project.cl_name.substring(0, 50) + '...' : this.project.cl_name
+                    return "Client: " + (this.project.cl_name.length > 100 ? this.project.cl_name.substring(0, 100) + '...' : this.project.cl_name)
                 return null
             }
         },
@@ -139,15 +184,16 @@
                 this.project = item
                 this.progress = await api.getProgress(item.prj_id, null, item.cl_code)
 
-            console.log("------------progress", this.progress)
                 item && await api.updateTaskList(item)
-                item && item.phases && item.phases.length > 0 && item.phases.forEach(e => {
+                this.phases = item.phases
+
+                this.phases && this.phases.length > 0 && this.phases.forEach(e => {
                     e.serverItems.length > 0 && this.setIkeyAndName(e.serverItems, 1)
-                    item.phases = []
-                    item.phases.push(e)
+                    // item.phases = []
+                    // item.phases.push(e)
                 })
             
-                this.phases = item.phases
+                // console.log("phases", this.phases)
                 this.waitProject = null
                 this.wait = false
             },

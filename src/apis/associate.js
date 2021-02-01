@@ -14,13 +14,37 @@ const findAll = async function () {
     catch (error) {
         console.log(error)
     }
-    associates && associates.length > 0 && associates.forEach(async e => {
-        let info = await findOne(e.id)
-        e.info = info
-        e.initialDesignation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
-        e.designation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
-    })
+
+    if (associates && associates.length > 0) {
+        for (let i in associates) {
+            let e = associates[i]
+            let info = await findOne(e.id)
+            e.info = info
+            e.initialDesignation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
+            e.designation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
+            e.designationDate = info[0].designations[0] && info[0].designations[0].effectivefromdate && info[0].designations[0].effectivefromdate
+            e.holidaycalid = 1
+        }
+    }
     
+    return associates
+}
+
+const getAssociates = async function () {
+    let associates = []
+    try {
+        const response = await http.post("/hr/hrFindAll")
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                associates = data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+
     return associates
 }
 
@@ -51,7 +75,7 @@ const add = async function(person) {
             const data = response.data;
             if (data.success) {
                 const hrId = data.response.data.insertId
-                const ret = await addDesignation(hrId, person.designation, 0)
+                const ret = await addDesignation(hrId, person.designationDate, person.designation, 0)
                 // return data.response
                 return ret
             }
@@ -68,7 +92,7 @@ const update = async function(person) {
     try {
         const response = await http.post("/hr/hrUpdateOne", person)
         if (response.status == 200) {
-            const ret = await addDesignation(person.id, person.designation, person.initialDesignation ? person.initialDesignation : 0)
+            const ret = await addDesignation(person.id, person.designationDate, person.designation, person.initialDesignation ? person.initialDesignation : 0)
             return ret
         }
     }
@@ -116,10 +140,10 @@ const getRoleWithData = function (roles) {
     return store
 }
 
-const addDesignation = async function(hrId, designationId, hrDesignationId) {
+const addDesignation = async function(hrId, date, designationId, hrDesignationId) {
     let jsonData = {
         "hrid": hrId,
-        "effectivefromdate": getCurrentDate(),
+        "effectivefromdate": date,
         "designationid": designationId,
         "closingdesignation_hrDesignationid": hrDesignationId
     }
@@ -146,5 +170,6 @@ export default {
     update,
     getRoleWithData,
     roleAssign,
-    addDesignation
+    addDesignation,
+    getAssociates
 }

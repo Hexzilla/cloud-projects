@@ -139,7 +139,7 @@
                         </v-btn>
                     </template>
                     <template v-else>
-                        <v-btn small color="primary" text title='Approve' @click="approveLeave(item)">
+                        <v-btn small :color="getColor(item)" text title='Approve' @click="approveLeave(item)">
                             <v-icon>
                                 mdi-eye
                             </v-icon>
@@ -231,6 +231,18 @@
                     this.$refs.form.resetValidation()
                 }
                 this.dialog = true
+            },
+
+            getColor(item) {
+                if (item.status == "cancelled-by-me") {
+                    return 'warning'
+                }
+                
+                if (item.status == "approved-by-hr") {
+                    return 'error'
+                }
+
+                return 'teal'
             },
 
             async approve() {

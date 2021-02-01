@@ -134,6 +134,7 @@
                                 </v-text-field>
                             </v-col>
                         </v-row>
+                        <!--
                         <v-row>
                             <v-col>
                                 <v-textarea
@@ -143,6 +144,7 @@
                                 ></v-textarea>
                             </v-col>
                         </v-row>
+                        -->
                     </v-form>
                 </v-card-text>
 

@@ -733,7 +733,7 @@ const getProgress = async function (id, date, code) {
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                let ret = data.response.allCarrierRecord[0]
+                let ret = data.response.allCarrierRecord.id[0]
                 ret && ret.length > 0 && (result = ret.filter( e => e.clientcode == code))
             }
         }

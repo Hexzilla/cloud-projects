@@ -36,7 +36,11 @@
                 </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="my-0" min-height="250px" v-show="!showUpdate">
+                <v-card class="my-0" min-height="500px" v-show="!showUpdate">
+                
+                    <v-toolbar flat color="teal" dark>
+                        <v-toolbar-title>Project</v-toolbar-title><br>
+                    </v-toolbar>
                     <!-- <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-row>
                             <v-col class="text-right py-8 px-10">
@@ -62,6 +66,7 @@
                                         :items="item['serverItems']"
                                         item-key="ikey"
                                         activatable
+                                        open-on-click
                                     >
                                         <template v-slot:prepend="{ item }">
                                             <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
@@ -79,6 +84,7 @@
                                                         </v-icon>
                                                     </v-btn>
                                                 </v-col>
+
                                                 <!--
                                                 <v-col>
                                                     <InputGroup 
@@ -97,6 +103,7 @@
                             </v-row>
                         </v-container>
                     </template>
+
                 </v-card>
                 <template v-if="selectedProject && selectedItem">
                     <v-container class="px-0 py-0" v-show="showUpdate" >
@@ -264,6 +271,7 @@
                                 </v-card-text>
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
+                                    <v-btn color="error" text @click="deleteBtnClicked" :disabled="deleteBtnStatus"> Delete </v-btn>
                                     <v-btn color="primary darken-1" @click="save"> Save </v-btn>
                                 </v-card-actions>
                             </v-card>
@@ -272,6 +280,7 @@
                 </template>
             </v-col>
         </v-row>
+
         <v-dialog v-model="confirmDialog" max-width="500px">
             <v-card>
                 <v-card-title class="headline">
@@ -280,14 +289,33 @@
                 </v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" @click="closeConfirm">
+                    <v-btn color="green darken-1" @click="closeConfirm">
                         No
                     </v-btn>
-                    <v-btn color="blue darken-1" text @click="saveConfirm">Yes</v-btn>
+                    <v-btn color="green darken-1" text @click="saveConfirm">Yes</v-btn>
                     <v-spacer></v-spacer>
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        
+        <v-dialog v-model="deleteDialog" max-width="500px">
+            <v-card>
+                <v-card-title class="headline">
+                    Are you sure?<br>
+                    <p style="font-size:14px">Delete</p>
+                </v-card-title>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="pink darken-1" @click="closeDelete">
+                        No
+                    </v-btn>
+                    <v-btn color="pink darken-1" text @click="confirmDelete">Yes</v-btn>
+                    <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
             {{ snackText }}
             <template v-slot:action="{ attrs }">
@@ -337,7 +365,9 @@
             task3Update: [],
             task4Update: [],
             confirmDialog: false,
-            showUpdate: false
+            showUpdate: false,
+
+            deleteDialog: false
         }),
         
         created: async function() {
@@ -356,6 +386,18 @@
             this.clearPerformer()
             this.wait = false
 
+            if (!this.task1Update) {
+                this.task1Update = []
+            }
+            if (!this.task2Update) {
+                this.task2Update = []
+            }
+            if (!this.task3Update) {
+                this.task3Update = []
+            }
+            if (!this.task4Update) {
+                this.task4Update = []
+            }
             console.log("hrId", this.hrId)
             console.log("task1", this.task1Update)
             console.log("task2", this.task2Update)
@@ -398,10 +440,10 @@
                     (v) => v > 0 || " > 0"
                 ]
             },
-            saveBtnStatus() {
+            deleteBtnStatus() {
                 if (this.selectedItem && this.selectedItem.userAction == "saved")
-                    return true
-                return false
+                    return false
+                return true
             }
         },
 
@@ -533,20 +575,32 @@
             async sendData() {
                 let status = false
                 if (this.selectedItem.level == 1) {
-                    for (let i in this.performer)
+                    for (let i in this.performer) {
                         status = await daily_api.add1(this.getId(), this.supervisor.id, this.performer[i])
+                        if (status)
+                            this.task1Update.push(status)
+                    }
                 }
                 if (this.selectedItem.level == 2) {
-                    for (let i in this.performer)
+                    for (let i in this.performer) {
                         status = await daily_api.add2(this.getId(), this.supervisor.id, this.performer[i])
+                        if (status)
+                            this.task2Update.push(status)
+                    }
                 }
                 if (this.selectedItem.level == 3) {
-                    for (let i in this.performer)
+                    for (let i in this.performer) {
                         status = await daily_api.add3(this.getId(), this.supervisor.id, this.performer[i])
+                        if (status)
+                            this.task3Update.push(status)
+                    }
                 }
                 if (this.selectedItem.level == 4) {
-                    for (let i in this.performer)
+                    for (let i in this.performer) {
                         status = await daily_api.add4(this.getId(), this.supervisor.id, this.performer[i])
+                        if (status)
+                            this.task4Update.push(status)
+                    }
                 }
                 this.selectedItem.userAction = "saved"
 
@@ -640,6 +694,53 @@
 
             backBtnClicked() {
                 this.showUpdate = false 
+            },
+
+            deleteBtnClicked() {
+                this.deleteDialog = true
+            },
+
+            closeDelete() {
+                this.deleteDialog = false
+            },
+
+            getDailyData(level) {
+                let itemId = this.getId()
+                let result
+                if (level == 1) {
+                    result = this.task1Update.filter(e => e.estimate_MP_taskL1id == itemId)
+                } else if (level == 2) {
+                    result = this.task2Update.filter(e => e.estimate_MP_taskL2id == itemId)
+                } else if (level == 3) {
+                    result = this.task3Update.filter(e => e.estimate_MP_taskL3id == itemId)
+                } else if (level == 4) {
+                    result = this.task4Update.filter(e => e.estimate_MP_taskL4id == itemId)
+                }
+                return result
+            },
+
+            async confirmDelete() {
+                this.updateLoading = true
+                this.closeDelete()
+                let level = this.selectedItem.level
+                let dailyData = this.getDailyData(level)
+                console.log("dailyData", dailyData)
+                let ret
+                for (let i in dailyData) {
+                    if (level == 1) {
+                        ret = await daily_api.remove1(dailyData[i].id)
+                    } else if (level == 2) {
+                        ret = await daily_api.remove2(dailyData[i].id)
+                    } else if (level == 3) {
+                        ret = await daily_api.remove3(dailyData[i].id)
+                    } else if (level == 4) {
+                        ret = await daily_api.remove4(dailyData[i].id)
+                    }
+                }
+                if (ret)
+                    this.selectedItem.userAction = "none"
+                this.show_snack(ret)
+                this.updateLoading = false
             }
         }
     }

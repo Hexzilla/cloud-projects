@@ -557,6 +557,7 @@ export default {
         },
 
         addItem() {
+            this.editedItem = Object.assign({}, this.defaultItem);
             this.openAddDialog()
         },
 
@@ -575,12 +576,16 @@ export default {
 
             if (people[0].localAddress[0]) {
                 this.localAddressItem = people[0].localAddress[0]
-                this.permanentAddressItem = people[0].permanentaddress[0]
             } else {
                 this.localAddressItem = Object.assign({}, this.initialAddressItem)
-                this.permanentAddressItem = Object.assign({}, this.initialAddressItem)
             }
             
+            if (people[0].permanentaddress[0]) {
+                this.permanentAddressItem = people[0].permanentaddress[0]
+            } else {
+                this.permanentAddressItem = Object.assign({}, this.initialAddressItem)
+            }
+
             this.loading = false    
             console.log("localAddressItem   ", this.localAddressItem)
             console.log("permanentAddressItem", this.permanentAddressItem)
@@ -624,6 +629,7 @@ export default {
                 this.closeAddress()
                 result = await people_api.updatePermanentAddress(this.editedItem.id, this.permanentAddressItem)
             }
+            this.show_snack(result)
             console.log("result", result)
             this.loading = false
         },

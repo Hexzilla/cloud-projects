@@ -31,6 +31,7 @@
                         :filter="filterTreeItems"
                         :open-all="true"
                         item-key="ikey"
+                        open-on-click
                         activatable>
                         <template v-slot:prepend="{ item }">
                             <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
@@ -928,7 +929,6 @@ export default {
             tree && tree.length > 0 && tree.forEach( e => {
                 const pInfo = this.findServerItem(e)
                 if (pInfo) {
-                    console.log("----------------info---------", pInfo)
                     e.info = pInfo
                     if (e.level == 1)  {
                         e.dateto = pInfo.est_MP_TL1_dateto

@@ -55,10 +55,28 @@
                                 </v-row>
                             </v-container>
                         </template>
+                        <template v-slot:item.detail="{ item }">
+                            <v-btn small color="teal" text title='Detail' @click="showDetail(item)">
+                                Detail
+                            </v-btn>
+                        </template>
                     </v-data-table>
                 </v-card>
             </v-col>
         </v-row>
+
+        <v-dialog v-model="detailModal" max-width="800px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">{{ getDetailTitle() }}</span><br>
+                    <span style="font-size:14px">{{ this.fromDate + ' ~ ' + this.toDate }}</span>
+                </v-card-title>
+                <v-data-table
+                    :headers="modalHeaders"
+                    :items="selectedData">
+                </v-data-table>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -79,12 +97,23 @@
                 { text: "Med.Leave", align: "start", value: "medLeave" },
                 { text: "Cas.Leave", align: "start", value: "casLeave" },
                 { text: "Vacation", align: "start", value: "vacation"},
-                { text: "Un Occ days", align: "start", value: "unOccDays"}
+                { text: "Un Occ days", align: "start", value: "unOccDays"},
+                { text: "", align: "center", value: "detail"}
+            ],
+            modalHeaders: [
+                { text: "Date", align: "start", value: "dt" },
+                { text: "Status", align: "start", value: "dayType" },
+                { text: "Worked Hour", align: "start", value: "hrsWorked" },
+                { text: "Wokred Min", align: "start", value: "minsWorked" },
             ],
             persons: [],
             fromDate: '',
             toDate: '',
-            search: ''
+            search: '',
+
+            detailModal: false,
+            selectedData: [],
+            selectedItem: []
         }),
 
         created: async function() {
@@ -108,6 +137,19 @@
                 this.loading = true
                 this.persons = await people_api.getManPower(this.fromDate, this.toDate)
                 this.loading = false
+            },
+
+            showDetail(item) {
+                this.selectedItem = item
+                this.selectedData = item.datewiseDetail
+                this.detailModal = true
+            },
+
+            getDetailTitle() {
+                if (this.selectedItem) {
+                    return this.selectedItem.name
+                }
+                return ''
             }
         }
     }

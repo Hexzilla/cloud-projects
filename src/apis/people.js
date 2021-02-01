@@ -52,7 +52,8 @@ const add = async function(person) {
     }
 }
 
-const update = async function(person) {
+const update = async function (person) {
+    console.log("update person", person)
     try {
         const response = await http.post("/hr/personUpdateOne", person)
         return (response.status == 200);
@@ -63,12 +64,10 @@ const update = async function(person) {
     }
 }
 
-const updateLocalAddress = async function(hrId, data) {
-    let addressId = data.id
-    if (addressId == 0) addressId = 1000 + hrId
+const updateLocalAddress = async function(pId, data) {
     let jsonData = {  
-        "hrid": hrId,
-        "addressid": addressId,
+        "personid": pId,
+        "addressid": data.id,
         "localAddress":
         {
             "addressLine1": data.addressLine1,
@@ -92,12 +91,10 @@ const updateLocalAddress = async function(hrId, data) {
     }
 }
 
-const updatePermanentAddress = async function(hrId, data) {
-    let addressId = data.id
-    if (addressId == 0) addressId = 2000 + hrId
+const updatePermanentAddress = async function(pId, data) {
     let jsonData = { 
-        "hrid": hrId,
-        "addressid": addressId,
+        "personid": pId,
+        "addressid": data.id,
         "permanentAddress":
         {
             "addressLine1": data.addressLine1,
@@ -170,8 +167,9 @@ const findPeopleToJoin = async function() {
         const response = await http.post("/hr/findPeopleToJoin")
         if (response.status == 200) {
             const data = response.data
-            if (data.success)
+            if (data.success) {
                 return data.response.allCarrierRecord
+            }
         }
     }
     catch (error) {
@@ -180,31 +178,52 @@ const findPeopleToJoin = async function() {
     return []
 }
 
-
 const getManPower = async function (from, to) {
     let jsonData = {
         fromdate: from,
         todate: to
     }
-    console.log("-----------jsonData", jsonData)
     try {
-        const response = await http.post("/reports/mpForcast", jsonData)
+        const response = await http.post("/reports/mpForcastView", jsonData)
         if (response.status == 200) {
             const data = response.data
             if (data.success) {
                 let result = []
-                let ret = data.response.allCarrierRecord[0]
-                ret && ret.length > 0 && ret.forEach(item => {
+                let ret = data.response.allCarrierRecord.id[0]
+                
+                ret && ret.length > 0 && ret.forEach( (item, i) => {
                     result.push({
                         name: item.firstname + ' ' + item.lastname,
                         total: item.Workingdays,
                         medLeave: item.MedicalLeaves,
                         casLeave: item.CasualLeave,
                         vacation: item.Vacations,
-                        unOccDays: item.UnOccDays
+                        unOccDays: item.UnOccDays,
+                        datewiseDetail: item.datewiseDetail
                     })
                 })
                 return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const getCurrentManPower = async function () {
+    let jsonData = {
+        fromdate: getCurrentDate(),
+        todate: getCurrentDate()
+    }
+
+    try {
+        const response = await http.post("/reports/mpForcastView", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                return data.response.allCarrierRecord.id[0]
             }
         }
     }
@@ -221,6 +240,11 @@ const dateToString = function (dataObj) {
     return dataObj.getFullYear() + "-" + monthStr + "-" + dateStr;
 }
 
+const getCurrentDate = function () {
+    const date = new Date()
+    return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+}
+
 export default {
     findAll,
     add,
@@ -232,5 +256,6 @@ export default {
     checkEmailToBeUpdated,
     findPeopleToJoin,
     getManPower,
-    dateToString
+    dateToString,
+    getCurrentDate
 }

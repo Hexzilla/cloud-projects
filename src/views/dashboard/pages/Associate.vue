@@ -125,6 +125,10 @@
                             </v-col>
                         </v-row>
                         <v-row>
+                            <v-col style="height: 30px">
+                            </v-col>
+                        </v-row>
+                        <v-row>
                             <v-col>
                                 <v-select
                                     v-model="editedItem.designation"
@@ -140,7 +144,14 @@
                             </v-col>
                         </v-row>
                         <v-row>
-                            <v-col style="height: 50px">
+                            <DatePicker
+                                textName="Designation Date"
+                                :date="editedItem.designationDate"
+                                :submit="(date) => editedItem.designationDate = date"
+                            ></DatePicker>
+                        </v-row>
+                        <v-row>
+                            <v-col style="height: 30px">
                             </v-col>
                         </v-row>
                         <v-row>
@@ -164,7 +175,7 @@
                             <DatePicker
                                 textName="Joined Date"
                                 :date="editedItem.joinDate"
-                                :submit="(date) => editedItem.joinDate = date"
+                                :submit="(date) => {editedItem.joinDate = date; joinedDateChanged(editedItem)}"
                                 :startDate="editedItem.JoinDateForResourcePlanning"
                                 :endDate="editedItem.SeperationDateForResourcePlanning"
                             ></DatePicker>
@@ -196,7 +207,8 @@
         <v-dialog v-model="roleDialog" max-width="700px" >
             <v-card>
                 <v-card-title>
-                    <span class="headline">Roles</span>
+                    <span class="headline">Roles</span><br>
+                    <span>{{ getNameAndDesign() }}</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -212,6 +224,7 @@
                                     v-model="selectedRoleId"
                                     multiple
                                     required
+                                    dense
                                     @change="roleDataChanged"
                                 ></v-select>
                             </v-col>
@@ -233,10 +246,15 @@
                                         textName="Date To"
                                         :date="item.data.effectivetodate"
                                         :submit="(date) => item.data.effectivetodate = date"
+                                        :type="`optional`"
                                     ></DatePicker>
                                 </v-col>
                             </v-row>
                         </template>
+                        <v-row>
+                            <v-col :style="roleStyle">
+                            </v-col>
+                        </v-row>
                     </v-form>
                 </v-card-text>
 
@@ -316,6 +334,7 @@ export default {
             assocationStatus: "",
             JoinDateForResourcePlanning: null,
             SeperationDateForResourcePlanning: null,
+            designationDate: null,
             joinDate: "",
             seperation: null,
             holidaycalid: 1,
@@ -387,6 +406,14 @@ export default {
                     `Password must be less than ${this.maxPasswordLength} characters`,
             ]
         },
+        roleStyle() {
+            if (this.selectedRoles.length == 0)
+                return "height:200px"
+            if (this.selectedRoles.length == 1)
+                return "height:120px"
+            if (this.selectedRoles.length == 2)
+                return "height:40px"
+        }
     },
 
     watch: {
@@ -426,14 +453,24 @@ export default {
             this.openAddDialog()
         },
 
+        formatRoleData(roles) {
+            roles && roles.length > 0 && roles.forEach( e => {
+                e.data.effectivefromdate = ""
+                e.data.effectivetodate = ""
+                e.data.id = ""
+                e.data.rolesid = ""
+            })
+        },
+
         async roleEdit(item) {
             this.loading = true
+            this.formatRoleData(this.selectedRoles)
             this.selectedRoles = []
             this.selectedRoleId = []
             // this.editedIndex = this.associates.indexOf(item);
             this.editedItem = Object.assign({}, item);
             let one = await associate_api.findOne(item.id)
-
+            console.log("edtiedItem", this.editedItem)
             console.log("one", one)
 
             let data = one[0].assignedRoles
@@ -513,7 +550,9 @@ export default {
                     if (addedItem) {
                         success = true
                         // this.associates.push(addedItem);
+                        // this.people = this.people.filter(e => e.id != addedItem.personid)
                         this.associates = await associate_api.findAll()
+                        this.people = await people_api.findPeopleToJoin()
                     }
                 }
                 this.show_snack(success)
@@ -591,6 +630,26 @@ export default {
                 })
             })
 
+        },
+
+        getNameAndDesign() {
+            if (this.editedItem && this.designations && this.designations.length > 0) {
+                let des = this.designations.find(e => e.id == this.editedItem.designation)
+                let ret = this.editedItem.firstname + ' ' + this.editedItem.lastname
+                des && des.name && (ret += '(' + des.name + ')')
+                return ret
+            }
+            return ""
+        },
+
+        joinedDateChanged(item) {
+            if (item.JoinDateForResourcePlanning == null) {
+                let date = new Date(item.joinDate)
+                date.setDate(date.getDate()-1)
+                let result = people_api.dateToString(date)
+
+                item.JoinDateForResourcePlanning = result
+            }
         }
     },
 };

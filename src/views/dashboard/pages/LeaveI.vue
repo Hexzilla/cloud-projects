@@ -89,7 +89,6 @@
                                             <v-textarea
                                             label="Reason"
                                             v-model="saveData.leaveReason"
-                                            :rules="reasonRules"
                                             rows="3"
                                             counter="200"
                                             ></v-textarea>
@@ -115,17 +114,19 @@
                                 </v-card-title>
 
                                 <v-card-text>
-                                <v-form ref="form1" v-model="valid1" lazy-validation>
-                                    <v-row>
-                                        <v-col>
-                                            <v-textarea
-                                            label="Cancel Reason"
-                                            v-model="cancelReason"
-                                            rows="5"
-                                            ></v-textarea>
-                                        </v-col>
-                                    </v-row>
-                                </v-form>
+                                    <v-form ref="form1" v-model="valid1" lazy-validation>
+                                        <v-row>
+                                            <v-col>
+                                                <v-textarea
+                                                label="Cancel Reason"
+                                                v-model="cancelReason"
+                                                rows="5"
+                                                :rules="reasonRules"
+                                                counter="200"
+                                                ></v-textarea>
+                                            </v-col>
+                                        </v-row>
+                                    </v-form>
                                 </v-card-text>
 
                                 <v-card-actions>
@@ -305,6 +306,9 @@
             },
 
             cancelLeave(item) {
+                if (this.$refs.form1) {
+                    this.$refs.form1.resetValidation()
+                }
                 this.selectedItem = item
                 this.cancelDialog = true
             },
@@ -326,6 +330,7 @@
             },
 
             async saveCancel() {
+                if (!this.$refs.form1.validate()) return
                 this.loading = true
                 this.closeCancelDlg()
                 let status = await leave_api.cancelLeaveByMe(this.selectedItem.id, this.cancelReason, this.selectedItem.lastUpdateTimeStamp)

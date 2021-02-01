@@ -91,11 +91,21 @@
             <v-col cols="12" md="4">
                 <v-card class="px-2 py-2 mt-0">
                     <v-card-title>
-                        <div style="width: 100%; text-align: right">
-                            <v-btn small rounded color="teal" @click="newDateClicked" :disabled=dateBtnValid>
-                                New Date
-                            </v-btn>
-                        </div>
+                        <v-row>
+                            <v-col cols="px-0 py-0">
+                                <v-text-field
+                                    label="Year"
+                                    append-icon="mdi-magnify"
+                                    v-model="searchKey"
+                                    @change="searchKeyChange()"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col style="text-align:right">
+                                <v-btn small rounded color="teal" @click="newDateClicked" :disabled=dateBtnValid>
+                                    New Date
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </v-card-title>
                     <v-row>
                         <v-col>
@@ -142,7 +152,8 @@
         <v-dialog v-model="addCalendarDialog" max-width="800px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Add Calendar</span>
+                    <span class="headline">Add Calendar</span><br>
+                    <span style="font-size:14px">Weekly off</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -318,9 +329,11 @@
             selectedDate: null,
             reason: null,
             dates: [],
+            allDates: [],
             calId: null,
             selectedDateItem: null,
             deleteDialog: false,
+            searchKey: ""
         }),
 
         created: async function() {
@@ -346,7 +359,8 @@
             async showDetail(item) {
                 this.wait = true
                 this.calId = item.id
-                this.dates = await api.getHolidayList(this.calId)
+                this.allDates = await api.getHolidayList(this.calId)
+                this.dates = this.allDates
                 console.log("dates", this.dates)
                 this.wait = false
             },
@@ -441,7 +455,10 @@
                 else 
                     status = await api.addHoliday(this.selectedDate, this.reason, this.calId)
 
-                status && (this.dates = await api.getHolidayList(this.calId))
+                if (status) {
+                    this.allDates = await api.getHolidayList(this.calId)
+                    this.filter()
+                }
                 this.show_snack(status)
                 this.wait = false
             },
@@ -466,7 +483,10 @@
                 this.wait = true
                 this.deleteDateNo()
                 let status = await api.removeHoliday(this.selectedDateItem.holidayid)
-                status && (this.dates = await api.getHolidayList(this.calId))
+                if (status) {
+                    this.allDates = await api.getHolidayList(this.calId)
+                    this.filter()
+                }
                 this.show_snack(status, 2)
                 this.selectedDateItem = null
                 this.wait = false
@@ -474,6 +494,19 @@
 
             deleteDateNo() {
                 this.deleteDialog = false
+            },
+
+            searchKeyChange() {
+                this.filter()
+            },
+
+            filter() {
+                if (this.allDates && this.allDates.length > 0) {
+                    if (this.searchKey)
+                        this.dates = this.allDates.filter(e=> e.dt.substring(0, 4) == this.searchKey)
+                    else
+                        this.dates = this.allDates
+                }
             }
         }
     }

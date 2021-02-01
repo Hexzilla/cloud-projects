@@ -27,7 +27,8 @@ const add1 = async function(taskId, supervisor, data) {
     try {
         const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response
         }
     }
     catch (error) {
@@ -51,7 +52,8 @@ const add2 = async function(taskId, supervisor, data) {
     try {
         const response = await http.post("/effort/duL2AddOne", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response
         }
     }
     catch (error) {
@@ -75,7 +77,8 @@ const add3 = async function(taskId, supervisor, data) {
     try {
         const response = await http.post("/effort/duL3AddOne", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response
         }
     }
     catch (error) {
@@ -99,7 +102,8 @@ const add4 = async function(taskId, supervisor, data) {
     try {
         const response = await http.post("/effort/duL4AddOne", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.response
         }
     }
     catch (error) {
@@ -192,7 +196,8 @@ const remove1 = async function(id) {
     try {
         const response = await http.post("/effort/L1removeOneEntry", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.success
         }
     }
     catch (error) {
@@ -209,7 +214,8 @@ const remove2 = async function(id) {
     try {
         const response = await http.post("/effort/L2removeOneEntry", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.success
         }
     }
     catch (error) {
@@ -226,7 +232,8 @@ const remove3 = async function(id) {
     try {
         const response = await http.post("/effort/L3removeOneEntry", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.success
         }
     }
     catch (error) {
@@ -243,7 +250,8 @@ const remove4 = async function(id) {
     try {
         const response = await http.post("/effort/L4removeOneEntry", jsonData)
         if (response.status == 200) {
-            return true
+            const data = response.data
+            return data.success
         }
     }
     catch (error) {
