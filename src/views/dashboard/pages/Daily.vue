@@ -122,6 +122,17 @@
                                         </v-col>
                                     </v-row>
                                 </v-card-title>
+                                <v-row>
+                                    <v-col></v-col>
+                                    <v-col>
+                                        <DatePicker
+                                            textName="Date"
+                                            :date="selectedDay"
+                                            :submit="(date) => selectedDay = date"
+                                        ></DatePicker>
+                                    </v-col>
+                                    <v-col></v-col>
+                                </v-row>
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="12" md="4">
@@ -181,6 +192,8 @@
                                                         :key="`item-${i}`"
                                                         :value="item"
                                                         active-class="text--accent-4"
+                                                    @click="performerClicked"
+
                                                     >
                                                         <template v-slot:default="{ active }">
                                                             <v-list-item-icon>
@@ -205,20 +218,12 @@
                                         <v-col cols="12" md="4">
                                             <p class="text-center my-0 mt-4 font-weight-bold">Amount</p>
                                             <v-list>
-                                                <v-list-item-group
-                                                    color="indigo"
-                                                >
+                                                <v-list-item-group multiple v-model="selectedAmount">
                                                     <template v-for="(item, i) in performers">
-                                                        <v-divider
-                                                            v-if="!item"
-                                                            :key="`divider-${i}`"
-                                                        ></v-divider>
-
                                                         <v-list-item
-                                                            v-else
                                                             :key="`item-${i}`"
-                                                            :value="item"
-                                                            active-class="text--accent-4"
+                                                            :value="item.id"
+                                                            color="pink"
                                                         >
                                                             <template v-slot:default="{ active }">
                                                                 <v-list-item-content>
@@ -272,10 +277,18 @@
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
                                     <v-btn color="error" text @click="deleteBtnClicked" :disabled="deleteBtnStatus"> Delete </v-btn>
-                                    <v-btn color="primary darken-1" @click="save"> Save </v-btn>
+                                    <v-btn color="primary darken-1" :disabled="saveBtnStatus" @click="save"> Save </v-btn>
                                 </v-card-actions>
                             </v-card>
                         </v-form>
+                        <DailyData
+                            ref="dailyData"
+                            v-bind:item = "selectedItem"
+                            v-bind:hrId = "hrId"
+                            v-bind:supervisors = "supervisors"
+                            v-bind:performers = "performers"
+                        >
+                        </DailyData>
                     </v-container>
                 </template>
             </v-col>
@@ -303,7 +316,7 @@
             <v-card>
                 <v-card-title class="headline">
                     Are you sure?<br>
-                    <p style="font-size:14px">Delete</p>
+                    <p style="font-size:14px">Today data will be deleted</p>
                 </v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -331,10 +344,14 @@
     import daily_api from "@/apis/daily.js";
     import auth_api from "@/apis/auth.js";
     import InputGroup from './InputGroup'
+    import DatePicker from './DatePicker'
+    import DailyData from './DailyData'
 
     export default {
         components: {
             InputGroup,
+            DatePicker,
+            DailyData
         },
 
         data: () => ({
@@ -367,7 +384,11 @@
             confirmDialog: false,
             showUpdate: false,
 
-            deleteDialog: false
+            deleteDialog: false,
+            today: null,
+            selectedDay: null,
+            selectedAmount: [],
+            saveBtnStatus: false
         }),
         
         created: async function() {
@@ -384,7 +405,6 @@
 
             this.projects = this.allProjects
             this.clearPerformer()
-            this.wait = false
 
             if (!this.task1Update) {
                 this.task1Update = []
@@ -398,6 +418,12 @@
             if (!this.task4Update) {
                 this.task4Update = []
             }
+
+            this.today = daily_api.getToday()
+            this.selectedDay = daily_api.getToday()
+            this.wait = false
+
+
             console.log("hrId", this.hrId)
             console.log("task1", this.task1Update)
             console.log("task2", this.task2Update)
@@ -573,6 +599,9 @@
                 this.performer = []
                 this.supervisor = []
                 this.showUpdate = true
+                this.selectedAmount = []
+                this.$refs.dailyData && this.$refs.dailyData.itemChanged()
+
                 if (this.$refs.form) {
                     this.$refs.form.resetValidation()
                 }
@@ -590,6 +619,18 @@
                 if (!this.$refs.form.validate()) {
                     return
                 }
+                this.selectedAmount = []
+                for (let i in this.performer) {
+                    let item = this.performer[i]
+                    if (item.hr == 0 && item.min == 0 && item.pct == 0 && (item.totalPct == 0 || !item.totalPct)) {
+                        this.selectedAmount.push(item.id)
+                    }
+                }
+                if (this.selectedAmount.length > 0) {
+                    this.show_error("Can not be all values are 0")
+                    return
+                }
+
                 this.selectedItem.userAction != "saved" && this.saveDaily()
                 this.selectedItem.userAction == "saved" && (this.confirmDialog = true)
             },
@@ -605,11 +646,13 @@
 
             async saveDaily() {
                 this.updateLoading = true
+                this.saveBtnStatus = true
                 this.checkSendData()
                 console.log("supervisor", this.supervisor)
                 console.log("selectedItem", this.selectedItem)
                 console.log("performer", this.performer)
-                await this.sendData()    
+                await this.sendData()
+                this.saveBtnStatus = false
                 this.updateLoading = false
             },
 
@@ -626,34 +669,36 @@
                 let status = false
                 if (this.selectedItem.level == 1) {
                     for (let i in this.performer) {
-                        status = await daily_api.add1(this.getId(), this.supervisor.id, this.performer[i])
-                        if (status)
+                        status = await daily_api.add1(this.selectedDay, this.getId(), this.supervisor.id, this.performer[i])
+                        if (status && this.selectedDay == this.today)
                             this.task1Update.push(status)
                     }
                 }
                 if (this.selectedItem.level == 2) {
                     for (let i in this.performer) {
-                        status = await daily_api.add2(this.getId(), this.supervisor.id, this.performer[i])
-                        if (status)
+                        status = await daily_api.add2(this.selectedDay, this.getId(), this.supervisor.id, this.performer[i])
+                        if (status && this.selectedDay == this.today)
                             this.task2Update.push(status)
                     }
                 }
                 if (this.selectedItem.level == 3) {
                     for (let i in this.performer) {
-                        status = await daily_api.add3(this.getId(), this.supervisor.id, this.performer[i])
-                        if (status)
+                        status = await daily_api.add3(this.selectedDay, this.getId(), this.supervisor.id, this.performer[i])
+                        if (status && this.selectedDay == this.today)
                             this.task3Update.push(status)
                     }
                 }
                 if (this.selectedItem.level == 4) {
                     for (let i in this.performer) {
-                        status = await daily_api.add4(this.getId(), this.supervisor.id, this.performer[i])
-                        if (status)
+                        status = await daily_api.add4(this.selectedDay, this.getId(), this.supervisor.id, this.performer[i])
+                        if (status && this.selectedDay == this.today)
                             this.task4Update.push(status)
                     }
                 }
-                this.selectedItem.userAction = "saved"
-
+                if (status && this.selectedDay == this.today)
+                    this.selectedItem.userAction = "saved"
+                this.$refs.dailyData && this.$refs.dailyData.itemChanged()
+                this.clearPerformer()
                 this.show_snack(status)
             },
 
@@ -708,7 +753,8 @@
 
             show_error(msg) {
                 this.snack = true
-                this.snackColor = "blue-grey"
+                // this.snackColor = "blue-grey"
+                this.snackColor = "blue darken-1"
                 this.snackText = msg
             },
 
@@ -790,9 +836,14 @@
                 if (ret) {
                     this.selectedItem.userAction = "none"
                     this.clearPerformer()
+                    this.$refs.dailyData && this.$refs.dailyData.itemChanged()
                 }
                 this.show_snack(ret)
                 this.updateLoading = false
+            },
+
+            performerClicked() {
+                this.selectedAmount = []
             }
         }
     }

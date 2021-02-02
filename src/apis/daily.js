@@ -11,9 +11,9 @@ const getToday = function() {
     return today
 }
 
-const add1 = async function(taskId, supervisor, data) {
+const add1 = async function(today, taskId, supervisor, data) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": today,
         "estimate_MP_taskL1id": taskId,
         "workSupervisor_hrid": supervisor,
         "workPerformedBy_hrid": data.id,
@@ -37,9 +37,9 @@ const add1 = async function(taskId, supervisor, data) {
     return false
 }
 
-const add2 = async function(taskId, supervisor, data) {
+const add2 = async function(today, taskId, supervisor, data) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": today,
         "estimate_MP_taskL2id": taskId,
         "workSupervisor_hrid": supervisor,
         "workPerformedBy_hrid": data.id,
@@ -62,9 +62,9 @@ const add2 = async function(taskId, supervisor, data) {
     return false
 }
 
-const add3 = async function(taskId, supervisor, data) {
+const add3 = async function(today, taskId, supervisor, data) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": today,
         "estimate_MP_taskL3id": taskId,
         "workSupervisor_hrid": supervisor,
         "workPerformedBy_hrid": data.id,
@@ -87,9 +87,9 @@ const add3 = async function(taskId, supervisor, data) {
     return false
 }
 
-const add4 = async function(taskId, supervisor, data) {
+const add4 = async function(today, taskId, supervisor, data) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": today,
         "estimate_MP_taskL4id": taskId,
         "workSupervisor_hrid": supervisor,
         "workPerformedBy_hrid": data.id,
@@ -112,9 +112,9 @@ const add4 = async function(taskId, supervisor, data) {
     return false
 }
 
-const getUpdate1 = async function(hrId) {
+const getUpdate1 = async function(hrId, date) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": date ? date : getToday(),
         "dataUpdated_hrid": hrId
     }
 
@@ -131,9 +131,9 @@ const getUpdate1 = async function(hrId) {
     return []
 }
 
-const getUpdate2 = async function(hrId) {
+const getUpdate2 = async function(hrId, date) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": date ? date : getToday(),
         "dataUpdated_hrid": hrId
     }
 
@@ -150,9 +150,9 @@ const getUpdate2 = async function(hrId) {
     return []
 }
 
-const getUpdate3 = async function(hrId) {
+const getUpdate3 = async function(hrId, date) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": date ? date : getToday(),
         "dataUpdated_hrid": hrId
     }
 
@@ -169,9 +169,9 @@ const getUpdate3 = async function(hrId) {
     return []
 }
 
-const getUpdate4 = async function(hrId) {
+const getUpdate4 = async function(hrId, date) {
     const jsonData = {
-        "effortdate": getToday(),
+        "effortdate": date ? date : getToday(),
         "dataUpdated_hrid": hrId
     }
 
