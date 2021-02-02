@@ -195,136 +195,132 @@
                                     <v-tabs-items v-model="tabModel"> 
                                         <v-tab-item :value="`tab-1`">
                                             <v-card flat>
-                                                <v-form ref="form1" lazy-validation>
-                                                    <v-container>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-select
-                                                                    v-model="localAddressItem.countryid"
-                                                                    :items="countries"
-                                                                    attach
-                                                                    item-text="name"
-                                                                    item-value="id"
-                                                                    label="Country"
-                                                                    :rules="addressCountryRule"
-                                                                ></v-select>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.addressLine1"
-                                                                    label="Address Line1"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.addressLine2"
-                                                                    label="Address Line2"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.addressLine3"
-                                                                    label="Address Line3"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.addressLine4"
-                                                                    label="Address Line4"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.zipcode"
-                                                                    label="Zip Code"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="localAddressItem.state_province"
-                                                                    label="Province"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-container>
-                                                </v-form>
+                                                <v-card-text>
+                                                    <v-form ref="form1" lazy-validation>
+                                                        <v-container>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-select
+                                                                        v-model="localAddressItem.countryid"
+                                                                        :items="countries"
+                                                                        attach
+                                                                        item-text="name"
+                                                                        item-value="id"
+                                                                        label="Country"
+                                                                        :rules="addressCountryRule"
+                                                                    ></v-select>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.addressLine1"
+                                                                        label="Address Line1"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.addressLine2"
+                                                                        label="Address Line2"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.addressLine3"
+                                                                        label="Address Line3"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.addressLine4"
+                                                                        label="Address Line4"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.zipcode"
+                                                                        label="Zip Code"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="localAddressItem.state_province"
+                                                                        label="Province"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                        </v-container>
+                                                    </v-form>
+                                                </v-card-text>
                                             </v-card>
                                         </v-tab-item>
                                         <v-tab-item :value="`tab-2`">
                                             <v-card flat>
-                                                <v-form ref="form2" lazy-validation>
-                                                    <v-container>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-select
-                                                                    v-model="permanentAddressItem.countryid"
-                                                                    :items="countries"
-                                                                    attach
-                                                                    item-text="name"
-                                                                    item-value="id"
-                                                                    label="Country"
-                                                                    :rules="addressCountryRule"
-                                                                ></v-select>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.addressLine1"
-                                                                    label="Address Line1"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.addressLine2"
-                                                                    label="Address Line2"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.addressLine3"
-                                                                    label="Address Line3"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.addressLine4"
-                                                                    label="Address Line4"
-                                                                    :rules="addressLineRule"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                        <v-row>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.zipcode"
-                                                                    label="Zip Code"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-text-field
-                                                                    v-model="permanentAddressItem.state_province"
-                                                                    label="Province"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-container>
-                                                </v-form>
+                                                <v-card-text>
+                                                    <v-form ref="form2" lazy-validation>
+                                                        <v-container>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-select
+                                                                        v-model="permanentAddressItem.countryid"
+                                                                        :items="countries"
+                                                                        attach
+                                                                        item-text="name"
+                                                                        item-value="id"
+                                                                        label="Country"
+                                                                        :rules="addressCountryRule"
+                                                                    ></v-select>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.addressLine1"
+                                                                        label="Address Line1"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.addressLine2"
+                                                                        label="Address Line2"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.addressLine3"
+                                                                        label="Address Line3"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.addressLine4"
+                                                                        label="Address Line4"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                            <v-row>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.zipcode"
+                                                                        label="Zip Code"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                                <v-col>
+                                                                    <v-text-field
+                                                                        v-model="permanentAddressItem.state_province"
+                                                                        label="Province"
+                                                                    ></v-text-field>
+                                                                </v-col>
+                                                            </v-row>
+                                                        </v-container>
+                                                    </v-form>
+                                                </v-card-text>
                                             </v-card>
                                         </v-tab-item>
                                     </v-tabs-items>                                 
@@ -534,7 +530,7 @@ export default {
                 addressItem = this.permanentAddressItem
             }
 
-            return !(addressItem && addressItem.addressLine1 && addressItem.addressLine2 && addressItem.addressLine3 && addressItem.addressLine4 && addressItem.countryid)
+            return !(addressItem && addressItem.countryid)
         }
     },
 

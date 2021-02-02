@@ -43,7 +43,13 @@
                         <template v-slot:label="{ item }">
                             <v-row>
                                 <v-col cols="12" sm="12" md="8">
-                                    <p class="subtitle-1 mb-0">{{ item.name }}</p>
+                                    <p class="subtitle-1 mb-0">{{ item.name }}
+                                        <v-badge
+                                        v-if="item.state == `newData`"
+                                        content="new"
+                                        color="blue darken-1"
+                                        ></v-badge>
+                                    </p>
                                     <p v-if="item.level > 0" class="title mb-0 text--disabled">
                                         {{ item.description || 'You can input task description.' }}
                                     </p>

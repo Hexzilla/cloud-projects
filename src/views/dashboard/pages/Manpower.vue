@@ -71,10 +71,17 @@
                     <span class="headline">{{ getDetailTitle() }}</span><br>
                     <span style="font-size:14px">{{ this.fromDate + ' ~ ' + this.toDate }}</span>
                 </v-card-title>
-                <v-data-table
-                    :headers="modalHeaders"
-                    :items="selectedData">
-                </v-data-table>
+                <v-card-text>
+                    <v-data-table
+                        :headers="modalHeaders"
+                        :items="selectedData"
+                        dense>
+                    </v-data-table>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDetailDialog"> Cancel </v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
     </v-container>
@@ -150,6 +157,10 @@
                     return this.selectedItem.name
                 }
                 return ''
+            },
+            
+            closeDetailDialog() {
+                this.detailModal = false
             }
         }
     }

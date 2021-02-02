@@ -125,7 +125,17 @@
                             </v-col>
                         </v-row>
                         <v-row>
-                            <v-col style="height: 30px">
+                            <v-col>
+                                <v-select
+                                    v-model="editedItem.holidaycalid"
+                                    :items="calendars"
+                                    :rules="defaultRules"
+                                    attach
+                                    item-text="name"
+                                    item-value="id"
+                                    label="Holiday Calendars"
+                                    required
+                                ></v-select>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -133,7 +143,7 @@
                                 <v-select
                                     v-model="editedItem.designation"
                                     :items="designations"
-                                    :rules="defaultRules"
+                                    :rules="designationRules"
                                     attach
                                     item-text="name"
                                     item-value="id"
@@ -148,11 +158,8 @@
                                 textName="Designation Date"
                                 :date="editedItem.designationDate"
                                 :submit="(date) => editedItem.designationDate = date"
+                                :type="designationType"
                             ></DatePicker>
-                        </v-row>
-                        <v-row>
-                            <v-col style="height: 30px">
-                            </v-col>
                         </v-row>
                         <v-row>
                             <DatePicker
@@ -160,6 +167,7 @@
                                 :date="editedItem.JoinDateForResourcePlanning"
                                 :submit="(date) => editedItem.JoinDateForResourcePlanning = date"
                                 :endDate="editedItem.joinDate"
+                                v-bind:type="joiningType"
                             ></DatePicker>
                             <DatePicker
                                 textName="Separating Date"
@@ -178,18 +186,15 @@
                                 :submit="(date) => {editedItem.joinDate = date; joinedDateChanged(editedItem)}"
                                 :startDate="editedItem.JoinDateForResourcePlanning"
                                 :endDate="editedItem.SeperationDateForResourcePlanning"
+                                v-bind:type="joinType"
                             ></DatePicker>
                             <DatePicker
                                 textName="Separated Date"
                                 :date="editedItem.seperation"
                                 :submit="(date) => editedItem.seperation = date"
                                 :startDate="editedItem.SeperationDateForResourcePlanning ? editedItem.SeperationDateForResourcePlanning : editedItem.joinDate"
-                                v-bind:type="`optional`"
+                                v-bind:type="seperateType"
                             ></DatePicker>
-                        </v-row>
-                        <v-row>
-                            <v-col style="height: 50px">
-                            </v-col>
                         </v-row>
                     </v-form>
                 </v-card-text>
@@ -197,7 +202,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
-                    <v-btn :disabled="!valid" color="blue darken-1" text @click="save"> Save </v-btn>
+                    <v-btn :disabled="false" color="blue darken-1" text @click="save"> Save </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -224,6 +229,7 @@
                                     v-model="selectedRoleId"
                                     multiple
                                     required
+                                    chips
                                     dense
                                     @change="roleDataChanged"
                                 ></v-select>
@@ -249,6 +255,9 @@
                                         :type="`optional`"
                                     ></DatePicker>
                                 </v-col>
+                                <v-btn x-small text style="margin-top: 35px" @click="removeRole(item)" title="remove">
+                                    <v-icon color="pink">mdi-delete</v-icon>
+                                </v-btn>
                             </v-row>
                         </template>
                         <v-row>
@@ -282,6 +291,7 @@ import role_api from "@/apis/role.js";
 import designation_api from "@/apis/designation.js";
 import people_api from "@/apis/people.js";
 import country_api from "@/apis/country.js";
+import calendar_api from "@/apis/calendar.js";
 
 export default {
     components: {
@@ -337,7 +347,7 @@ export default {
             designationDate: null,
             joinDate: "",
             seperation: null,
-            holidaycalid: 1,
+            holidaycalid: 0,
             personid: 0,
             firstname: "Karthik U",
             lastname: "K U",
@@ -352,6 +362,9 @@ export default {
         selectedRoles: [],
         selectedRoleId: [],
         initialRolesId: [],
+
+        calendars: [],
+        calendar: null
     }),
 
     created: async function () {
@@ -413,6 +426,48 @@ export default {
                 return "height:120px"
             if (this.selectedRoles.length == 2)
                 return "height:40px"
+        },
+
+        designationRules() {
+            return [
+                v => {
+                    if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "joined") {
+                        if (!v) {
+                            return 'please select designation'
+                        }
+                    }
+                    return true
+                }
+            ]
+        },
+
+        designationType() {
+            if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "joined") {
+                return ''
+            }
+            return 'optional'
+        },
+
+        joiningType() {
+            if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "toBeJoined") {
+                return ''
+            }
+            return 'optional'
+         
+        },
+
+        joinType() {
+            if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "joined") {
+                return ''
+            }
+            return 'optional'
+        },
+
+        seperateType() {
+            if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "seperated") {
+                return ''
+            }
+            return 'optional'
         }
     },
 
@@ -434,11 +489,13 @@ export default {
             this.designations = await designation_api.findAll()
             this.roles = await role_api.findAll()
             this.associates = await associate_api.findAll()
+            this.calendars = await calendar_api.findAllCalendar()
 
             this.roleData = associate_api.getRoleWithData(this.roles)
             
             console.log("associates", this.associates)
             console.log("designations", this.designations)
+            console.log("calendars", this.calendars)
             this.loading = false
         },
 
@@ -453,23 +510,15 @@ export default {
             this.openAddDialog()
         },
 
-        formatRoleData(roles) {
-            roles && roles.length > 0 && roles.forEach( e => {
-                e.data.effectivefromdate = ""
-                e.data.effectivetodate = ""
-                e.data.id = ""
-                e.data.rolesid = ""
-            })
-        },
-
         async roleEdit(item) {
             this.loading = true
-            this.formatRoleData(this.selectedRoles)
+            this.clearRoleData()
             this.selectedRoles = []
             this.selectedRoleId = []
             // this.editedIndex = this.associates.indexOf(item);
             this.editedItem = Object.assign({}, item);
             let one = await associate_api.findOne(item.id)
+            this.initialRolesId = []
             console.log("edtiedItem", this.editedItem)
             console.log("one", one)
 
@@ -490,7 +539,7 @@ export default {
                     })
                 })
             }
-            
+            console.log("initial role", this.initialRolesId)
             console.log("selected role", this.selectedRoles)
             this.roleDialog = true
             this.loading = false
@@ -532,6 +581,7 @@ export default {
 
         async save() {
             if (!this.$refs.form.validate()) return
+
             const selectedIndex = this.editedIndex
             const item = Object.assign({}, this.editedItem)
             this.close();
@@ -540,6 +590,10 @@ export default {
             {
                 let success = false
                 if (selectedIndex > -1) {
+                    if (item.initialDesignationDate == item.designationDate) {
+                        // this.snack_warning("Designation date is already exist")
+                    }
+
                     success = await associate_api.update(item) 
                     if (success) {
                         Object.assign(this.associates[selectedIndex], item);
@@ -572,6 +626,12 @@ export default {
             }
         },
 
+        snack_warning(msg) {
+            this.snack = true;
+            this.snackColor = "warning"
+            this.snackText = msg
+        },
+
         closeRole() {
             this.roleDialog = false
         },
@@ -583,12 +643,12 @@ export default {
             this.closeRole()
             this.setRecordType(this.initialRolesId, this.selectedRoleId)
             console.log("role data", this.roleData)
-            await associate_api.roleAssign(this.editedItem.id, this.roleData)
+            let result = await associate_api.roleAssign(this.editedItem.id, this.roleData)
+            this.show_snack(result)
             this.loading = false
         },
 
         roleDataChanged() {
-            console.log("selected: ", this.selectedRoleId)
             this.selectedRoles = []
             this.selectedRoleId.length > 0 && this.selectedRoleId.forEach(id=> {
                 this.roleData.forEach(role=> {
@@ -601,7 +661,7 @@ export default {
 
         setRecordType(initalIds, selectedIds) {
             console.log("initial---------", initalIds)
-            console.log("selected", selectedIds)
+            console.log("selected----------", selectedIds)
             let addedIds = selectedIds.filter(x => initalIds.indexOf(x) === -1)
             let removedIds = initalIds.filter(x => selectedIds.indexOf(x) === -1)
             let updatedIds = selectedIds.filter(x => addedIds.indexOf(x) === -1)
@@ -650,6 +710,23 @@ export default {
 
                 item.JoinDateForResourcePlanning = result
             }
+        },
+
+        removeRole(item) {
+            const filtered = this.selectedRoles.filter( e => e.id != item.id)
+            this.selectedRoles = filtered
+
+            const ids = this.selectedRoleId.filter( e => e != item.id)
+            this.selectedRoleId = ids
+        },
+
+        clearRoleData() {
+            let data = this.roleData
+            data && data.length > 0 && data.forEach( e => {
+                e.data.effectivefromdate = null
+                e.data.effectivetodate = null
+                e.data.recordType = "noAction"
+            })
         }
     },
 };

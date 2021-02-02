@@ -254,7 +254,7 @@
                                                                         <v-col class="py-0 my-0 px-1">
                                                                             <v-text-field
                                                                                 label="Total"
-                                                                                :rules="pctRules"
+                                                                                :rules="totalRules"
                                                                                 v-model="item.totalPct"
                                                                                 v-if="checkPerformer(item)"
                                                                             ></v-text-field>
@@ -418,26 +418,66 @@
             },
             hrRules() {
                 return [
-                    (v) => !!v || "required",
-                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
-                    (v) => v >= 0 || " >= 0",
-                    (v) => v < 24 || " < 24",
+                    v => {
+                        if (!v) {
+                            return true
+                        } else if (!(!isNaN(parseFloat(v)) && isFinite(v))) {
+                            return 'number'
+                        } else if (v < 0) {
+                            return ' >= 0'
+                        } else if (v > 24) {
+                            return ' <= 24'
+                        }
+                        return true
+                    }
                 ]
             },
             minRules() {
                 return [
-                    (v) => !!v || "required",
-                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
-                    (v) => v >= 0 || " >= 0",
-                    (v) => v < 60 || " < 60",
+                    v => {
+                        if (!v) {
+                            return true
+                        } else if (!(!isNaN(parseFloat(v)) && isFinite(v))) {
+                            return 'number'
+                        } else if (v < 0) {
+                            return ' >= 0'
+                        } else if (v > 60) {
+                            return ' <= 60'
+                        }
+                        return true
+                    }
                 ]
             },
             pctRules() {
                 return [
-                    (v) => !!v || "required",
-                    (v) => (!isNaN(parseFloat(v)) && isFinite(v)) || 'number',
-                    (v) => v < 100 || " < 100",
-                    (v) => v > 0 || " > 0"
+                    v => {
+                        if (!v) {
+                            return true
+                        } else if (!(!isNaN(parseFloat(v)) && isFinite(v))) {
+                            return 'number'
+                        } else if (v < 0) {
+                            return ' >= 0'
+                        } else if (v > 100) {
+                            return ' <= 100'
+                        }
+                        return true
+                    }
+                ]
+            },
+            totalRules() {
+                return [
+                    v => {
+                        if (!v) {
+                            return true
+                        } else if (!(!isNaN(parseFloat(v)) && isFinite(v))) {
+                            return 'number'
+                        } else if (v < 0) {
+                            return ' >= 0'
+                        } else if (v > 100) {
+                            return ' <= 100'
+                        }
+                        return true
+                    }
                 ]
             },
             deleteBtnStatus() {
@@ -554,8 +594,18 @@
                 this.selectedItem.userAction == "saved" && (this.confirmDialog = true)
             },
 
+            checkSendData(){
+                this.performer && this.performer.length > 0 && this.performer.forEach( e => {
+                    e.hr == "" && (e.hr = 0)
+                    e.min == "" && (e.min = 0)
+                    e.pct == "" && (e.pct = 0)
+                    e.totalPct == "" && (e.totalPct = null)
+                })
+            },
+
             async saveDaily() {
                 this.updateLoading = true
+                this.checkSendData()
                 console.log("supervisor", this.supervisor)
                 console.log("selectedItem", this.selectedItem)
                 console.log("performer", this.performer)
@@ -737,8 +787,10 @@
                         ret = await daily_api.remove4(dailyData[i].id)
                     }
                 }
-                if (ret)
+                if (ret) {
                     this.selectedItem.userAction = "none"
+                    this.clearPerformer()
+                }
                 this.show_snack(ret)
                 this.updateLoading = false
             }

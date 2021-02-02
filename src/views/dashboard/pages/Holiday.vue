@@ -93,12 +93,22 @@
                     <v-card-title>
                         <v-row>
                             <v-col cols="px-0 py-0">
+                                <!--
                                 <v-text-field
                                     label="Year"
                                     append-icon="mdi-magnify"
                                     v-model="searchKey"
                                     @change="searchKeyChange()"
                                 ></v-text-field>
+                                -->
+                                <v-select
+                                    label="Year"
+                                    append-icon="mdi-magnify"
+                                    v-model="searchKey"
+                                    :items="searchYears"
+                                    @change="searchKeyChange()"
+                                >
+                                </v-select>
                             </v-col>
                             <v-col style="text-align:right">
                                 <v-btn small rounded color="teal" @click="newDateClicked" :disabled=dateBtnValid>
@@ -333,7 +343,8 @@
             calId: null,
             selectedDateItem: null,
             deleteDialog: false,
-            searchKey: ""
+            searchKey: "",
+            searchYears: []
         }),
 
         created: async function() {
@@ -361,8 +372,19 @@
                 this.calId = item.id
                 this.allDates = await api.getHolidayList(this.calId)
                 this.dates = this.allDates
-                console.log("dates", this.dates)
+
+                this.getYears()
+                this.searchKey = ""
+
                 this.wait = false
+            },
+
+            getYears() {
+                let tempYears = []
+                this.allDates.forEach( e => {
+                    tempYears.push(e.dt.substring(0, 4))
+                })
+                this.searchYears = ["", ...new Set(tempYears)]
             },
 
             newCalendarClicked() {
@@ -457,6 +479,8 @@
 
                 if (status) {
                     this.allDates = await api.getHolidayList(this.calId)
+                    this.getYears()
+
                     this.filter()
                 }
                 this.show_snack(status)
@@ -485,6 +509,7 @@
                 let status = await api.removeHoliday(this.selectedDateItem.holidayid)
                 if (status) {
                     this.allDates = await api.getHolidayList(this.calId)
+                    this.getYears()
                     this.filter()
                 }
                 this.show_snack(status, 2)

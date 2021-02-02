@@ -168,7 +168,7 @@ export default {
     projectCodeRules() {
       return [
         (v) => !!v || "Code is required",
-        // (v) => /[a-zA-Z0-9]+$/.test(v) || 'Code must only contain letters',
+        (v) => /^[a-zA-Z0-9]+$/.test(v) || 'Code must only contain letters',
         (v) =>
           (v && v.length <= this.maxCodeLength) ||
           `Code must be less than ${this.Length} characters`,

@@ -23,7 +23,7 @@ const findAll = async function () {
             e.initialDesignation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
             e.designation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
             e.designationDate = info[0].designations[0] && info[0].designations[0].effectivefromdate && info[0].designations[0].effectivefromdate
-            e.holidaycalid = 1
+            e.initialDesignationDate = info[0].designations[0] && info[0].designations[0].effectivefromdate && info[0].designations[0].effectivefromdate
         }
     }
     
@@ -69,14 +69,27 @@ const findOne = async function(id) {
 
 const add = async function(person) {
     console.log("add person", person)
+    let data
+    if (person.assocationStatus == 'toBeJoined') {
+        data = {
+            assocationType: person.assocationType,
+            assocationStatus: person.assocationStatus,
+            JoinDateForResourcePlanning: person.JoinDateForResourcePlanning,
+            holidaycalid: person.holidaycalid,
+            personid: person.personid
+        }
+    } else {
+        data = person
+    }
     try {
-        const response = await http.post("/hr/hrAddOne", person)
+        const response = await http.post("/hr/hrAddOne", data)
         if (response.status == 200) {
-            const data = response.data;
-            if (data.success) {
-                const hrId = data.response.data.insertId
-                const ret = await addDesignation(hrId, person.designationDate, person.designation, 0)
-                // return data.response
+            const data = response.data
+            if (person.assocationStatus == 'toBeJoined' || person.assocationStatus == 'seperated') {
+                console.log("add no design")
+                return true
+            } else {
+                const ret = await addDesignation(data.response.data.insertId, person.designationDate, person.designation, 0)
                 return ret
             }
         }
@@ -89,11 +102,29 @@ const add = async function(person) {
 
 const update = async function(person) {
     console.log("update person", person)
+
+    let data
+    if (person.assocationStatus == 'toBeJoined') {
+        data = {
+            assocationType: person.assocationType,
+            assocationStatus: person.assocationStatus,
+            JoinDateForResourcePlanning: person.JoinDateForResourcePlanning,
+            holidaycalid: person.holidaycalid,
+            personid: person.personid
+        }
+    } else {
+        data = person
+    }
     try {
-        const response = await http.post("/hr/hrUpdateOne", person)
+        const response = await http.post("/hr/hrUpdateOne", data)
         if (response.status == 200) {
-            const ret = await addDesignation(person.id, person.designationDate, person.designation, person.initialDesignation ? person.initialDesignation : 0)
-            return ret
+            if (person.assocationStatus == 'toBeJoined' || person.assocationStatus == 'seperated' || person.designationDate == person.initialDesignationDate) {
+                console.log("update no design")
+                return true
+            } else {
+                const ret = await addDesignation(person.id, person.designationDate, person.designation, person.initialDesignation ? person.initialDesignation : 0)
+                return ret
+            }
         }
     }
     catch (error) {
@@ -115,7 +146,11 @@ const roleAssign = async function(hrId ,data) {
     }
     try {
         const response = await http.post("/hr/hrRolesAssign", jsonData)
-        return (response.status == 200);
+        if (response.status == 200) {
+            const data = response.data
+            return data.success
+        }
+            
     }
     catch (error) {
         console.log(error)
@@ -147,6 +182,7 @@ const addDesignation = async function(hrId, date, designationId, hrDesignationId
         "designationid": designationId,
         "closingdesignation_hrDesignationid": hrDesignationId
     }
+    console.log("---------add designation", jsonData)
     try {
         const response = await http.post("/hr/hrAddNewDesignation", jsonData)
         console.log("designation response", response)

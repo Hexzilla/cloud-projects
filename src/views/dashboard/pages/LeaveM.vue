@@ -238,7 +238,7 @@
                     return 'warning'
                 }
                 
-                if (item.status == "approved-by-hr") {
+                if (item.status == "rejected-by-hr") {
                     return 'error'
                 }
 

@@ -340,13 +340,14 @@
             },
 
             getIcon(item) {
-                if (item == "cancelled-by-me") return "mdi-sticker-remove-outline"
-                if (item == "approved-by-hr" || "rejected-by-hr") return "mdi-sticker-check-outline"
+                if (item == "cancelled-by-me" || "rejected-by-hr") return "mdi-sticker-remove-outline"
+                if (item == "approved-by-hr") return "mdi-sticker-check-outline"
             },
 
             getColor(item) {
-                if (item == "cancelled-by-me") return "red"
-                if (item == "approved-by-hr" || "rejected-by-hr") return "primary"
+                if (item == "cancelled-by-me") return "warning"
+                if (item == "approved-by-hr") return "teal"
+                if (item == "rejected-by-hr") return "error"
             },
         }
     }
