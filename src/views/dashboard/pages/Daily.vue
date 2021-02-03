@@ -118,7 +118,8 @@
                                                 </v-icon>
                                                 back
                                             </v-btn><br>
-                                            <span class="headline" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Update ( <span style="font-size: 18px">{{this.selectedItem.name}}</span> )</span>
+                                            <span class="headline" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Efforts and progress </span><br>
+                                            <span class="text--disabled" style="font-size: 15px">{{this.selectedItem.name}}</span>
                                         </v-col>
                                     </v-row>
                                 </v-card-title>

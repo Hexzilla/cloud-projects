@@ -58,13 +58,13 @@
                     {{ value.toUpperCase() }}
                 </template>
                 <template v-slot:item.actions="{ item }">
-                    <v-icon small class="mr-2" @click="editItem(item)">
+                    <v-icon small class="mr-2" @click="editItem(item)" title="EDIT">
                         mdi-pencil
                     </v-icon>
-                    <v-icon small class="mr-2" @click="roleEdit(item)">
+                    <v-icon small class="mr-2" @click="roleEdit(item)" title="ROLES">
                         mdi-account
                     </v-icon>
-                    <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
+                    <v-icon small disabled @click="deleteItem(item)" title="DELETE"> mdi-delete </v-icon>
                 </template>
 
                 <template v-slot:no-data>
@@ -436,13 +436,22 @@ export default {
                             return 'please select designation'
                         }
                     }
+                    if (this.editedItem && this.editedItem.designationDate) {
+                        if (!v) {
+                            return 'please select designation'
+                        }
+                    }
                     return true
                 }
             ]
         },
 
         designationType() {
+
             if (this.editedItem && this.editedItem.assocationStatus && this.editedItem.assocationStatus == "joined") {
+                return ''
+            }
+            if (this.editedItem && this.editedItem.designation) {
                 return ''
             }
             return 'optional'

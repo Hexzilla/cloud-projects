@@ -132,6 +132,7 @@
                                                     :rules="passwordRules"
                                                     @click:append="passwordShow = !passwordShow"
                                                     label="Password"
+                                                    autocomplete="new-password"
                                                     required>
                                                     <template v-slot:append-outer>
                                                         <v-btn
@@ -553,7 +554,7 @@ export default {
         },
 
         addItem() {
-            this.editedItem = Object.assign({}, this.defaultItem);
+            this.editedItem = Object.assign({}, this.defaultItem)
             this.openAddDialog()
         },
 

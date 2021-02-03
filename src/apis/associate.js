@@ -106,6 +106,7 @@ const update = async function(person) {
     let data
     if (person.assocationStatus == 'toBeJoined') {
         data = {
+            id: person.id,
             assocationType: person.assocationType,
             assocationStatus: person.assocationStatus,
             JoinDateForResourcePlanning: person.JoinDateForResourcePlanning,
