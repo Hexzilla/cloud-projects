@@ -4,7 +4,6 @@
     class="v-snackbar--material"
     v-bind="{
       ...$attrs,
-      'color': 'transparent'
     }"
   >
     <base-material-alert

@@ -1,6 +1,13 @@
 <template>
     <v-container id="regular-tables" tag="section">
-        <v-card icon="mdi-file-tree" title="Task List" class="px-5 py-2">
+        <base-material-card
+            color="green"
+        >
+        <template v-slot:heading>
+            <div class="display-1 font-weight-light">
+                Associate List
+            </div>
+        </template>
             <v-data-table
                 :headers="headers"
                 :items="associates"
@@ -13,9 +20,10 @@
                     <v-container>
                         <div class="d-flex flex-row-reverse" flat tile>
                             <v-btn
-                                color="primary"
+                                color="pink"
                                 dark
                                 class="mb-2"
+                                text
                                 @click="addItem"
                             >
                                 New
@@ -71,7 +79,7 @@
                     <v-btn color="primary" small outlined @click="initialize"> Reset </v-btn>
                 </template>
             </v-data-table>
-        </v-card>
+        </base-material-card>
 
         <!--Add Dialog Begin-->
         <v-dialog v-model="dialog" max-width="500px">

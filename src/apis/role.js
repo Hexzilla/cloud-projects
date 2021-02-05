@@ -45,8 +45,25 @@ const update = async function(item) {
     }
 }
 
+const findAllRoles = async function() {
+    try {
+        const response = await http.post("/common/roleRoleTypes")
+        if (response.status == 200) {
+            const data = response.data;
+            if (data.success) {
+                return data.response.allCarrierRecord.roleTypes
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 export default {
     findAll,
     add,
     update,
+    findAllRoles
 }

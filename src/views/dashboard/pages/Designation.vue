@@ -1,14 +1,11 @@
 <template>
   <v-container id="regular-tables" tag="section">
-    <!--
-    <v-card icon="mdi-file-tree" title="Designation" class="px-5 py-2">
-    -->
     <base-material-card
       color="green"
     >
       <template v-slot:heading>
         <div class="display-1 font-weight-light">
-          Designation List
+          Designation
         </div>
       </template>
       <v-data-table
@@ -179,15 +176,18 @@
         </template>
       </v-data-table>
     </base-material-card>
-    <!--
-    </v-card>
-    -->
-    <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+
+    <base-material-snackbar
+      v-model="snack"
+      :type="snackColor"
+      v-bind="{
+        bottom: true,
+        center: true,
+        color: snackColor
+      }"
+    >
       {{ snackText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
+    </base-material-snackbar>
   </v-container>
 </template>
 

@@ -37,12 +37,12 @@ const router = new Router({
           component: () => import('@/views/dashboard/pages/CountryList'),
         },
         {
-          name: 'Designation',
+          name: 'HR- Manpower Associate types',
           path: 'pages/designation',
           component: () => import('@/views/dashboard/pages/Designation'),
         },
         {
-          name: 'Role List',
+          name: 'Organization Wide Roles',
           path: 'pages/role',
           component: () => import('@/views/dashboard/pages/RoleList'),
         },
