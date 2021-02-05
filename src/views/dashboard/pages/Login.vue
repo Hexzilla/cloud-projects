@@ -1,14 +1,18 @@
 <template>
-    <v-app style="background-color: rgba(24, 103, 192, .8)">
-        <v-card
-            class="mx-auto"
-            style="width: 500px; margin-top: 100px"
+    <v-app style="background-image:url('/login.jpg')">
+        <base-material-card
+            color="success"
+            class="px-5 py-3 mx-auto"
+            style="width: 400px; margin-top: 200px"
             elevation="15"
-            max-width="500">
-            <v-card-title class="py-5 px-5">
-                <h2>Log In</h2>
-            </v-card-title>
-            <v-container>
+        >
+            <template v-slot:heading>
+                <div class="display-2 font-weight-bold text-center">
+                   Login    <br><br>
+                    <v-icon>mdi-login</v-icon>
+                </div>
+            </template>
+            <v-card-text>
                 <v-form ref="form" lazy-validation>
                     <v-row>
                         <v-col>
@@ -47,6 +51,63 @@
                         </v-col>
                     </v-row>
                 </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <div class="text-center" style="width:100%">
+                    <v-btn color="primary" text @click="onLogin">
+                        LOGIN
+                    </v-btn>
+                </div>
+            </v-card-actions>
+        </base-material-card>
+        <!--
+        <v-card
+            class="mx-auto"
+            style="width: 500px; margin-top: 100px"
+            elevation="15"
+            max-width="500">
+            <v-card-title class="py-5 px-5">
+                <h2>Log In</h2>
+            </v-card-title>
+            <v-container>
+                <v-form ref="form" lazy-validation>
+                    <v-row>
+                        <v-col>
+                            <v-text-field
+                                label="Email"
+                                prepend-icon="mdi-email"
+                                :rules="emailRules"
+                                v-model="email"
+                                :error-messages="errorMessageEmail"
+                                @keydown="errorMessageEmail = ''"
+                            ></v-text-field>
+                            <v-text-field
+                                label="Code"
+                                prepend-icon="mdi-language-c"
+                                :rules="codeRules"
+                                v-model="code"
+                                :error-messages="errorMessageCode"
+                                @keydown="errorMessageCode = ''"
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col>
+                            <v-text-field
+                                label="Password"
+                                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                                :type="show1 ? 'text' : 'password'"
+                                @click:append="show1 = !show1"
+                                prepend-icon="mdi-account-lock"
+                                :rules="passwordRules"
+                                v-model="password"
+                                :error-messages="errorMessagePassword"
+                                @keydown="errorMessagePassword = ''"
+                                counter
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-form>
             </v-container>
             <v-card-actions>
                 <div class="text-center" style="width:100%">
@@ -56,6 +117,7 @@
                 </div>
             </v-card-actions>
         </v-card>
+        -->
     </v-app>
 </template>
 

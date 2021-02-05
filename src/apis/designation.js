@@ -21,7 +21,10 @@ const add = async function(item) {
         const response = await http.post("/common/designationAddOne", item)
         if (response.status == 200) {
             const data = response.data;
+            const scalecodes = JSON.parse(data.response.scalecodes)
+            data.response.scalecodes = scalecodes
             console.log("destination.add", data.response)
+
             if (data.success) {
                 return data.response
             }

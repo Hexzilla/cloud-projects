@@ -14,7 +14,7 @@
             <v-col cols="12" md="2" sm="3" style="display:flex; align-items:center; font-size: 11px">
                 MIN: {{ this.min }}
             </v-col>
-            <v-col cols="12" md="3" sm="12" class="px-0">
+            <v-col cols="12" md="3" sm="12" xs="6" class="px-0">
                 <apexchart type="pie" align="center" width="90" :options="pieOptions" :series="pieSeries"></apexchart>
             </v-col>
             <!-- <v-col class="px-0">

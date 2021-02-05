@@ -16,8 +16,8 @@
                     </v-col>
                     <v-col class="pb-0 text-right" md="6">
                         <v-btn small @click="openPhaseEditDialog()" color="cyan">Change Date</v-btn>
-                        <v-btn small @click="openTreeDialog()" color="teal">Add Task</v-btn>
-                        <v-btn small @click="saveTask()" color="teal" :disabled="saveBtnStatus()">Save Task</v-btn>
+                        <v-btn small width="70px" @click="openTreeDialog()" color="teal">Add Task</v-btn>
+                        <v-btn small width="70px" @click="saveTask()" color="teal" :disabled="saveBtnStatus()">Save Task</v-btn>
                     </v-col>
                 </v-row>
             </v-card-title>
@@ -42,7 +42,7 @@
                         </template>
                         <template v-slot:label="{ item }">
                             <v-row>
-                                <v-col cols="12" sm="12" md="8">
+                                <v-col cols="12" sm="12" md="8" >
                                     <p class="subtitle-1 mb-0">{{ item.name }}
                                         <v-badge
                                         v-if="item.state == `newData`"

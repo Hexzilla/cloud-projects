@@ -1,21 +1,32 @@
 <template>
   <v-container id="regular-tables" tag="section">
+    <!--
     <v-card icon="mdi-file-tree" title="Designation" class="px-5 py-2">
+    -->
+    <base-material-card
+      color="green"
+    >
+      <template v-slot:heading>
+        <div class="display-1 font-weight-light">
+          Designation List
+        </div>
+      </template>
       <v-data-table
         :headers="headers"
         :items="clients"
         :search="search"
         :loading="loading"
         loading-text="Loading... Please wait"
-        sort-by="id"
+        sort-by="level"
+        sort-desc
       >
         <template v-slot:top>
           <v-container>
             <div class="d-flex flex-row-reverse" flat tile>
               <v-btn
-                color="primary"
-                dark
+                color="pink"
                 class="mb-2"
+                text
                 @click="addItem"
               >
                 New
@@ -32,7 +43,7 @@
             </div>
             
 			      <!--Add Dialog Begin-->
-            <v-dialog v-model="dialog" max-width="500px">
+            <v-dialog v-model="dialog" max-width="550px">
               <v-card>
                 <v-card-title>
                   <span class="headline">{{ formTitle }}</span>
@@ -40,6 +51,17 @@
 
                 <v-card-text>
                   <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-row>
+                      <v-col>
+                        <v-text-field
+                          v-model="editedItem.name"
+                          :counter="maxNameLength"
+                          :rules="nameRules"
+                          label="Name"
+						              required
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
                     <v-row>
                       <v-col cols="12" sm="12" md="4">
                         <v-text-field
@@ -52,14 +74,21 @@
                           @keydown.space.prevent
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="12" md="8">
+                      <v-col>
                         <v-text-field
-                          v-model="editedItem.name"
-                          :counter="maxNameLength"
-                          :rules="nameRules"
-                          label="Name"
-						              required
-                        ></v-text-field>
+                          v-model="editedItem.level"
+                          label="level"
+                          type="number"
+                          :rules="levelRules"
+                        >
+                        </v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col class="text-center">
+                        <v-btn v-for="i in 9" :key="i" small style="margin-right: 2px; color: black" :color="scaleColor(i)" @click="scaleClick(i)">
+                          {{ scaleName(i) }}
+                        </v-btn>
                       </v-col>
                     </v-row>
                   </v-form>
@@ -100,7 +129,16 @@
           </v-icon>
           <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
         </template>
-
+        
+        <template v-slot:item.codes="{ item }">
+          <template v-if="item.scalecodes && item.scalecodes.length > 0">
+            <v-btn v-for="(e, i) in item.scalecodes" :key="i" small color="pink lighten-4" style="margin-left: 2px; color:black">
+              {{ e }}
+            </v-btn>
+          </template>
+        </template>
+        
+        <!--
         <template v-slot:item.code="props">
           <v-edit-dialog large @save="updateItemCode(props.item)" @open="inlineEditedCode = props.item.code">
             {{ props.item.code.toUpperCase() }}
@@ -135,13 +173,15 @@
             </template>
           </v-edit-dialog>
         </template>
-
+        -->
         <template v-slot:no-data>
           <v-btn color="primary" small outlined @click="initialize"> Reset </v-btn>
         </template>
       </v-data-table>
+    </base-material-card>
+    <!--
     </v-card>
-
+    -->
     <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
       {{ snackText }}
       <template v-slot:action="{ attrs }">
@@ -169,24 +209,31 @@ export default {
     dialog: false,
     dialogDelete: false,
     headers: [
-      {
-        text: "Code",
-        align: "start",
-        value: "code",
-        width: "30%",
-      },
-      { text: "Name", value: "name" },
-      { text: "Actions", align: "right", value: "actions", sortable: false },
+      // {
+      //   text: "Code",
+      //   align: "start",
+      //   value: "code",
+      //   width: "30%",
+      //   class: 'success--text body-1'
+      // },
+      { text: "Name", value: "name", class: 'body-1' },
+      { text: "Level", value: "level", class: 'body-1' },
+      { text: "", value: "codes", class: 'body-1', width:"50%" },
+      { text: "Actions", align: "right", value: "actions", sortable: false, class: 'body-1' },
     ],
     clients: [],
     editedIndex: -1,
     editedItem: {
       code: "",
       name: "",
+      level: "",
+      scalecodes: [1]
     },
     defaultItem: {
       code: "",
       name: "",
+      level: "",
+      scalecodes: [1]
     },
   }),
 
@@ -212,6 +259,14 @@ export default {
           `Name must be less than ${this.maxNameLength} characters`,
       ];
     },
+    levelRules() {
+      return [
+        (v) => !!v || "Level is required",
+        (v) => v >= 1 || " >= 1",
+        (v) => v < 1000 || " < 1000",
+        (v) => v % 1 == 0 || "invalid"
+      ]
+    }
   },
 
   watch: {
@@ -231,6 +286,7 @@ export default {
     async initialize() {
       this.loading = true
       this.clients = await api.findAll()
+      console.log("clients", this.clients)
       this.loading = false;
     },
 
@@ -239,8 +295,17 @@ export default {
     },
 
     editItem(item) {
+      console.log("item", item)
       this.editedIndex = this.clients.indexOf(item);
       this.editedItem = Object.assign({}, item);
+
+      let tempScales = []
+      this.editedItem.scalecodes.forEach((e, i) => {
+        tempScales.push(i+1)
+      })
+      this.editedItem.scalecodes = tempScales
+      console.log("tempScales", tempScales)
+
       this.openAddDialog()
     },
     
@@ -320,7 +385,14 @@ export default {
 
       this.editedItem.code = this.editedItem.code.trim().toUpperCase()
       this.editedItem.name = this.editedItem.name.trim()
-      
+      const firstLetter = this.editedItem.name.slice(0, 1)
+      let tempScales = []
+      for (const i in this.editedItem.scalecodes) {
+        const e = this.editedItem.scalecodes[i]
+        tempScales.push(firstLetter.toUpperCase() + e)
+      }
+      this.editedItem.scalecodes = tempScales
+
       const selectedIndex = this.editedIndex
       const item = Object.assign({}, this.editedItem)
       this.close();
@@ -357,6 +429,35 @@ export default {
         this.snackText = "Error";
       }
     },
+
+    scaleName(i) {
+      let firstLetter = ""
+      if (this.editedItem.name) {
+        firstLetter = this.editedItem.name.slice(0, 1)
+      }
+      return firstLetter.toUpperCase() + i
+    },
+
+    scaleColor(i) {
+      const found =this.editedItem.scalecodes.find(e => e == i)
+      if (found)
+        return "pink lighten-4"
+      else
+        return "white"
+    },
+
+    scaleClick(i) {
+      if (i == 1) return
+      var index = this.editedItem.scalecodes.indexOf(i)
+      if (index > -1) {
+        this.editedItem.scalecodes.splice(index, 9)
+      }
+      else {
+        this.editedItem.scalecodes = []
+        for (let j = 1; j <= i; j++)
+          this.editedItem.scalecodes.push(j)
+      }
+    }
   },
 };
 </script>
