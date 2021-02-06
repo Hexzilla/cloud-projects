@@ -36,7 +36,7 @@
       </v-row>
       <v-row>
         <v-col v-for="(item, i) in roleTypes" :key="i">
-          <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #EC407A; color:white">{{ item }}</p>
+          <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #6A1B9A; color:white">{{ item }}</p>
           <v-data-table
             :headers="headers"
             :items="filteredItems(clients, item)"
@@ -61,10 +61,10 @@
                 -->
 
             <template v-slot:item.actions="{ item }">
-              <v-icon small class="mr-2" @click="editItem(item)">
+              <v-icon small class="mr-2" @click="editItem(item)" color="primary">
                 mdi-pencil
               </v-icon>
-              <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
+              <v-icon small @click="deleteItem(item)" color="warning" disabled> mdi-delete </v-icon>
             </template>
             <template v-slot:item.name="props">
               <v-edit-dialog large @save="updateItemName(props.item)" @open="inlineEditedName = props.item.name">
@@ -134,14 +134,14 @@
     <v-dialog v-model="dialogDelete" max-width="600px">
       <v-card>
         <v-card-title class="headline"
-          >Are you sure you want to delete this item?</v-card-title
+          >Are you sure?</v-card-title
         >
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDelete">
-            Cancel
+          <v-btn color="blue darken-1" @click="closeDelete">
+            No
           </v-btn>
-          <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+          <v-btn color="blue darken-1" text @click="deleteItemConfirm">Yes</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

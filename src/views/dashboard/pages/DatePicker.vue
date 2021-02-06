@@ -12,12 +12,13 @@
         <v-text-field
           :value="date"
           :label="textName"
-          prepend-icon="mdi-calendar"
+          append-icon="mdi-calendar"
           readonly
           v-bind="attrs"
           v-on="on"
           required
           :rules="dateRules"
+          :filled="fillStatus"
         ></v-text-field>
       </template>
       <v-date-picker
@@ -49,7 +50,7 @@
 <script>
 export default {
   name: 'DatePicker',
-  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ,'type'],
+  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ,'type', 'fill'],
 
   data: () => ({
     pickerOpened: false,
@@ -76,6 +77,12 @@ export default {
         return [(v) => !!v || `${this.textName} is required`]
       }
     },
+
+    fillStatus() {
+      if (this.fill == "fill")
+        return true
+      return false
+    }
   },
 
   methods: {

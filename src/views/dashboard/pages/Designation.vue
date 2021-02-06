@@ -104,14 +104,14 @@
             <v-dialog v-model="dialogDelete" max-width="600px">
               <v-card>
                 <v-card-title class="headline"
-                  >Are you sure you want to delete this item?</v-card-title
+                  >Are you sure?</v-card-title
                 >
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="closeDelete">
-                    Cancel
+                  <v-btn color="blue darken-1" @click="closeDelete">
+                    No
                   </v-btn>
-                  <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                  <v-btn color="blue darken-1" text @click="deleteItemConfirm">Yes</v-btn>
                   <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
@@ -121,10 +121,10 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)">
+          <v-icon small class="mr-2" @click="editItem(item)" color="primary">
             mdi-pencil
           </v-icon>
-          <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
+          <v-icon small @click="deleteItem(item)" color="warning" disabled> mdi-delete </v-icon>
         </template>
         
         <template v-slot:item.codes="{ item }">
@@ -198,7 +198,7 @@ export default {
   data: () => ({
     loading: true,
     snack: false,
-    snackColor: "",
+    snackColor: "success",
 	  snackText: "",
 	  valid: true,
     maxCodeLength: 5,
@@ -216,10 +216,10 @@ export default {
       //   width: "30%",
       //   class: 'success--text body-1'
       // },
-      { text: "Name", value: "name", class: 'body-1' },
-      { text: "Level", value: "level", class: 'body-1' },
-      { text: "", value: "codes", class: 'body-1', width:"50%" },
-      { text: "Actions", align: "right", value: "actions", sortable: false, class: 'body-1' },
+      { text: "Name", value: "name", class: 'success--text' },
+      { text: "Level", value: "level", class: 'success--text' },
+      { text: "", value: "codes", class: 'success--text', width:"50%" },
+      { text: "Actions", align: "right", value: "actions", sortable: false, class: 'success--text' },
     ],
     clients: [],
     editedIndex: -1,

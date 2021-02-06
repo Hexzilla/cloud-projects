@@ -3,15 +3,22 @@
         <v-progress-linear
             class="mb-1"
             indeterminate
-            color="teal"
+            color="primary"
             v-if="wait">
         </v-progress-linear>
         <v-row>
             <v-col cols="12" md="8">
-                <v-card class="px-2 py-2 mt-0">
+                <base-material-card
+                    color="green"
+                >
+                    <template v-slot:heading>
+                        <div class="display-1 font-weight-light">
+                            Holiday Calendar
+                        </div>
+                    </template>
                     <v-card-title>
                         <div style="width: 100%; text-align: right">
-                            <v-btn small rounded color="primary" @click="newCalendarClicked">
+                            <v-btn color="pink" text @click="newCalendarClicked">
                                 New Calendar
                             </v-btn>
                         </div>
@@ -76,20 +83,24 @@
                         </template>
 
                         <template v-slot:item.edit="{ item }">
-                            <v-btn x-small color="teal" title='Edit' @click="editCalendar(item)">
+                            <v-btn small color="primary" title='Edit' text @click="editCalendar(item)">
                                 EDIT
                             </v-btn>
                         </template>
                         <template v-slot:item.detail="{ item }">
-                            <v-btn x-small color="teal" title='More Info' @click="showDetail(item)">
+                            <v-btn small color="pink" title='More Info' text @click="showDetail(item)">
                                 MORE INFO
                             </v-btn>
                         </template>
                     </v-data-table>
-                </v-card>
+                </base-material-card>
             </v-col>
             <v-col cols="12" md="4">
-                <v-card class="px-2 py-2 mt-0">
+                <base-material-card
+                icon="mdi-calendar"
+                title="Holiday"
+                class="px-5 py-3"
+                >
                     <v-card-title>
                         <v-row>
                             <v-col cols="px-0 py-0">
@@ -111,7 +122,7 @@
                                 </v-select>
                             </v-col>
                             <v-col style="text-align:right">
-                                <v-btn small rounded color="teal" @click="newDateClicked" :disabled=dateBtnValid>
+                                <v-btn color="pink" text @click="newDateClicked" :disabled=dateBtnValid>
                                     New Date
                                 </v-btn>
                             </v-col>
@@ -139,13 +150,13 @@
                                         <td class="px-1">{{ item.dt }}</td>
                                         <td class="px-1">{{ item.reason }}</td>
                                         <td class="px-1">
-                                            <v-icon color="teal" class="mr-2" @click="editDate(item)"
+                                            <v-icon color="primary" class="mr-2" @click="editDate(item)"
                                                     title="Edit" style="cursor: pointer">
-                                                mdi-square-edit-outline
+                                                mdi-pencil
                                             </v-icon>
-                                            <v-icon color="red" title="Remove" @click="deleteDate(item)"
+                                            <v-icon color="warning" title="Remove" @click="deleteDate(item)"
                                                     style="cursor: pointer">
-                                                mdi-tooltip-remove-outline
+                                                mdi-delete
                                             </v-icon>
                                         </td>
                                     </tr>
@@ -154,7 +165,7 @@
                             </v-simple-table>
                         </v-col>
                     </v-row>
-                </v-card>
+                </base-material-card>
             </v-col>
         </v-row>
 
@@ -285,12 +296,17 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        <base-material-snackbar
+            v-model="snack"
+            :type="snackColor"
+            v-bind="{
+                bottom: true,
+                center: true,
+                color: snackColor
+            }"
+            >
             {{ snackText }}
-            <template v-slot:action="{ attrs }">
-                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-            </template>
-        </v-snackbar>
+        </base-material-snackbar>
     </v-container>
 </template>
 
@@ -305,15 +321,15 @@
 
         data: () => ({
             headers: [
-                { text: "Name", align: "start", value: "name" },
-                { text: "Sun", align: "start", value: "sunoff"},
-                { text: "Mon", align: "start", value: "monoff" },
-                { text: "Tue", align: "start", value: "tueoff" },
-                { text: "Wed", align: "start", value: "wedoff"},
-                { text: "Thu", align: "start", value: "thuoff"},
-                { text: "Fri", align: "start", value: "frioff"},
-                { text: "Sat", align: "start", value: "satoff"},
-                { text: "Edit", align: "center", value: "edit"},
+                { text: "Name", align: "start", value: "name", class:'primary--text'},
+                { text: "Sun", align: "start", value: "sunoff", class:'primary--text', sortable: false },
+                { text: "Mon", align: "start", value: "monoff", class:'primary--text', sortable: false },
+                { text: "Tue", align: "start", value: "tueoff", class:'primary--text', sortable: false },
+                { text: "Wed", align: "start", value: "wedoff", class:'primary--text', sortable: false },
+                { text: "Thu", align: "start", value: "thuoff", class:'primary--text', sortable: false },
+                { text: "Fri", align: "start", value: "frioff", class:'primary--text', sortable: false },
+                { text: "Sat", align: "start", value: "satoff", class:'primary--text', sortable: false },
+                { text: "", align: "center", value: "edit", class:'primary--text' },
                 { text: "", align: "center", value: "detail"},
             ],
             wait:false,
@@ -331,7 +347,7 @@
             sunday: false,
             calendarName: null,
             snack: false,
-            snackColor: "",
+            snackColor: "success",
             snackText: "",
             selectedCalendar: null,
 
@@ -401,7 +417,7 @@
             },
 
             getColor(item) {
-                if (item == 1) return "red"
+                if (item == 1) return "pink"
                 if (item == 0) return "primary"
             },
 

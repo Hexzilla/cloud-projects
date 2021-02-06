@@ -8,7 +8,14 @@
         </v-progress-linear>
         <v-row>
             <v-col cols="12" md="7">
-                <v-card class="px-2 py-2 mt-0">
+                <base-material-card
+                color="green"
+                >
+                <template v-slot:heading>
+                    <div class="display-1 font-weight-light">
+                        Leave Balance
+                    </div>
+                </template>
                     <v-data-table
                         :headers="headers"
                         :items="leaveBalances"
@@ -41,25 +48,29 @@
                         </template>
 
                         <template v-slot:item.detail="{ item }">
-                            <v-btn small color="teal" title='Detail' @click="showDetail(item)">
+                            <v-btn small text color="pink" title='Detail' @click="showDetail(item)">
                                 Detail
                             </v-btn>
                         </template>
                         <template v-slot:item.rowSelected="{ item }">
                             <template v-if="item == selectedItem">
-                                <v-icon color="red accent-4">
+                                <v-icon color="pink">
                                     mdi-check
                                 </v-icon>
                             </template>
                         </template>
                     </v-data-table>
-                </v-card>
+                </base-material-card>
             </v-col>
             <v-col cols="12" md="5">
-                <v-card class="mt-0">
+                <base-material-card
+                icon="mdi-notebook-edit"
+                title="Detail"
+                class="px-5 py-3"
+                >
                     <v-card-title>
                         <div style="text-align: right; width: 100%">
-                            <v-btn rounded small color="primary" @click="addBalance" :disabled="addBtnValid">
+                            <v-btn text color="pink" @click="addBalance" :disabled="addBtnValid">
                                 Add
                             </v-btn>
                         </div>
@@ -68,16 +79,16 @@
                     <template v-slot:default>
                     <thead>
                         <tr>
-                            <th class="text-center">
+                            <th class="text-center primary--text">
                                 +
                             </th>
-                            <th class="text-center">
+                            <th class="text-center primary--text">
                                 -
                             </th>
-                            <th class="text-center">
+                            <th class="text-center primary--text">
                                 Transaction Details
                             </th>
-                            <th class="text-center">
+                            <th class="text-center primary--text">
                                 Date
                             </th>
                         </tr>
@@ -94,8 +105,8 @@
                         </tr>
                     </tbody>
                     </template>
-                </v-simple-table>
-                </v-card>
+                    </v-simple-table>
+                </base-material-card>
             </v-col>
         </v-row>
 
@@ -177,10 +188,10 @@
 
         data: () => ({
             headers: [
-                { text: "Name", align: "start", value: "name" },
-                { text: "Designation", align: "start", value: "designation" },
-                { text: "Leave Balance", align: "start", value: "leavebal" },
-                { text: "Detail", align: "center", value: "detail"},
+                { text: "Name", align: "start", value: "name", class: "primary--text"},
+                { text: "Designation", align: "start", value: "designation", class: "primary--text" },
+                { text: "Leave Balance", align: "start", value: "leavebal", class: "primary--text" },
+                { text: "", align: "center", value: "detail", class: "primary--text"},
                 { text: "", align: "center", value: "rowSelected"}
             ],
             loading: true,

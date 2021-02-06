@@ -1,6 +1,14 @@
 <template>
   <v-container id="regular-tables" tag="section">
-    <v-card icon="mdi-file-tree" title="Task List" class="px-5 py-2">
+    
+    <base-material-card
+        color="green"
+    >
+      <template v-slot:heading>
+          <div class="display-1 font-weight-light">
+              Country List
+          </div>
+      </template>
       <v-data-table
         :headers="headers"
         :items="clients"
@@ -13,7 +21,8 @@
           <v-container>
             <div class="d-flex flex-row-reverse" flat tile>
               <v-btn
-                color="primary"
+                color="pink"
+                text
                 dark
                 class="mb-2"
                 @click="addItem"
@@ -95,7 +104,7 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)">
+          <v-icon small class="mr-2" @click="editItem(item)" color="primary">
             mdi-pencil
           </v-icon>
           <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
@@ -140,14 +149,19 @@
           <v-btn color="primary" small outlined @click="initialize"> Reset </v-btn>
         </template>
       </v-data-table>
-    </v-card>
+    </base-material-card>
 
-    <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
-      {{ snackText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
+    <base-material-snackbar
+        v-model="snack"
+        :type="snackColor"
+        v-bind="{
+            bottom: true,
+            center: true,
+            color: snackColor
+        }"
+        >
+    {{ snackText }}
+    </base-material-snackbar>
   </v-container>
 </template>
 
@@ -158,7 +172,7 @@ export default {
   data: () => ({
     loading: true,
     snack: false,
-    snackColor: "",
+    snackColor: "success",
 	  snackText: "",
 	  valid: true,
     maxCodeLength: 10,
@@ -174,9 +188,10 @@ export default {
         align: "start",
         value: "ISOcode",
         width: "30%",
+        class: "primary--text"
       },
-      { text: "Name", value: "name" },
-      { text: "Actions", align: "right", value: "actions", sortable: false },
+      { text: "Name", value: "name", class: "primary--text" },
+      { text: "Actions", align: "right", value: "actions", sortable: false, class: "primary--text" },
     ],
     clients: [],
     editedIndex: -1,

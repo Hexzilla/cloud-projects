@@ -1,6 +1,13 @@
 <template>
     <v-container id="regular-tables" tag="section">
-        <v-card icon="mdi-file-tree" title="Task List" class="px-5 py-2">
+        <base-material-card
+        color="green"
+        >
+        <template v-slot:heading>
+            <div class="display-1 font-weight-light">
+            People List
+            </div>
+        </template>
             <v-data-table
                 :headers="headers"
                 :items="people"
@@ -13,9 +20,10 @@
                     <v-container>
                         <div class="d-flex flex-row-reverse" flat tile>
                             <v-btn
-                                color="primary"
+                                color="pink"
                                 dark
                                 class="mb-2"
+                                text
                                 @click="addItem"
                             >
                                 New
@@ -181,14 +189,15 @@
                             <v-card>
                                 <v-card-title class="headline">Address</v-card-title>
 
-                                <v-tabs>
+                                <v-tabs dark fixed-tabs>
                                     <v-tabs-slider></v-tabs-slider>
 
-                                    <v-tabs v-model="tabModel" >
+                                    <v-tabs v-model="tabModel" background-color="primary">
                                         <v-tab
                                             v-for="i in 2"
                                             :key="i"
-                                            :href="`#tab-${i}`">
+                                            :href="`#tab-${i}`"
+                                            >
                                             {{tabName(i)}}
                                         </v-tab>
                                     </v-tabs>
@@ -346,11 +355,11 @@
                 </template>
 
                 <template v-slot:item.actions="{ item }">
-                    <v-icon small class="mr-2" @click="editItem(item)" title="edit">
+                    <v-icon small class="mr-2" @click="editItem(item)" title="edit" color="primary">
                         mdi-pencil
                     </v-icon>
-                    <v-icon small class="mr-2" @click="editAddress(item)" title="Address">
-                        mdi-card-bulleted-settings
+                    <v-icon small class="mr-2" @click="editAddress(item)" title="Address" color="cyan">
+                        mdi-map-marker
                     </v-icon>
                     <v-icon small disabled @click="deleteItem(item)">
                         mdi-delete
@@ -361,14 +370,19 @@
                     <v-btn color="primary" small outlined @click="initialize"> Reset </v-btn>
                 </template>
             </v-data-table>
-        </v-card>
+        </base-material-card>
 
-        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
-            {{ snackText }}
-            <template v-slot:action="{ attrs }">
-                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-            </template>
-        </v-snackbar>
+        <base-material-snackbar
+            v-model="snack"
+            :type="snackColor"
+            v-bind="{
+                bottom: true,
+                center: true,
+                color: snackColor
+            }"
+            >
+        {{ snackText }}
+        </base-material-snackbar>
     </v-container>
 </template>
 
@@ -385,7 +399,7 @@ export default {
     data: () => ({
         loading: true,
         snack: false,
-        snackColor: "",
+        snackColor: "success",
 	    snackText: "",
         valid: true,
         maxNameLength: 100,
@@ -398,12 +412,12 @@ export default {
         dialogDelete: false,
         genderList: [ {name: 'Male', value: 'm'}, { name: 'Female', value: 'f' } ],
         headers: [
-            { text: "First Name", align: "start", value: "firstname" },
-            { text: "Last Name", value: "lastname" },
-            { text: "Gender", value: "gender" },
-            { text: "Date of Birth", value: "DOB" },
-            { text: "Email", value: "email" },
-            { text: "Actions", align: "right", value: "actions", sortable: false },
+            { text: "First Name", align: "start", value: "firstname", class:"success--text" },
+            { text: "Last Name", value: "lastname", class:"success--text" },
+            { text: "Gender", value: "gender", class:"success--text" },
+            { text: "Date of Birth", value: "DOB", class:"success--text" },
+            { text: "Email", value: "email", class:"success--text" },
+            { text: "Actions", align: "right", value: "actions", sortable: false, class:"success--text" },
         ],
         people: [],
         countries: [],

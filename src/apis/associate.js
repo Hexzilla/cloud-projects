@@ -1,13 +1,17 @@
 import http from "./http.js";
 
 const findAll = async function () {
-    let associates = []
+    const jsonData = {
+        "firstname_like_": "",
+        "lastname_like_": ""
+    }
     try {
-        const response = await http.post("/hr/hrFindAll")
+        const response = await http.post("/hr/hrFindAll", jsonData)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                associates = data.response.allCarrierRecord
+
+                return data.response.allCarrierRecord
             }
         }
     }
@@ -15,19 +19,7 @@ const findAll = async function () {
         console.log(error)
     }
 
-    if (associates && associates.length > 0) {
-        for (let i in associates) {
-            let e = associates[i]
-            let info = await findOne(e.id)
-            e.info = info
-            e.initialDesignation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
-            e.designation = info[0].designations[0] && info[0].designations[0].designationid && info[0].designations[0].designationid
-            e.designationDate = info[0].designations[0] && info[0].designations[0].effectivefromdate && info[0].designations[0].effectivefromdate
-            e.initialDesignationDate = info[0].designations[0] && info[0].designations[0].effectivefromdate && info[0].designations[0].effectivefromdate
-        }
-    }
-    
-    return associates
+    return []
 }
 
 const getAssociates = async function () {
@@ -89,8 +81,8 @@ const add = async function(person) {
                 console.log("add no design")
                 return true
             } else {
-                const ret = await addDesignation(data.response.data.insertId, person.designationDate, person.designation, 0)
-                return ret
+                // const ret = await addDesignation(data.response.data.insertId, person.designationDate, person.designation, 0)
+                // return ret
             }
         }
     }
@@ -134,12 +126,13 @@ const update = async function(person) {
     }
 }
 
-const roleAssign = async function(hrId ,data) {
-    console.log("hrId", hrId)
-    console.log("data", data)
+const roleAssign = async function(hrId ,data, date) {
     let roleAction = []
     data.forEach(item => {
-        item.data.recordType != "noAction" && roleAction.push(item.data)
+        item.data.effectivedate = date
+        // item.data.effectivefromdate = date //todo remove
+        if (item.data.recordType != "noAction" && item.data.recordType != "update")
+            roleAction.push(item.data)
     })
     let jsonData = {
         "hrid": hrId,
@@ -149,7 +142,10 @@ const roleAssign = async function(hrId ,data) {
         const response = await http.post("/hr/hrRolesAssign", jsonData)
         if (response.status == 200) {
             const data = response.data
-            return data.success
+            console.log("return role data", data)
+            if (data.success) {
+                return findOne(data.response.hrid)
+            }
         }
             
     }
@@ -164,26 +160,27 @@ const getRoleWithData = function (roles) {
     roles.forEach(item=> store.push(
         {
             "id":item.id, 
-            "name":item.name,
+            "name": item.name,
+            "roleType": item.roleType,
             "data": {
-                "effectivefromdate": null,    
-                "effectivetodate": null,
+                "effectivedate": null,
                 "recordType": "noAction",
-                "rolesid": item.id
+                // "rolesid": item.id,
+                "id": null
             },
         }
     ))
     return store
 }
 
-const addDesignation = async function(hrId, date, designationId, hrDesignationId) {
+const addDesignation = async function(hrId, date, designationId, hrDesignationId, scaleCode) {
     let jsonData = {
         "hrid": hrId,
         "effectivefromdate": date,
         "designationid": designationId,
-        "closingdesignation_hrDesignationid": hrDesignationId
+        "closingdesignation_hrDesignationid": hrDesignationId,
+        "scaleCode": scaleCode
     }
-    console.log("---------add designation", jsonData)
     try {
         const response = await http.post("/hr/hrAddNewDesignation", jsonData)
         console.log("designation response", response)
