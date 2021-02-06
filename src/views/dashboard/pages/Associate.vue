@@ -225,6 +225,7 @@
         <!--Add Dialog End-->
 
         <!--Add Role Dialog Begin-->
+        <!--
         <v-dialog v-model="roleDialog" max-width="700px" >
             <v-card>
                 <v-card-title>
@@ -289,6 +290,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        -->
         <!--Add Role Dialog End-->
         
         <base-material-snackbar
@@ -546,40 +548,40 @@ export default {
             // this.openAddDialog()
         },
 
-        async roleEdit(item) {
-            this.loading = true
-            this.clearRoleData()
-            this.selectedRoles = []
-            this.selectedRoleId = []
-            // this.editedIndex = this.associates.indexOf(item);
-            this.editedItem = Object.assign({}, item);
-            let one = await associate_api.findOne(item.id)
-            this.initialRolesId = []
-            console.log("edtiedItem", this.editedItem)
-            console.log("one", one)
+        // async roleEdit(item) {
+        //     this.loading = true
+        //     this.clearRoleData()
+        //     this.selectedRoles = []
+        //     this.selectedRoleId = []
+        //     // this.editedIndex = this.associates.indexOf(item);
+        //     this.editedItem = Object.assign({}, item);
+        //     let one = await associate_api.findOne(item.id)
+        //     this.initialRolesId = []
+        //     console.log("edtiedItem", this.editedItem)
+        //     console.log("one", one)
 
-            let data = one[0].assignedRoles
-            if (data && data.length > 0) {
-                data.forEach(item=> {
-                    // let selected = this.roles.find(element => element.id == item.rolesid)
-                    // item.name = selected.name
-                    // item.recordType = "update"
-                    // this.selectedRoles.push(item.rolesid)
-                    this.roleData.forEach(role=> {
-                        if (role.id == item.rolesid) {
-                            role.data = item
-                            this.selectedRoles.push(role)
-                            this.selectedRoleId.push(role.id)
-                            this.initialRolesId.push(role.id)
-                        }
-                    })
-                })
-            }
-            console.log("initial role", this.initialRolesId)
-            console.log("selected role", this.selectedRoles)
-            this.roleDialog = true
-            this.loading = false
-        },
+        //     let data = one[0].assignedRoles
+        //     if (data && data.length > 0) {
+        //         data.forEach(item=> {
+        //             // let selected = this.roles.find(element => element.id == item.rolesid)
+        //             // item.name = selected.name
+        //             // item.recordType = "update"
+        //             // this.selectedRoles.push(item.rolesid)
+        //             this.roleData.forEach(role=> {
+        //                 if (role.id == item.rolesid) {
+        //                     role.data = item
+        //                     this.selectedRoles.push(role)
+        //                     this.selectedRoleId.push(role.id)
+        //                     this.initialRolesId.push(role.id)
+        //                 }
+        //             })
+        //         })
+        //     }
+        //     console.log("initial role", this.initialRolesId)
+        //     console.log("selected role", this.selectedRoles)
+        //     this.roleDialog = true
+        //     this.loading = false
+        // },
         
         openAddDialog() {
             if (this.$refs.form) {
@@ -668,42 +670,42 @@ export default {
             this.snackText = msg
         },
 
-        closeRole() {
-            this.roleDialog = false
-        },
+        // closeRole() {
+        //     this.roleDialog = false
+        // },
         
-        async saveRole() {
-            if (!this.$refs.form1.validate()) return
+        // async saveRole() {
+        //     if (!this.$refs.form1.validate()) return
 
-            this.loading = true
-            this.closeRole()
-            this.setRecordType(this.initialRolesId, this.selectedRoleId)
-            console.log("role data", this.roleData)
-            let result = await associate_api.roleAssign(this.editedItem.id, this.roleData)
-            this.show_snack(result)
-            this.loading = false
-        },
+        //     this.loading = true
+        //     this.closeRole()
+        //     this.setRecordType(this.initialRolesId, this.selectedRoleId)
+        //     console.log("role data", this.roleData)
+        //     let result = await associate_api.roleAssign(this.editedItem.id, this.roleData)
+        //     this.show_snack(result)
+        //     this.loading = false
+        // },
 
-        roleDataChanged() {
-            this.selectedRoles = []
-            this.selectedRoleId.length > 0 && this.selectedRoleId.forEach(id=> {
-                this.roleData.forEach(role=> {
-                    if (role.id == id) {
-                        this.selectedRoles.push(role)
-                    }
-                })
-            })
-        },
+        // roleDataChanged() {
+        //     this.selectedRoles = []
+        //     this.selectedRoleId.length > 0 && this.selectedRoleId.forEach(id=> {
+        //         this.roleData.forEach(role=> {
+        //             if (role.id == id) {
+        //                 this.selectedRoles.push(role)
+        //             }
+        //         })
+        //     })
+        // },
 
-        getNameAndDesign() {
-            if (this.editedItem && this.designations && this.designations.length > 0) {
-                let des = this.designations.find(e => e.id == this.editedItem.designation)
-                let ret = this.editedItem.firstname + ' ' + this.editedItem.lastname
-                des && des.name && (ret += '(' + des.name + ')')
-                return ret
-            }
-            return ""
-        },
+        // getNameAndDesign() {
+        //     if (this.editedItem && this.designations && this.designations.length > 0) {
+        //         let des = this.designations.find(e => e.id == this.editedItem.designation)
+        //         let ret = this.editedItem.firstname + ' ' + this.editedItem.lastname
+        //         des && des.name && (ret += '(' + des.name + ')')
+        //         return ret
+        //     }
+        //     return ""
+        // },
 
         joinedDateChanged(item) {
             if (item.JoinDateForResourcePlanning == null) {
@@ -715,13 +717,13 @@ export default {
             }
         },
 
-        removeRole(item) {
-            const filtered = this.selectedRoles.filter( e => e.id != item.id)
-            this.selectedRoles = filtered
+        // removeRole(item) {
+        //     const filtered = this.selectedRoles.filter( e => e.id != item.id)
+        //     this.selectedRoles = filtered
 
-            const ids = this.selectedRoleId.filter( e => e != item.id)
-            this.selectedRoleId = ids
-        },
+        //     const ids = this.selectedRoleId.filter( e => e != item.id)
+        //     this.selectedRoleId = ids
+        // },
 
         clearRoleData() {
             let data = this.roleData

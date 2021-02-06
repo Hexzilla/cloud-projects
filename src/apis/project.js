@@ -1,6 +1,7 @@
 import moment from 'moment'
 import http from "./http.js";
 import task from "./task.js";
+import associate from "./associate.js";
 
 const getProjects = async function() {
     const tempList = await findAll()
@@ -698,28 +699,16 @@ const allocateResource = async function (id, current, initial) {
     return false
 }
 
-const findPeople = async function() {
-    try {
-        const response = await http.post("/hr/hrFindAll")
-        if (response.status == 200) {
-            const data = response.data;
-            if (data.success) {
-                let ret = data.response.allCarrierRecord
-                let result = []
-                ret && ret.length > 0 && ret.forEach(item => {
-                    result.push({
-                        id: item.id,
-                        name: item.firstname + " " + item.lastname
-                    })
-                })
-                return result
-            }
-        }
-    }
-    catch (error) {
-        console.log(error)
-    }
-    return []
+const findPeople = async function () {
+    let ret = await associate.findAll()
+    let result = []
+    ret && ret.length > 0 && ret.forEach(item => {
+        result.push({
+            id: item.id,
+            name: item.firstname + " " + item.lastname
+        })
+    })    
+    return result
 }
 
 const getProgress = async function (id, date, code) {

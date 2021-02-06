@@ -1,12 +1,14 @@
 <template>
-  <v-card class="my-0">
+  <base-material-card
+  icon="mdi-notebook-edit"
+  title="Project Detail"
+  color="purple"
+  class="px-5 py-3"
+  >
     <v-card-title class="px-0 mx-4"> 
       <v-row>
-        <v-col>
-          <p class="subtitle-1">Project Details</p> 
-        </v-col>
         <v-col class="text-right">
-          <v-btn small @click="addPhase" color="green">Add Phase</v-btn>
+          <v-btn @click="addPhase" color="pink" text>Add Phase</v-btn>
         </v-col>
       </v-row>
     </v-card-title>
@@ -38,7 +40,7 @@
       </v-container>
     </v-form>
 
-  </v-card>
+  </base-material-card>
 </template>
 
 <script>

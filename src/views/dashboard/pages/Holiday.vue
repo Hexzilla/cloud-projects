@@ -99,6 +99,7 @@
                 <base-material-card
                 icon="mdi-calendar"
                 title="Holiday"
+                color="purple"
                 class="px-5 py-3"
                 >
                     <v-card-title>
@@ -134,13 +135,13 @@
                                 <template v-slot:default>
                                 <thead>
                                     <tr>
-                                        <th width="30%" class="text-left">
+                                        <th width="30%" class="text-left primary--text">
                                             Date
                                         </th>
-                                        <th width="50%" class="text-left">
+                                        <th width="50%" class="text-left primary--text">
                                             Reason
                                         </th>
-                                        <th width="20%" class="text-center">
+                                        <th width="20%" class="text-center primary--text">
                                             Action
                                         </th>
                                     </tr>

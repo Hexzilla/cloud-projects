@@ -8,9 +8,16 @@
         </v-progress-linear>
         <v-row>
             <v-col cols="12" sm="12" md="3">
-                <v-card class="my-0">
+                <base-material-card
+                color="green"
+                >
+                <template v-slot:heading>
+                    <div class="display-1 font-weight-light">
+                    Project List
+                    </div>
+                </template>
                     <v-card-title class="flex flex-row-reverse px-0 mx-0">
-                        <v-btn small :disabled="wait" v-on:click="project_addButtonClicked" color="primary">New Project</v-btn>
+                        <v-btn small :disabled="wait" v-on:click="project_addButtonClicked" color="pink" text class="py-5">New Project</v-btn>
                     </v-card-title>
                     <v-list :disabled="wait">
                         <v-list-item-group>
@@ -34,7 +41,7 @@
                             </v-list-item>
                         </v-list-item-group>
                     </v-list>
-                </v-card>
+                </base-material-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
                 <ProjectDetails 

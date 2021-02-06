@@ -1,6 +1,14 @@
 <template>
     <v-container id="regular-tables" tag="section" fluid>
-        <v-card icon="mdi-file-tree" title="Leave" class="px-5 py-2">
+        
+        <base-material-card
+        color="green"
+        >
+        <template v-slot:heading>
+            <div class="display-1 font-weight-light">
+                Leave Individual
+            </div>
+        </template>
             <v-data-table
                 :headers="headers"
                 :items="leaveData"
@@ -11,9 +19,10 @@
                     <v-container>
                         <div class="d-flex flex-row-reverse" flat tile>
                         <v-btn
-                            color="primary"
+                            color="pink"
                             dark
                             class="mb-2"
+                            text
                             @click="addItem">
                             New
                         </v-btn>
@@ -166,14 +175,19 @@
                     </template>
                 </template>
             </v-data-table>
-        </v-card>
+        </base-material-card>
 
-        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        <base-material-snackbar
+            v-model="snack"
+            :type="snackColor"
+            v-bind="{
+                bottom: true,
+                center: true,
+                color: snackColor
+            }"
+            >
             {{ snackText }}
-            <template v-slot:action="{ attrs }">
-                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-            </template>
-        </v-snackbar>
+        </base-material-snackbar>
 
     </v-container>
 </template>
@@ -189,11 +203,11 @@
 
         data: () => ({
             headers: [
-                { text: "Leave From", align: "start", value: "leaveFrom" },
-                { text: "Leave To", align: "start", value: "leaveTo" },
-                { text: "Status", align: "start", value: "status" },
-                { text: "Reason", align: "start", value: "reason", sortable: false },
-                { text: "Action", align: "center", value: "actions"}
+                { text: "Leave From", align: "start", value: "leaveFrom", class: "primary--text"},
+                { text: "Leave To", align: "start", value: "leaveTo",class: "primary--text" },
+                { text: "Status", align: "start", value: "status",class: "primary--text" },
+                { text: "Reason", align: "start", value: "reason", sortable: false, class: "primary--text" },
+                { text: "Action", align: "center", value: "actions", class: "primary--text"}
             ],
             leaveData: [],
             leaveTypes: [{value: 'EL', name: 'Earned Leave'},
@@ -220,7 +234,7 @@
                 toHalf: false
             },
             snack: false,
-            snackColor: "",
+            snackColor: "success",
             snackText: "",
             editOrAdd: "",
             selectedItem: null,

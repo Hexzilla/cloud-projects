@@ -2,7 +2,14 @@
     <v-container id="regular-tables" tag="section" fluid>
         <v-row>
             <v-col>
-                <v-card class="my-0" style="min-height:500px">
+                <base-material-card
+                color="green"
+                >
+                <template v-slot:heading>
+                    <div class="display-1 font-weight-light">
+                        Manpower Utilization
+                    </div>
+                </template>
                     <v-card-title>
                         <v-row>
                             <v-col>
@@ -25,8 +32,8 @@
                             </v-col>
                             <v-col style="display:flex; align-items:center;">
                                 <v-btn
-                                    elevation="2"
-                                    color="teal"
+                                    color="pink"
+                                    text
                                     small
                                     @click="getReport"
                                 >Report</v-btn>
@@ -56,12 +63,12 @@
                             </v-container>
                         </template>
                         <template v-slot:item.detail="{ item }">
-                            <v-btn small color="teal" text title='Detail' @click="showDetail(item)">
+                            <v-btn small color="pink" text title='Detail' @click="showDetail(item)">
                                 Detail
                             </v-btn>
                         </template>
                     </v-data-table>
-                </v-card>
+                </base-material-card>
             </v-col>
         </v-row>
 
@@ -99,19 +106,19 @@
         data: () => ({
             loading: false,
             headers: [
-                { text: "Name", align: "start", value: "name" },
-                { text: "Total working days", align: "start", value: "total" },
-                { text: "Med.Leave", align: "start", value: "medLeave" },
-                { text: "Cas.Leave", align: "start", value: "casLeave" },
-                { text: "Vacation", align: "start", value: "vacation"},
-                { text: "Un Occ days", align: "start", value: "unOccDays"},
+                { text: "Name", align: "start", value: "name", class: "primary--text"},
+                { text: "Total working days", align: "start", value: "total", class: "primary--text" },
+                { text: "Med.Leave", align: "start", value: "medLeave", class: "primary--text" },
+                { text: "Cas.Leave", align: "start", value: "casLeave", class: "primary--text" },
+                { text: "Vacation", align: "start", value: "vacation", class: "primary--text"},
+                { text: "Un Occ days", align: "start", value: "unOccDays", class: "primary--text"},
                 { text: "", align: "center", value: "detail"}
             ],
             modalHeaders: [
-                { text: "Date", align: "start", value: "dt" },
-                { text: "Status", align: "start", value: "dayType" },
-                { text: "Worked Hour", align: "start", value: "hrsWorked" },
-                { text: "Wokred Min", align: "start", value: "minsWorked" },
+                { text: "Date", align: "start", value: "dt", class: "primary--text" },
+                { text: "Status", align: "start", value: "dayType", class: "primary--text" },
+                { text: "Worked Hour", align: "start", value: "hrsWorked", class: "primary--text" },
+                { text: "Wokred Min", align: "start", value: "minsWorked", class: "primary--text" },
             ],
             persons: [],
             fromDate: '',

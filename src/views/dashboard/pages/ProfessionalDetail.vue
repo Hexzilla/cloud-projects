@@ -132,7 +132,7 @@
                             </v-row><br>
                             <v-row>
                                 <v-col class="py-0" v-for="(type, i) in roleTypes" :key="i">
-                                    <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #6A1B9A; color:white">{{ type }}</p>
+                                    <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #7B1FA2; color:white">{{ type }}</p>
                                     <v-list>
                                         <v-list-item-group
                                             v-model="selectedRoles"

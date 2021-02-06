@@ -66,6 +66,7 @@
                 <base-material-card
                 icon="mdi-notebook-edit"
                 title="Detail"
+                color="purple"
                 class="px-5 py-3"
                 >
                     <v-card-title>
@@ -167,12 +168,18 @@
             </v-card>
         </v-dialog>
         <!--Add Dialog End-->
-        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        
+        <base-material-snackbar
+            v-model="snack"
+            :type="snackColor"
+            v-bind="{
+                bottom: true,
+                center: true,
+                color: snackColor
+            }"
+            >
             {{ snackText }}
-            <template v-slot:action="{ attrs }">
-                <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-            </template>
-        </v-snackbar>
+        </base-material-snackbar>
     </v-container>
 </template>
 
@@ -214,7 +221,7 @@
             },
             addBtnValid: true,
             snack: false,
-            snackColor: "",
+            snackColor: "success",
             snackText: "",
         }),
 

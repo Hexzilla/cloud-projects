@@ -12,7 +12,7 @@
         <v-text-field
           :value="date"
           :label="textName"
-          append-icon="mdi-calendar"
+          prepend-icon="mdi-calendar"
           readonly
           v-bind="attrs"
           v-on="on"

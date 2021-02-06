@@ -1,5 +1,5 @@
 <template>
-  <v-container id="regular-tables" tag="section">
+  <v-container>
     
     <base-material-card
       color="green"
@@ -36,7 +36,7 @@
       </v-row>
       <v-row>
         <v-col v-for="(item, i) in roleTypes" :key="i">
-          <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #6A1B9A; color:white">{{ item }}</p>
+          <p class="text-center mb-0 py-2 body-1 font-weight-bold" style="background-color: #7B1FA2; color:white">{{ item }}</p>
           <v-data-table
             :headers="headers"
             :items="filteredItems(clients, item)"

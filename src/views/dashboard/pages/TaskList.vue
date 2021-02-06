@@ -1,11 +1,19 @@
 <template>
   <v-container tag="section">
-    <v-card icon="mdi-file-tree" title="Task List" class="px-5 py-2">
+    <base-material-card
+    color="green"
+    >
+    <template v-slot:heading>
+        <div class="display-1 font-weight-light">
+            Leave Balance
+        </div>
+    </template>
       <v-card class="d-flex flex-row-reverse" flat tile>
         <div>
           <v-btn
             class="mx-4"
-            color="primary"
+            color="pink"
+            text
             @click="addCategory"
           >
             New Category
@@ -13,6 +21,7 @@
           <v-btn
             class="px-2"
             color="primary"
+            elevation="10"
             @click="saveAll"
             :disabled="saveBtnStatus"
           >
@@ -101,14 +110,19 @@
           </v-icon>
         </template>
       </v-treeview>
-    </v-card>
+    </base-material-card>
 
-    <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
-        {{ snackText }}
-        <template v-slot:action="{ attrs }">
-            <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-        </template>
-    </v-snackbar>
+    <base-material-snackbar
+      v-model="snack"
+      :type="snackColor"
+      v-bind="{
+          bottom: true,
+          center: true,
+          color: snackColor
+      }"
+      >
+      {{ snackText }}
+    </base-material-snackbar>
   </v-container>
 </template>
 
@@ -133,7 +147,7 @@ export default {
     roles: [],
     selectedRole: null,
     snack: false,
-    snackColor: "",
+    snackColor: "success",
     snackText: "",
     saveBtnStatus: true,
   }),

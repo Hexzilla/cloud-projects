@@ -218,7 +218,7 @@ export default {
       // },
       { text: "Name", value: "name", class: 'success--text' },
       { text: "Level", value: "level", class: 'success--text' },
-      { text: "", value: "codes", class: 'success--text', width:"50%" },
+      { text: "", value: "codes", class: 'success--text', width:"50%", sortable: false},
       { text: "Actions", align: "right", value: "actions", sortable: false, class: 'success--text' },
     ],
     clients: [],
@@ -300,9 +300,10 @@ export default {
       this.editedItem = Object.assign({}, item);
 
       let tempScales = []
-      this.editedItem.scalecodes.forEach((e, i) => {
+      this.editedItem.scalecodes && this.editedItem.scalecodes.length > 0 && this.editedItem.scalecodes.forEach((e, i) => {
         tempScales.push(i+1)
       })
+      if (tempScales.length == 0) tempScales.push(1)
       this.editedItem.scalecodes = tempScales
       console.log("tempScales", tempScales)
 

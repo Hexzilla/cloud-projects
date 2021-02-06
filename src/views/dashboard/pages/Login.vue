@@ -59,6 +59,12 @@
                     </v-btn>
                 </div>
             </v-card-actions>
+            <v-progress-linear
+                class="my-0 py-0"
+                indeterminate
+                color="green"
+                v-show="wait">
+            </v-progress-linear>
         </base-material-card>
         <!--
         <v-card
@@ -134,6 +140,7 @@ export default {
         code: "",
         errorMessageCode: "",
         show1: false,
+        wait: false
     }),
 
     created: function() {
@@ -167,6 +174,7 @@ export default {
     methods: {
         async onLogin() {
             if (!this.$refs.form.validate()) return
+            this.wait = true
             let status = await auth_api.login(this.code, this.password)
             if (status) {
                 localStorage.setItem('code', this.code)
@@ -180,6 +188,7 @@ export default {
                 this.errorMessageCode = "Not registered code"
                 this.errorMessagePassword = "Not registered password"
             }
+            this.wait =false
         }
     }
 }

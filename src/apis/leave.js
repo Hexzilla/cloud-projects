@@ -1,4 +1,5 @@
 import http from "./http.js"
+import associate from "./associate.js"
 
 const getMyLeave = async function(hrId) {
     let data = {
@@ -22,7 +23,7 @@ const getMyLeave = async function(hrId) {
 
 const getNecessaryFromLeave = async function(ret) {
     let result = []
-    let persons = await getPerson()
+    let persons = await associate.findAll()
 
     ret && ret.length > 0 && ret.forEach(item => {
         let hrId = item.LAhrid ? item.LAhrid : 0
@@ -264,43 +265,6 @@ const adjustBalance = async function(data) {
 const getCurrentDate = function () {
     const date = new Date()
     return (1900 + date.getYear()) + '-' + (date.getMonth() + 1) + '-' + date.getDate()
-}
-
-const getPerson = async function () {
-    let associates = []
-    try {
-        const response = await http.post("/hr/hrFindAll")
-        if (response.status == 200) {
-            const data = response.data;
-            if (data.success) {
-                associates = data.response.allCarrierRecord
-            }
-        }
-    }
-    catch (error) {
-        console.log(error)
-    }
-    
-    return associates
-}
-
-const getOnePerson = async function(id) {
-    let data = {
-        id: id
-    }
-    try {
-        const response = await http.post("/hr/hrFindOne", data)
-        if (response.status == 200) {
-            const data = response.data;
-            if (data.success) {
-                return data.response.allCarrierRecord
-            }
-        }
-    }
-    catch (error) {
-        console.log(error)
-    }
-    return []
 }
 
 export default {
