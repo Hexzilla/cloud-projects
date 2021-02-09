@@ -104,6 +104,19 @@
                 class="px-5 py-3"
                 >
                     <v-row>
+                        <v-col class="text-right">
+                            <v-btn
+                                small
+                                color="pink"
+                                text
+                                @click="goToDetail"
+                                :disabled="wait"
+                            >
+                                Project Detail
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                    <v-row>
                         <v-col>
                             <v-text-field
                             label="Project Code"
@@ -144,6 +157,14 @@
                             <v-text-field
                             label="Approval stsatus"
                             v-model="projectApproval"
+                            readonly
+                            >
+                            </v-text-field>
+                        </v-col>
+                        <v-col>
+                            <v-text-field
+                            label="PM"
+                            v-model="projectPM"
                             readonly
                             >
                             </v-text-field>
@@ -440,70 +461,79 @@ export default {
     }),
 
     computed: {
-      projectName: function() {
-        return (this.project) ? this.project.prj_name : ''
-      },
-      projectCode: function() {
-        return (this.project) ? this.project.prj_code : ''
-      },
-      projectClient: function() {
-        let name = ''
-        this.project && this.clients.forEach(client => {
-          if (client.id == this.project.cl_id) {
-            name = client.name
-            return
-          }
-        })
-        return name
-      },
-      preSalesDateRange() {
-        if (this.project == null) return ''
-        return (this.project.prj_presalesopendate || '') + ' ~ ' + (this.project.prj_presalesclosedate || '')
-      },
-      billingDateRange() {
-        if (this.project == null) return ''
-        return (this.project.prj_executionopendate || '') + ' ~ ' + (this.project.prj_executionclosedate || '')
-      },
-      warrantyDateRange() {
-        if (this.project == null) return ''
-        return (this.project.prj_warrantyopendate || '') + ' ~ ' + (this.project.prj_warrantyclosedate || '')
-      },
-      projectApproval() {
-          return (this.project) ? this.project.prj_approval : ''
-      },
-      projectEnqNumber() {
-          return (this.project) ? this.project.prj_refEnqNumber : ''
-      },
-
-      docFileRules() {
-        return [
-            (v) => {
-                if (!v)
-                    return 'File is required'
-                else if (v.size > 2097152)
-                    return ' < 2MB'
-                return true
+        projectName: function() {
+            return (this.project) ? this.project.prj_name : ''
+        },
+        projectCode: function() {
+            return (this.project) ? this.project.prj_code : ''
+        },
+        projectClient: function() {
+            let name = ''
+            this.project && this.clients.forEach(client => {
+            if (client.id == this.project.cl_id) {
+                name = client.name
+                return
             }
-        ]
-      },
-      docCodeRules() {
-        return [
-            (v) => !!v || "Code is required",
-            (v) => (v && v.trim().length > 0) || "Code is required"
-        ]
-      },
-      docDescRules() {
-        return [
-            (v) => !!v || "File Description is required",
-            (v) => (v && v.trim().length > 0) || "File Description is required",
-        ]
-      },
+            })
+            return name
+        },
+        preSalesDateRange() {
+            if (this.project == null) return ''
+            return (this.project.prj_presalesopendate || '') + ' ~ ' + (this.project.prj_presalesclosedate || '')
+        },
+        billingDateRange() {
+            if (this.project == null) return ''
+            return (this.project.prj_executionopendate || '') + ' ~ ' + (this.project.prj_executionclosedate || '')
+        },
+        warrantyDateRange() {
+            if (this.project == null) return ''
+            return (this.project.prj_warrantyopendate || '') + ' ~ ' + (this.project.prj_warrantyclosedate || '')
+        },
+        projectApproval() {
+            return (this.project) ? this.project.prj_approval : ''
+        },
+        projectEnqNumber() {
+            return (this.project) ? this.project.prj_refEnqNumber : ''
+        },
+        projectPM() {
+            // return (this.project) ? this.project.prj_projectmanagerhrid : ''
+            if (this.project) {
+                const found = this.associates.find(e => e.id == this.project.prj_projectmanagerhrid)
+                if (found)
+                    return found.firstname + ' ' + found.lastname
+            }
+            return ''
+        },
 
-      phaseDlgTitle() {
-        if (this.phaseEdit)
-            return "Edit Phase"
-        return "Add Phase"
-      }
+        docFileRules() {
+            return [
+                (v) => {
+                    if (!v)
+                        return 'File is required'
+                    else if (v.size > 2097152)
+                        return ' < 2MB'
+                    return true
+                }
+            ]
+        },
+        docCodeRules() {
+            return [
+                (v) => !!v || "Code is required",
+                (v) => (v && v.trim().length > 0) || "Code is required"
+            ]
+        },
+        docDescRules() {
+            return [
+                (v) => !!v || "File Description is required",
+                (v) => (v && v.trim().length > 0) || "File Description is required",
+            ]
+        },
+
+        phaseDlgTitle() {
+            if (this.phaseEdit)
+                return "Edit Phase"
+            return "Add Phase"
+        }
     },
 
     created: async function() {
@@ -805,6 +835,11 @@ export default {
 
             this.docWait = false
             this.wait = false
+        },
+
+        goToDetail() {
+            if (!this.project) return
+            this.$router.push('/pages/project_detail?prj_id=' + this.project.prj_id)
         }
     }
 }
