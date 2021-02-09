@@ -16,8 +16,7 @@
     "now-start": "vue-cli-service serve",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
-    "preinstall": "npx npm-force-resolutions",
-    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build"
+    "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
     "apexcharts": "^3.23.1",
