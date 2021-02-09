@@ -727,6 +727,68 @@ const approveProject = async function (id) {
     return false
 }
 
+const addDoc = async function (id, code, description, file) {
+    let jsonData = {
+        "prj_id": id,
+        "docTypeCode": code,
+        "fileDescription": description,
+        "projRelatedDoc": file
+    }
+    const postData = new FormData()
+    postData.append('prj_id', id)
+    postData.append('docTypeCode', code)
+    postData.append('fileDescription', description)
+    postData.append('projRelatedDoc', file, file.name)
+    try {
+        const response = await http.post("/plan/projectAddDoc", postData)
+        if (response.status == 200) {
+            const data = response.data;
+            console.log("file uploaded", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const deleteDoc = async function (id, doc_id, store_id) {
+    let jsonData = {
+        "prj_id": id,
+        "projectDocsid": doc_id,
+        "documentStoreid": store_id
+    }
+    try {
+        const response = await http.post("/plan/projectRemoveDoc", jsonData)
+        if (response.status == 200) {
+            const data = response.data;
+            console.log("doc deleted", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const getDoc = async function (id, doc_id, store_id) {
+    let jsonData = {
+        "prj_id": id,
+        "projectDocsid": doc_id,
+        "documentStoreid": store_id
+    }
+    try {
+        const response = await http.post("/plan/projectGetDoc", jsonData)
+        return response
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
 const findPeople = async function () {
     let ret = await associate.findAll()
     let result = []
@@ -798,5 +860,9 @@ export default {
     allocateResource,
     findPeople,
     getProgress,
-    approveProject    
+    approveProject,
+    
+    addDoc,
+    deleteDoc,
+    getDoc
 }

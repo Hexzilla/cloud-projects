@@ -544,7 +544,6 @@
                 console.log("phases", this.phases)
             },
 
-
             cloneTree(items) {
                 return items.map((item) => {
                     const node = Object.assign({}, item)

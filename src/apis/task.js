@@ -38,14 +38,14 @@ const findAll = async function() {
 }
 
 const update = async function(tasks) {
-    try {
-        const postData = {
-            saveThisRecord: {
-                TaskCategory: tasks
-            }
+    const postData = {
+        saveThisRecord: {
+            TaskCategory: tasks
         }
-        const data = JSON.stringify(postData)
-        //console.log(data)
+    }
+    console.log("updated data", postData)
+    const data = JSON.stringify(postData)
+    try {
         const response = await http.post("/taskCat/updateAllTaskAndSubTasksF2", data)
         if (response.status == 200) {
             return true

@@ -67,6 +67,11 @@ const router = new Router({
           component: () => import('@/views/dashboard/pages/ProjectSummary'),
         },
         {
+          name: 'Project Detail',
+          path: 'pages/project_detail',
+          component: () => import('@/views/dashboard/pages/PDetail'),
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('@/views/dashboard/pages/UserProfile'),

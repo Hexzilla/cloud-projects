@@ -5,7 +5,7 @@
     >
     <template v-slot:heading>
         <div class="display-1 font-weight-light">
-            Leave Balance
+            Task List
         </div>
     </template>
       <v-card class="d-flex flex-row-reverse" flat tile>
@@ -51,7 +51,7 @@
       ></v-progress-linear>
 
       <!--Add, Edit dialog-->
-      <v-dialog v-model="dialog" max-width="500px">
+      <v-dialog v-model="dialog" max-width="600px">
         <v-card>
           <v-card-title>
             <span class="headline">{{ formTitle }}</span>
@@ -68,13 +68,15 @@
                   required
                 ></v-text-field>
                 <v-select
-                  v-if="isLevel1"
+                  v-if="isTask"
                   :items="roles"
                   :rules="roleRules"
                   v-model="selectedRole"
-                  item-text="name"
+                  item-text="nameWithType"
                   item-value="id"
                   label="Role"
+                  chips
+                  multiple
                 ></v-select>
               </v-form>
             </v-container>
@@ -96,6 +98,7 @@
         :search="search"
         :open="initiallyOpen"
         :items="items"
+        open-on-click
         item-key="ikey"
         activatable
       >
@@ -103,6 +106,22 @@
           <v-icon v-if="item.level < 4" color="green" @click="addTask(item)">
             mdi-playlist-plus
           </v-icon>
+        </template>
+        <template v-slot:label="{ item }">
+          <v-row>
+            <v-col>
+              {{ item.name }}
+            </v-col>
+            <template v-if="item.roles">
+              <v-col>
+                  <v-chip
+                    color="purple darken-1"
+                    class="white--text mr-1"
+                  v-for="(v, i) in item.roles" :key="i">
+                  {{ getRoleName(v) }}</v-chip>
+              </v-col>
+            </template>
+          </v-row>
         </template>
         <template v-slot:append="{ item }">
           <v-icon v-if="item.ikey != 0" color="green" @click="editTask(item)">
@@ -174,8 +193,10 @@ export default {
     roleRules() {
       return [(v) => !!v || "Role is required"]
     },
-    isLevel1() {
-      if (this.selectedItem && this.actionMode === "add_task" && this.selectedItem.level == 0 || this.selectedItem && this.actionMode === "edit_task" && this.selectedItem.level == 1)
+
+    isTask() {
+      console.log("selected ", this.selectedItem)
+      if (this.selectedItem && this.actionMode === "add_task" || this.selectedItem && this.actionMode === "edit_task" && this.selectedItem.level >= 1)
         return true
       return false
     }
@@ -183,11 +204,24 @@ export default {
 
   created: async function () {
     this.items = await api.findAll();
+
     this.uniqueTreeId = this.setUniqueId(this.items)
     console.log("uniqueTreeId:", this.uniqueTreeId, this.items)
 
     this.roles = await roleApi.findAll();
+    this.roles.sort( (a, b) => {
+      let comp = 0
+      if (a.roleType > b.roleType)
+        comp = 1
+      else if (a.roleType < b.roleType)
+        comp = -1
+      return comp
+    })
     console.log("roles:", this.roles)
+
+    this.roles.forEach( e => {
+      e.nameWithType = '(' + e.roleType + ')  ' + e.name
+    })
 
     this.loading = false;
   },
@@ -215,8 +249,10 @@ export default {
       this.selectedItem = item;
       console.log("editTask", this.editName);
 
-      if(item.level == 1)
-        this.selectedRole = item.roleid
+      if(item.level >= 1) {
+        // this.selectedRole = item.roleid
+        this.selectedRole = item.roles
+      }
       this.openDialog();
     },
 
@@ -300,8 +336,9 @@ export default {
         userAction: 'newData',
         children: [],
       };
-      if (level == 1) {
-        tazk["roleid"] = this.selectedRole
+      if (level >= 1) {
+        // tazk["roleid"] = this.selectedRole
+        tazk["roles"] = this.selectedRole
       }
       return tazk
     },
@@ -339,8 +376,17 @@ export default {
       else {
         this.selectedItem.userAction = "modified"
         this.selectedItem.name = this.editName;
-        if (this.selectedItem.level && this.selectedItem.level == 1)
-          this.selectedItem.roleid = this.selectedRole
+        this.selectedItem.roles = this.selectedRole
+        // if (this.selectedItem.level && this.selectedItem.level >= 1) {
+        //   this.selectedItem.roles = "{rolesidlist=["
+        //   this.selectedRole.forEach( (e, i) => {
+        //     this.selectedItem.roles += e
+        //     if (i != this.selectedRole.length - 1)
+        //       this.selectedItem.roles += ','
+        //   })
+        //   this.selectedItem.roles += "]}"
+        // }
+
         console.log("save.edit.tazk", this.selectedItem)
       }
       this.saveBtnStatus = false
@@ -388,6 +434,11 @@ export default {
       if (result)
         return item
       return result
+    },
+
+    getRoleName(roleId) {
+      const found = this.roles.find( e => e.id == roleId)
+      return found.name
     }
   },
 };

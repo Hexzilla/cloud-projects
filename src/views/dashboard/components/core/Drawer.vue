@@ -166,7 +166,7 @@
             },
             {
               icon: 'mdi-semantic-web',
-              title: 'project_summary',
+              title: 'project',
               to: '/pages/project_summary',
             },
           ]

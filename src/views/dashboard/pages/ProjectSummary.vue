@@ -150,6 +150,17 @@
                         </v-col>
                     </v-row>
                     <v-row>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field readonly label="Pre sales Date" style="font-size:14px" v-model="preSalesDateRange"/>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field readonly label="Billing Date" style="font-size:14px" v-model="billingDateRange"/>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field readonly label="Warranty Date" style="font-size:14px"  v-model="warrantyDateRange"/>
+                        </v-col>
+                    </v-row>
+                    <v-row>
                         <v-col class="text-center">
                             <v-btn
                                 color="purple"
@@ -176,6 +187,12 @@
                     </v-row>
                     <v-row>
                         <v-col>
+                            <v-progress-linear
+                                class="mb-1"
+                                indeterminate
+                                color="green"
+                                v-if="phaseWait">
+                            </v-progress-linear>
                             <v-simple-table>
                                 <tbody>
                                     <template v-if="project">
@@ -203,19 +220,29 @@
                     </v-row>
                     <v-row>
                         <v-col class="text-right">
-                            <v-btn x-small color="purple" fab>
+                            <v-btn x-small color="purple" fab @click="document_addButtonClicked">
                                 <v-icon>mdi-plus</v-icon>
                             </v-btn>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col>
+                            <v-progress-linear
+                                class="mb-1"
+                                indeterminate
+                                color="green"
+                                v-if="docWait">
+                            </v-progress-linear>
                             <v-simple-table>
                                 <tbody>
                                     <template v-if="project">
                                         <tr v-for="(item, i) in project.documents" :key="i">
                                             <td>{{i + 1}}</td>
                                             <td>{{item.documentStorefileDescription}}</td>
+                                            <td>
+                                                <v-icon color="primary" :disabled="docWait" @click="showDoc(item)" class="mr-3">mdi-eye</v-icon>
+                                                <v-icon color="warning" :disabled="docWait" @click="deleteDoc(item)">mdi-delete</v-icon>
+                                            </td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -242,7 +269,7 @@
         <v-dialog v-model="phaseDialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Add Phase</span>
+                    <span class="headline">{{phaseDlgTitle}}</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
@@ -275,6 +302,73 @@
             </v-card>
         </v-dialog>
 
+        <!--Add doc dialog-->
+        <v-dialog v-model="docDialog" max-width="600px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Document Manage</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-form ref="docForm" lazy-validation>
+                            <v-row>
+                                <v-file-input
+                                    accept=".xlx, .xlsx, .doc, .docs, .pdf"
+                                    label="Select file"
+                                    :rules="docFileRules"
+                                    truncate-length="50"
+                                    v-model="docFile"
+                                ></v-file-input>
+                            </v-row>
+                            <v-row>
+                                <v-text-field
+                                    counter="30"
+                                    label="DocTypeCode"
+                                    :rules="docCodeRules"
+                                    maxlength="30"
+                                    v-model="docCode"
+                                >
+                                </v-text-field>
+                            </v-row>
+                            <v-row>
+                                <v-textarea
+                                    counter="1000"
+                                    label="File Description"
+                                    :rules="docDescRules"
+                                    maxlength="1000"
+                                    v-model="docDesc"
+                                ></v-textarea>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDocDialog"> Cancel </v-btn>
+                    <v-btn color="blue darken-1" text @click="doc_dialogAddButtonClicked">
+                        Save
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!--Delete Dialog -->
+        <v-dialog v-model="dialogDelete" max-width="600px">
+        <v-card>
+            <v-card-title class="headline"
+            >Are you sure?</v-card-title
+            >
+            <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" @click="closeDelete">
+                No
+            </v-btn>
+            <v-btn color="blue darken-1" text @click="deleteItemConfirm">Yes</v-btn>
+            <v-spacer></v-spacer>
+            </v-card-actions>
+        </v-card>
+        </v-dialog>
+
         <base-material-snackbar
             v-model="snack"
             :type="snackColor"
@@ -304,7 +398,9 @@ export default {
 
     data: () => ({
         wait: false,
-        
+        docWait: false,
+        phaseWait: false,
+
         snack: false,
         snackColor: "success",
 	    snackText: "",
@@ -332,7 +428,15 @@ export default {
         phase: null,
         phaseEdit: false,
 
-        associates: []
+        associates: [],
+
+        docDialog: false,
+        docFile: null,
+        docCode: null,
+        docDesc: null,
+        selectedDoc: null,
+        dialogDelete: false,
+
     }),
 
     computed: {
@@ -369,6 +473,36 @@ export default {
       },
       projectEnqNumber() {
           return (this.project) ? this.project.prj_refEnqNumber : ''
+      },
+
+      docFileRules() {
+        return [
+            (v) => {
+                if (!v)
+                    return 'File is required'
+                else if (v.size > 2097152)
+                    return ' < 2MB'
+                return true
+            }
+        ]
+      },
+      docCodeRules() {
+        return [
+            (v) => !!v || "Code is required",
+            (v) => (v && v.trim().length > 0) || "Code is required"
+        ]
+      },
+      docDescRules() {
+        return [
+            (v) => !!v || "File Description is required",
+            (v) => (v && v.trim().length > 0) || "File Description is required",
+        ]
+      },
+
+      phaseDlgTitle() {
+        if (this.phaseEdit)
+            return "Edit Phase"
+        return "Add Phase"
       }
     },
 
@@ -486,6 +620,8 @@ export default {
         },
 
         phase_addButtonClicked: function() {
+            if (!this.project)
+                return
             this.phaseFromDate = ''
             this.phaseToDate = ''
             this.phaseDialog = true
@@ -506,6 +642,8 @@ export default {
 
         phase_dialogAddButtonClicked: async function() {
             this.wait = true
+            this.phaseWait = true
+
             this.phaseDialog = false
 
             if (this.phaseEdit) {
@@ -548,6 +686,7 @@ export default {
             }
             this.setMaxPhaseDate()
             this.wait = false   
+            this.phaseWait = false
         },
 
         setMaxPhaseDate () {
@@ -561,6 +700,8 @@ export default {
             this.phaseDialog = true
             this.phaseEdit = true
 
+            this.phaseFromDate = item.phase_opendate
+            this.phaseToDate = item.phase_closedate
             this.project.phases.forEach( (e, i) => {
                 if (e == item) {
                     if (i == 0) {
@@ -573,12 +714,96 @@ export default {
         },
 
         async projectApprove() {
+            if (!this.project)
+                return
             this.wait = true
             const result = await project_api.approveProject(this.project.prj_id)
             if (result) {
                 this.project.prj_approval = "approved"
                 this.show_snack(result)
             }
+            this.wait = false
+        },
+
+        document_addButtonClicked() {
+            if (!this.project) return
+
+            this.$refs.docForm && this.$refs.docForm.resetValidation()
+            this.docFile = null
+            this.docCode = null
+            this.docDesc = null
+            this.docDialog = true
+        },
+
+        closeDocDialog() {
+            this.docDialog = false
+        },
+
+        async doc_dialogAddButtonClicked() {
+            if (!this.$refs.docForm.validate()) {
+                return
+            }
+            this.closeDocDialog()
+            this.wait = true
+            this.docWait = true
+            let result = await project_api.addDoc(this.project.prj_id, this.docCode, this.docDesc, this.docFile)
+            if (result) {
+                const temp = await project_api.getProjectWithPhase(this.project.prj_code)
+                this.project.documents = temp[0].documents
+            }
+            this.show_snack(result)
+            this.docWait = false
+            this.wait = false
+        },
+
+        deleteDoc(item) {
+            this.dialogDelete = true
+            this.selectedDoc = item
+        },
+
+        closeDelete() {
+            this.dialogDelete = false
+        },
+
+        async deleteItemConfirm() {
+            this.closeDelete()
+            const item = this.selectedDoc
+
+            this.wait = true
+            this.docWait = true
+            let result = await project_api.deleteDoc(this.project.prj_id, item.projectDocsid, item.documentStoreid)
+            if (result) {
+                for (const i in this.project.documents) {
+                    const e = this.project.documents[i]
+                    if (item.projectDocsid == e.projectDocsid) {
+                        this.project.documents.splice(i, 1)
+                        break
+                    }
+                }
+            }
+            this.show_snack(result)
+            this.docWait = false
+            this.wait = false
+        },
+
+        async showDoc(item) {
+            this.wait = true
+            this.docWait = true
+            const result = await project_api.getDoc(this.project.prj_id, item.projectDocsid, item.documentStoreid)
+            console.log(result)
+
+            let blob = new Blob([result.data], {
+                type: item.documentStoremimetype
+            }); 
+            let url = window.URL.createObjectURL(blob); 
+
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = item.documentStorefilename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            this.docWait = false
             this.wait = false
         }
     }
