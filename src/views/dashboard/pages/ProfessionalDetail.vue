@@ -4,8 +4,7 @@
             <v-tabs
             v-model="tabs"
             fixed-tabs
-            dark
-            background-color="primary"
+            color="purple"
             >
                 <v-tabs-slider></v-tabs-slider>
                 <v-tab

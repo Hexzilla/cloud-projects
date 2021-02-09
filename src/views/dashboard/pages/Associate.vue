@@ -13,7 +13,6 @@
                 :items="associates"
                 :search="search"
                 :loading="loading"
-                dense
                 loading-text="Loading... Please wait"
                 sort-by="id"
             >
@@ -30,6 +29,7 @@
                                 New
                             </v-btn>
                         </div>
+                        <!--
                         <div flat tile>
                             <v-text-field
                                 v-model="search"
@@ -39,24 +39,26 @@
                                 hide-details
                             ></v-text-field>
                         </div>
-
-                        <!--Delete Dialog Begin-->
-                        <v-dialog v-model="dialogDelete" max-width="600px">
-                            <v-card>
-                                <v-card-title class="headline"
-                                    >Are you sure?</v-card-title
-                                >
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn color="blue darken-1" @click="closeDelete">
-                                        No
-                                    </v-btn>
-                                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">Yes</v-btn>
-                                    <v-spacer></v-spacer>
-                                </v-card-actions>
-                            </v-card>
-                        </v-dialog>
-		            	<!--Delete Dialog End-->
+                        -->
+                        <v-row>
+                            <v-col>
+                                <v-text-field
+                                    v-model="firstNameSearch"
+                                    label="FirstName"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col>
+                                <v-text-field
+                                    v-model="lastNameSearch"
+                                    label="LastName"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col style="display:flex; align-items:center; text-align:center;">
+                                <v-btn @click="searchAssociate" color="primary" fab small>
+                                    <v-icon>mdi-magnify</v-icon>
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </v-container>
                 </template>
 
@@ -223,6 +225,24 @@
             </v-card>
         </v-dialog>
         <!--Add Dialog End-->
+
+        <!--Delete Dialog Begin-->
+        <v-dialog v-model="dialogDelete" max-width="600px">
+            <v-card>
+                <v-card-title class="headline"
+                    >Are you sure?</v-card-title
+                >
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" @click="closeDelete">
+                        No
+                    </v-btn>
+                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">Yes</v-btn>
+                    <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <!--Delete Dialog End-->
 
         <!--Add Role Dialog Begin-->
         <!--
@@ -392,7 +412,10 @@ export default {
         calendars: [],
         calendar: null,
 
-        selectedItem: null
+        selectedItem: null,
+
+        firstNameSearch: null,
+        lastNameSearch: null,
     }),
 
     created: async function () {
@@ -520,7 +543,6 @@ export default {
     methods: {
         async initialize() {
             this.loading = true
-            this.associates = await associate_api.findAll()
             this.roles = await role_api.findAll()
             this.roleData = associate_api.getRoleWithData(this.roles)
 
@@ -535,6 +557,13 @@ export default {
             this.loading = false
         },
 
+        async searchAssociate() {
+            this.loading = true
+            this.associates = []
+            this.associates = await associate_api.findAll(this.firstNameSearch, this.lastNameSearch)
+            this.loading = false
+        },
+        
         addItem() {
             this.openAddDialog()
         },

@@ -15,11 +15,12 @@
                   :rules="projectNameRules"
                   label="Name"
                   required
+                  dense
                 ></v-text-field>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12" sm="12" md="12">
+              <v-col cols="12" sm="12" md="6">
                 <v-text-field
                   :counter="maxCodeLength"
                   v-model="project.prj_code"
@@ -30,6 +31,30 @@
                   @keydown.space.prevent
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" sm="12" md="6">
+                <v-text-field
+                  :counter="maxCodeLength"
+                  v-model="project.prj_refEnqNumber"
+                  :rules="enqRules"
+                  label="Enquiry Number"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-select
+                  v-model="project.prj_projectmanagerhrid"
+                  :items="associates"
+                  :rules="projectManagerRules"
+                  item-value="id"
+                  item-text="firstname"
+                  label="Project Manager"
+                  attach
+                  required
+                  dense
+                ></v-select>
+              </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" sm="12" md="12">
@@ -38,6 +63,7 @@
                   :items="clientList"
                   :rules="clientSelectRules"
                   label="Client"
+                  attach
                   required
                   dense
                 ></v-select>
@@ -121,6 +147,7 @@ export default {
     clients: Array,
     project: Object,
     edit: Boolean,
+    associates: Array
   },
   components: {
     DatePicker,
@@ -174,9 +201,22 @@ export default {
           `Code must be less than ${this.Length} characters`,
       ];
     },
+    enqRules() {
+      return [
+        (v) => !!v || "Enquiry Number is required",
+        (v) =>
+          (v && v.length <= this.maxCodeLength) ||
+          `Enquiry Number must be less than ${this.Length} characters`,
+      ];
+    },
     clientSelectRules() {
       return [
         (v) => !!v || "Client is required"
+      ];
+    },
+    projectManagerRules() {
+      return [
+        (v) => !!v || "Projetc manager is required"
       ];
     }
   },

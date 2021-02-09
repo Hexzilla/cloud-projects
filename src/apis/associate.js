@@ -1,9 +1,9 @@
 import http from "./http.js";
 
-const findAll = async function () {
+const findAll = async function (firstName, lastName) {
     const jsonData = {
-        "firstname_like_": "",
-        "lastname_like_": ""
+        "firstname_like_": firstName ? firstName : "",
+        "lastname_like_": lastName ? lastName : ""
     }
     try {
         const response = await http.post("/hr/hrFindAll", jsonData)

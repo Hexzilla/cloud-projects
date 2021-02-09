@@ -3,9 +3,8 @@
         <v-col>
             <v-tabs
             v-model="tabs"
-            background-color="primary"
-            dark
             fixed-tabs
+            color="purple"
             >
                 <v-tabs-slider></v-tabs-slider>
                 <v-tab

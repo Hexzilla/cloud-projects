@@ -62,9 +62,9 @@ const router = new Router({
           component: () => import('@/views/dashboard/pages/TaskList'),
         },
         {
-          name: 'Project List',
-          path: 'pages/project',
-          component: () => import('@/views/dashboard/pages/Projects'),
+          name: 'Project Summary',
+          path: 'pages/project_summary',
+          component: () => import('@/views/dashboard/pages/ProjectSummary'),
         },
         {
           name: 'User Profile',

@@ -102,9 +102,15 @@ const addFieldToTask = function(obj) {
     }
 }
 
-const findAll = async function() {
+const findAll = async function (code, name, refEnqNumber, clientName) {
+    const jsonData = {
+        "code": code ? code : "",
+        "name": name ? name : "",
+        "refEnqNumber": refEnqNumber ? refEnqNumber : "",
+        "clientName": clientName ? clientName : ""
+    }
     try {
-        const response = await http.post("/plan/projectFindAll")
+        const response = await http.post("/plan/projectFindAll", jsonData)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -128,7 +134,9 @@ const addProject = async function(project) {
         "executionopendate": project.prj_executionopendate,
         "executionclosedate": project.prj_executionclosedate,
         "warrantyopendate": project.prj_warrantyopendate,
-        "warrantyclosedate": project.prj_warrantyclosedate
+        "warrantyclosedate": project.prj_warrantyclosedate,
+        "refEnqNumber": project.prj_refEnqNumber,
+        "projectmanagerhrid": project.prj_projectmanagerhrid
     }
     try {
         const response = await http.post("/plan/projectAddOne", data)
@@ -154,7 +162,9 @@ const updateProject = async function(project) {
         "executionopendate": project.prj_executionopendate,
         "executionclosedate": project.prj_executionclosedate,
         "warrantyopendate": project.prj_warrantyopendate,
-        "warrantyclosedate": project.prj_warrantyclosedate
+        "warrantyclosedate": project.prj_warrantyclosedate,
+        "refEnqNumber": project.prj_refEnqNumber,
+        "projectmanagerhrid": project.prj_projectmanagerhrid
     }
     try {
         const response = await http.post("/plan/projectUpdateOne", data)
@@ -191,7 +201,7 @@ const phaseSet = async function(projectId, phases) {
     const jsonData = {
         "prj_id": projectId,
         "phases": phases,
-        "phasesToRemove": []
+        "phasesToRemove": [],
     }
 
     try {
@@ -699,6 +709,24 @@ const allocateResource = async function (id, current, initial) {
     return false
 }
 
+const approveProject = async function (id) {
+    let jsonData = {
+        "prj_id": id,
+        "action":"approved"
+    }
+    try {
+        const response = await http.post("/plan/projectApprove", jsonData)
+        if (response.status == 200) {
+            const data = response.data;
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
 const findPeople = async function () {
     let ret = await associate.findAll()
     let result = []
@@ -769,5 +797,6 @@ export default {
     checkRemoveTaskByLevel,
     allocateResource,
     findPeople,
-    getProgress
+    getProgress,
+    approveProject    
 }
