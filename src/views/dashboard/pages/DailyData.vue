@@ -1,8 +1,15 @@
 <template>
-    <v-card :loading="loading">
-        <v-card-title>
-            <span class="headline mt-4" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Existing Data</span>
-        </v-card-title>
+    <base-material-card
+        icon="mdi-note-search-outline"
+        color="pink"
+        title="Existing Data"
+    >
+        <v-progress-linear
+            indeterminate
+            class="mb-1"
+            color="pink"
+            v-if="loading">
+        </v-progress-linear>
         <v-card-text>
             <v-row>
                 <v-col></v-col>
@@ -24,7 +31,7 @@
                 </v-col>
             </v-row>
         </v-card-text>
-    </v-card>
+    </base-material-card>
 </template>
 
 <script>

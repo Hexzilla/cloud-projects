@@ -8,10 +8,16 @@
         </v-progress-linear>
         <v-row>
             <v-col cols="12" sm="12" md="3">
-                <v-card class="my-0" style="min-height: 100px">
+                <base-material-card
+                color="green"
+                >
+                    <template v-slot:heading>
+                        <div class="display-1 font-weight-light">
+                            Projects
+                        </div>
+                    </template>
                     <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-text-field
-                            filled
                             label="Search"
                             append-icon="mdi-magnify"
                             @change="searchKeyChange($event)"
@@ -35,13 +41,15 @@
                             </v-list-item>
                         </v-list-item-group>
                     </v-list>
-                </v-card>
+                </base-material-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="my-0" style="min-height: 500px">
-                    <v-toolbar flat color="teal" dark>
-                        <v-toolbar-title>{{ project ? project.prj_name : "Project Progress"}}</v-toolbar-title><br>
-                    </v-toolbar>
+                <base-material-card
+                icon="mdi-chart-line"
+                :title="progressTitle"
+                color="purple"
+                class="px-5 py-3"
+                >
                     <p class="title mb-0 text--disabled" style="color:white">
                         {{ clientName }}
                     </p>
@@ -65,11 +73,11 @@
                                         activatable
                                     >
                                     <template v-slot:prepend="{ item }">
-                                        <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                        <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 0" color="purple">mdi-cube</v-icon>
+                                        <v-icon v-if="item.level == 1" color="purple">mdi-numeric-1-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 2" color="purple">mdi-numeric-2-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 3" color="purple">mdi-numeric-3-box-outline</v-icon>
+                                        <v-icon v-if="item.level == 4" color="purple">mdi-numeric-4-box-outline</v-icon>
                                     </template>
                                     <template v-slot:append="{ item }">
                                         <ProgressChart
@@ -110,11 +118,11 @@
                                             open-on-click
                                         >
                                             <template v-slot:prepend="{ item }">
-                                                <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                                <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 0" color="purple">mdi-cube</v-icon>
+                                                <v-icon v-if="item.level == 1" color="purple">mdi-numeric-1-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 2" color="purple">mdi-numeric-2-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 3" color="purple">mdi-numeric-3-box-outline</v-icon>
+                                                <v-icon v-if="item.level == 4" color="purple">mdi-numeric-4-box-outline</v-icon>
                                             </template>
                                             <template v-slot:label="{ item }">
                                                 <span style="font-weight: bold;">{{ item.name }}</span>
@@ -132,7 +140,7 @@
                         </v-list-group>
                         <v-divider inset></v-divider>
                     </template>
-                </v-card>
+                </base-material-card>
             </v-col>
         </v-row>
 </v-container>
@@ -171,6 +179,10 @@
                 if (this.project)
                     return "Client: " + (this.project.cl_name.length > 100 ? this.project.cl_name.substring(0, 100) + '...' : this.project.cl_name)
                 return null
+            },
+
+            progressTitle() {
+                return this.project ? this.project.prj_name : "Project Progress"
             }
         },
 

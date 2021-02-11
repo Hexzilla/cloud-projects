@@ -556,6 +556,12 @@ export default {
                 this.snackText = "Error";
             }
         },
+
+        snack_message(color, message) {
+            this.snack = true;
+            this.snackColor = color
+            this.snackText = message
+        },
         
         async searchProjects() {
             this.wait = true
@@ -838,8 +844,11 @@ export default {
         },
 
         goToDetail() {
-            if (!this.project) return
-            this.$router.push('/pages/project_detail?prj_id=' + this.project.prj_id)
+            if (!this.project) {
+                this.snack_message("info", "Please select project")
+                return
+            }
+            this.$router.push('/pages/project_detail?prj_code=' + this.project.prj_code)
         }
     }
 }

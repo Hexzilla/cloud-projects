@@ -8,10 +8,16 @@
         </v-progress-linear>
         <v-row>
             <v-col cols="12" sm="12" md="3">
-                <v-card class="my-0">
+                <base-material-card
+                color="green"
+                >
+                    <template v-slot:heading>
+                        <div class="display-1 font-weight-light">
+                            Projects
+                        </div>
+                    </template>
                     <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-text-field
-                            filled
                             label="Search"
                             append-icon="mdi-magnify"
                             @change="searchKeyChange($event)"
@@ -26,21 +32,23 @@
                                 <v-progress-circular
                                     v-if="waitProject == item"
                                     indeterminate
-                                    color="teal"
+                                    color="primary"
                                     :width="2"
                                     :size="24"
                                 ></v-progress-circular>
                             </v-list-item>
                         </v-list-item-group>
                     </v-list>
-                </v-card>
+                </base-material-card>
             </v-col>
             <v-col cols="12" sm="12" md="9">
-                <v-card class="my-0" min-height="500px" v-show="!showUpdate">
-                
-                    <v-toolbar flat color="teal" dark>
-                        <v-toolbar-title>Project</v-toolbar-title><br>
-                    </v-toolbar>
+                <base-material-card
+                icon="mdi-note-text-outline"
+                title="Detail"
+                color="purple"
+                class="px-5 py-3"
+                v-show="!showUpdate"
+                >
                     <!-- <v-card-title class="flex flex-row-reverse px-0 mx-0 py-0">
                         <v-row>
                             <v-col class="text-right py-8 px-10">
@@ -69,16 +77,16 @@
                                         open-on-click
                                     >
                                         <template v-slot:prepend="{ item }">
-                                            <v-icon v-if="item.level == 0" color="teal">mdi-cube</v-icon>
-                                            <v-icon v-if="item.level == 1" color="teal">mdi-numeric-1-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 2" color="teal">mdi-numeric-2-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 3" color="teal">mdi-numeric-3-box-outline</v-icon>
-                                            <v-icon v-if="item.level == 4" color="teal">mdi-numeric-4-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 0" color="purple">mdi-cube</v-icon>
+                                            <v-icon v-if="item.level == 1" color="purple">mdi-numeric-1-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 2" color="purple">mdi-numeric-2-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 3" color="purple">mdi-numeric-3-box-outline</v-icon>
+                                            <v-icon v-if="item.level == 4" color="purple">mdi-numeric-4-box-outline</v-icon>
                                         </template>
                                         <template  v-slot:append="{ item }">
                                             <v-row v-if="item.level > 0">
                                                 <v-col class="py-0 my-0" style="display:flex; align-items: center;">
-                                                    <v-btn color='teal' rounded small @click="btnClicked(item)">
+                                                    <v-btn color='primary' elevation="10" rounded small @click="btnClicked(item)">
                                                         <v-icon dark>
                                                             mdi-calendar-edit
                                                         </v-icon>
@@ -104,11 +112,21 @@
                         </v-container>
                     </template>
 
-                </v-card>
+                </base-material-card>
                 <template v-if="selectedProject && selectedItem">
                     <v-container class="px-0 py-0" v-show="showUpdate" >
                         <v-form ref="form" lazy-validation>
-                            <v-card :loading="updateLoading" class="my-0">
+                            <base-material-card
+                                icon="mdi-chart-bell-curve-cumulative"
+                                color="warning"
+                                title="Efforts and progress "
+                            >
+                                <v-progress-linear
+                                    indeterminate
+                                    class="mb-1"
+                                    color="warning"
+                                    v-if="updateLoading">
+                                </v-progress-linear>
                                 <v-card-title>
                                     <v-row>
                                         <v-col>
@@ -118,7 +136,6 @@
                                                 </v-icon>
                                                 back
                                             </v-btn><br>
-                                            <span class="headline" style="font-weight: bold; color: rgb(24, 103, 192); font-size: 20px;">Efforts and progress </span><br>
                                             <span class="text--disabled" style="font-size: 15px">{{this.selectedItem.name}}</span>
                                         </v-col>
                                     </v-row>
@@ -278,9 +295,9 @@
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
                                     <v-btn color="error" text @click="deleteBtnClicked" :disabled="deleteBtnStatus"> Delete </v-btn>
-                                    <v-btn color="primary darken-1" :disabled="saveBtnStatus" @click="save"> Save </v-btn>
+                                    <v-btn color="primary" elevation="10" :disabled="saveBtnStatus" @click="save"> Save </v-btn>
                                 </v-card-actions>
-                            </v-card>
+                            </base-material-card>
                         </v-form>
                         <DailyData
                             ref="dailyData"

@@ -42,6 +42,24 @@ const getProjects = async function() {
     return items
 }
 
+const setServerItem = async function (project) {
+    if (project.phases) {
+        const phases = await Promise.all(
+            project.phases.map(async (phase) => {
+                const categories = await getProjectCategory(project.prj_code, phase.phaseNumber)
+                //TOOD---console.log('categories', categories)
+                phase.serverItems = categories.map((it) => {
+                    it.level = 0
+                    it.name = it.taskCateg_name
+                    return it
+                })
+                return phase
+            })
+        )
+        project.phases = phases.filter(it => it != null)
+    }
+}
+
 const getTaskByKeyInfo = async function(task) {
     if (task.level == 0) return await getTask1(task.info.est_MP_categ_id)
     if (task.level == 1) return await getTask2(task.info.est_MP_TL1_id)
@@ -835,6 +853,7 @@ export default {
     updateTaskList,
     getTaskByLevel,
     getTaskByKeyInfo,
+    setServerItem,
     phaseSet,
     saveTask1,
     saveTask2,
