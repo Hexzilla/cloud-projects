@@ -378,7 +378,7 @@
             const associates = await associate_api.findAll()
             let filtered = associates.filter( e => e.assocationStatus == 'joined')
             filtered && filtered.length > 0 && filtered.forEach( e => {
-                e.showName = e.code + ',   ' + e.firstname + ' ' + e.lastname
+                e.showName = e.firstname + ' ' + e.lastname + ' -      ' + e.code
             })
                 
             this.supervisors = filtered

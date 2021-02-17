@@ -12,8 +12,17 @@
                 </template>
                     <v-container>
                         <v-row>
-                            <v-col cols="12" md="3">
-                                <v-spacer></v-spacer>
+                            <v-col cols="12" md="2">
+                                <v-select
+                                    label="Year"
+                                    :items="years"
+                                    v-model="year"
+                                    @change="changeYear"
+                                    :disabled="loading"
+                                >
+                                </v-select>
+                            </v-col>
+                            <v-col cols="12" md="2">
                                 <v-select
                                     label="Quater"
                                     :items="[1, 2, 3, 4]"
@@ -21,7 +30,7 @@
                                 >
                                 </v-select>
                             </v-col>
-                            <v-col class="text-center" cols="12" md="9">
+                            <v-col class="text-center" cols="12" md="8">
                                 <v-btn small :color="getColor(e)" fab v-for="(e, i) in getMonths" :key="i" @click="selectMonth(e)" class="mt-2">
                                     {{ getMonthName(e) }}
                                 </v-btn>
@@ -325,9 +334,14 @@
 
             leaveDialog: false,
             selectedLeave: [],
+
+            years: [],
+            year: null
         }),
 
         created: async function() {
+            this.year = this.getCurrentYear()
+            this.setYears()
         },
 
         computed: {
@@ -352,10 +366,8 @@
 
         methods: {
             setDate(month) {        
-                let dt = new Date();
-                let year = dt.getFullYear();
-                let FirstDay = new Date(year, month, 1);
-                let LastDay = new Date(year, month + 1, 0);
+                let FirstDay = new Date(this.year, month, 1);
+                let LastDay = new Date(this.year, month + 1, 0);
                 this.fromDate = people_api.dateToString(FirstDay)
                 this.toDate = people_api.dateToString(LastDay)
             },
@@ -366,6 +378,7 @@
                 this.selectedMonth = month
                 this.persons = []
                 this.setDate(month - 1)
+                console.log('date', this.fromDate, this.toDate)
                 if (!this.yearData[month]) {
                     this.yearData[month] = await people_api.getManPower(this.fromDate, this.toDate)
                 }
@@ -519,6 +532,25 @@
                 if (type == 'ML') return "Medical Leave"
                 if (type == 'CL') return "Casual Leave"
                 return ''
+            },
+
+            getCurrentYear() {
+                const now = new Date()
+                const year = now.getYear()
+                return year + 1900
+            },
+
+            setYears() {
+                const year = this.getCurrentYear()
+                for (let i = -3; i <= 0; i++)
+                    this.years.push(year + i)
+            },
+
+            changeYear() {
+                this.yearData = []
+                this.selectedMonth = null
+                this.quarter = null
+                this.persons = []
             }
         }
     }

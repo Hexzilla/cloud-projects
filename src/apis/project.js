@@ -968,7 +968,7 @@ const projectResource = async function (taskLevel, taskId, roleId) {
                 ret && ret.length > 0 && ret.forEach(e => {
                     days.push(e.workingDate)
                 });
-                [...new Set(days)]
+                days = [...new Set(days)]
                 days.forEach(e => {
                     const filtered = ret.filter(v => v.workingDate == e)
                     const temp = {
@@ -1010,19 +1010,18 @@ const findPeople = async function () {
     return result
 }
 
-const getProgress = async function (id, date, code) {
+const getProgress = async function (id, date) {
     let jsonData = {
-        "projectid": id,
+        "phaseid": id,
         "uptoDate": getCurrentDate()
     }
     let result = []
     try {
-        const response = await http.post("/reports/project_progress_001", jsonData)
+        const response = await http.post("/reports/projectprogress001", jsonData)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
-                let ret = data.response.allCarrierRecord.id[0]
-                ret && ret.length > 0 && (result = ret.filter( e => e.clientcode == code))
+                result = data.response.allCarrierRecord.id[0]
             }
         }
     }

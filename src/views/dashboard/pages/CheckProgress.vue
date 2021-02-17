@@ -50,95 +50,246 @@
                 color="purple"
                 class="px-5 py-3"
                 >
-                    <p class="title mb-0 text--disabled" style="color:white">
-                        {{ clientName }}
-                    </p>
-                    <!--
-                    <template v-for="(item, i) in this.phases">
-                        <v-container class="ml-3">
-                            <v-row>
-                                <v-col>
-                                    <p class="subtitle-1 mb-0" style="color:#1867c0; font-size: 20px !important;"><b>{{ `Phase ${i + 1}` }}</b></p>
-                                    <p class="title mb-0 text--disabled">
-                                        {{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}
-                                    </p>
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col>
-                                    <v-treeview
-                                        :open="initiallyOpen"
-                                        :items="item.serverItems"
-                                        item-key="ikey"
-                                        activatable
-                                    >
-                                    <template v-slot:prepend="{ item }">
-                                        <v-icon v-if="item.level == 0" color="purple">mdi-cube</v-icon>
-                                        <v-icon v-if="item.level == 1" color="purple">mdi-numeric-1-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 2" color="purple">mdi-numeric-2-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 3" color="purple">mdi-numeric-3-box-outline</v-icon>
-                                        <v-icon v-if="item.level == 4" color="purple">mdi-numeric-4-box-outline</v-icon>
-                                    </template>
-                                    <template v-slot:append="{ item }">
-                                        <ProgressChart
-                                            v-bind:item = item
-                                            v-bind:progresses = progress
-                                            v-if="item.level > 0"
-                                        >
-                                        </ProgressChart>
-                                    </template>
-                                    </v-treeview>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </template>
-                    -->
-                    <template v-for="(item, i) in phases">
-                        <v-list-group
-                        :value="false"
-                        :key="i"
-                        no-action
-                        prepend-icon="mdi-layers">
-                            <template v-slot:activator>
-                                <v-list-item-content>
-                                    <v-list-item-title style="font-size:15px; font-weight:bold">
-                                        {{ `Phase ${i + 1}` }}
-                                        <span class="text--disabled ml-10" style="font-size:13px; font-weight:normal">{{ `${item.phase_opendate} ~ ${item.phase_closedate}` }}</span>
-                                    </v-list-item-title>
-                                </v-list-item-content>
-                            </template>
-                            <v-list-item>
-                                <v-row>
-                                    <v-col>
-                                        <v-treeview
-                                            :open="initiallyOpen"
-                                            :items="item.serverItems"
-                                            item-key="ikey"
-                                            activatable
-                                            open-on-click
-                                        >
-                                            <template v-slot:prepend="{ item }">
-                                                <v-icon v-if="item.level == 0" color="purple">mdi-cube</v-icon>
-                                                <v-icon v-if="item.level == 1" color="purple">mdi-numeric-1-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 2" color="purple">mdi-numeric-2-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 3" color="purple">mdi-numeric-3-box-outline</v-icon>
-                                                <v-icon v-if="item.level == 4" color="purple">mdi-numeric-4-box-outline</v-icon>
-                                            </template>
-                                            <template v-slot:label="{ item }">
-                                                <span style="font-weight: bold;">{{ item.name }}</span>
-                                                <ProgressChart
-                                                    v-bind:item = item
-                                                    v-bind:progresses = progress
-                                                    v-if="item.level > 0"
-                                                >
-                                                </ProgressChart>
-                                            </template>
-                                        </v-treeview>
-                                    </v-col>
-                                </v-row>
-                            </v-list-item>
-                        </v-list-group>
-                        <v-divider inset></v-divider>
+                    <v-row>
+                        <v-col>
+                            <v-text-field
+                                label="Project Code"
+                                v-model="projectCode"
+                                readonly
+                            >
+                            </v-text-field>
+                        </v-col>
+                        <v-col>
+                            <v-text-field
+                                label="Client"
+                                v-model="clientName"
+                                readonly
+                            >
+                            </v-text-field>
+                        </v-col>
+                        <v-col>
+                            <v-text-field
+                                label="PM"
+                                v-model="pm"
+                                readonly
+                            >
+                            </v-text-field>
+                        </v-col>
+                    </v-row>
+                    <div class="text-center">
+                        <v-btn v-for="(item, i) in phaseItems" :key="i" :color="getPhaseColor(item)" fab small @click="selectPhase(item)">
+                        {{ item }}
+                        </v-btn>
+                    </div>
+                    <br>
+                    <v-progress-linear
+                        indeterminate
+                        class="mb-1"
+                        color="purple"
+                        v-if="phaseLoading">
+                    </v-progress-linear>             
+                    
+                    <template v-for="(item, i) in progress">
+                        <div :key="i">
+                            <p class="body-1 purple white--text py-2 px-2 my-1">{{item.name}}</p>
+                            <v-expansion-panels flat hover multiple :value="[0, 1, 2, 3]">
+                                <v-expansion-panel v-if="item.L1.length > 0">
+                                    <v-expansion-panel-header color="grey lighten-4" ripple>
+                                        <p class="body-1 mb-0 purple--text">
+                                            <v-icon color="purple">mdi-numeric-1-box-outline</v-icon> Level
+                                        </p>
+                                    </v-expansion-panel-header>
+                                    <v-expansion-panel-content class="pb-0">
+                                        <div v-for="(e, i) in item.L1" :key="i" class="pl-5">
+                                            <div class="display-1 py-2 my-1">
+                                                {{e.TLx_name}}
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-3 text-center" style="width: 20px">
+                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
+                                                </span>
+                                                <span style="width: 90px" class="text-center">
+                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
+                                                </span>
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-5" style="padding-top: 15px">
+                                                    {{ v.rolename }}
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span style="width: 90px">
+                                                    <Chart></Chart>
+                                                </span>
+                                            </div>
+                                            <v-divider></v-divider>
+                                        </div>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+
+                                <v-expansion-panel v-if="item.L2.length > 0">
+                                    <v-expansion-panel-header color="grey lighten-4" ripple>
+                                        <p class="body-1 mb-0 purple--text">
+                                            <v-icon color="purple">mdi-numeric-2-box-outline</v-icon> Level
+                                        </p>
+                                    </v-expansion-panel-header>
+                                    <v-expansion-panel-content>
+                                        <div v-for="(e, i) in item.L2" :key="i" class="pl-5">
+                                            <div class="display-1 py-2 my-1">
+                                                {{e.TLx_name}}
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-3 text-center" style="width: 20px">
+                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
+                                                </span>
+                                                <span style="width: 90px" class="text-center">
+                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
+                                                </span>
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-5" style="padding-top: 15px">
+                                                    {{ v.rolename }}
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span style="width: 90px">
+                                                    <Chart></Chart>
+                                                </span>
+                                            </div>
+                                            <v-divider></v-divider>
+                                        </div>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                                
+                                <v-expansion-panel v-if="item.L3.length > 0">
+                                    <v-expansion-panel-header color="grey lighten-4" ripple>
+                                        <p class="body-1 mb-0 purple--text">
+                                            <v-icon color="purple">mdi-numeric-3-box-outline</v-icon> Level
+                                        </p>
+                                    </v-expansion-panel-header>
+                                    <v-expansion-panel-content>
+                                        <div v-for="(e, i) in item.L3" :key="i" class="pl-5">
+                                            <div class="display-1 py-2 my-1">
+                                                {{e.TLx_name}}
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-3 text-center" style="width: 20px">
+                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
+                                                </span>
+                                                <span style="width: 90px" class="text-center">
+                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
+                                                </span>
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-5" style="padding-top: 15px">
+                                                    {{ v.rolename }}
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span style="width: 90px">
+                                                    <Chart></Chart>
+                                                </span>
+                                            </div>
+                                            <v-divider></v-divider>
+                                        </div>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                                
+                                <v-expansion-panel v-if="item.L4.length > 0">
+                                    <v-expansion-panel-header color="grey lighten-4" ripple>
+                                        <p class="body-1 mb-0 purple--text">
+                                            <v-icon color="purple">mdi-numeric-4-box-outline</v-icon> Level
+                                        </p>
+                                    </v-expansion-panel-header>
+                                    <v-expansion-panel-content>
+                                        <div v-for="(e, i) in item.L4" :key="i" class="pl-5">
+                                            <div class="display-1 py-2 my-1">
+                                                {{e.TLx_name}}
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-3 text-center" style="width: 20px">
+                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
+                                                </span>
+                                                <span class="mr-3 text-center" style="width: 40px">
+                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
+                                                </span>
+                                                <span style="width: 90px" class="text-center">
+                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
+                                                </span>
+                                            </div>
+                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
+                                                <v-spacer></v-spacer>
+                                                <span class="mr-5" style="padding-top: 15px">
+                                                    {{ v.rolename }}
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
+                                                    
+                                                </span>
+                                                <span style="width: 90px">
+                                                    <Chart></Chart>
+                                                </span>
+                                            </div>
+                                            <v-divider></v-divider>
+                                        </div>
+                                    </v-expansion-panel-content>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
+                        </div>
                     </template>
                 </base-material-card>
             </v-col>
@@ -148,11 +299,12 @@
 
 <script>
     import api from "@/apis/project.js";
-    import ProgressChart from './ProgressChart'
+    import Chart from './Chart'
+    import associate_api from "@/apis/associate.js";
 
     export default {
         components: {
-            ProgressChart
+            Chart
         },
 
         data: () => ({
@@ -160,15 +312,18 @@
             project: null,
             projects: [],
             initiallyOpen: ["public"],
-            allPerformers: [],
             phases: [],
+            phase: null,
+            selectedPhase: null,
             waitProject: null,
-            progress:[]
+            progress:[],
+            phaseLoading: false,
         }),
         
         created: async function() {
             this.wait = true
-            this.allProjects = await api.getProjects()
+            this.allProjects = await api.findAll()
+            this.associates = await associate_api.findAll()
             this.projects = this.allProjects
 
             this.wait = false
@@ -177,35 +332,58 @@
         computed: {
             clientName() {
                 if (this.project)
-                    return "Client: " + (this.project.cl_name.length > 100 ? this.project.cl_name.substring(0, 100) + '...' : this.project.cl_name)
+                    return (this.project.cl_name.length > 20 ? this.project.cl_name.substring(0, 20) + '...' : this.project.cl_name)
+                return null
+            },
+
+            projectCode() {
+                if (this.project)
+                    return this.project.prj_code
                 return null
             },
 
             progressTitle() {
                 return this.project ? this.project.prj_name : "Project Progress"
-            }
+            },
+
+            phaseItems() {
+                if (this.project) {
+                    let ret = []
+                    console.log("project", this.project)
+                    this.project.phases.forEach( e => {
+                        ret.push(e.phaseNumber)
+                    })
+                    return ret
+                }
+                return []
+            },
+            
+            pm() {
+                if (this.project && this.associates) {
+                    const found = this.associates.find(e => e.id == this.project.prj_projectmanagerhrid)
+                    if (found)
+                        return found.firstname + ' ' + found.lastname
+                }
+                return ''
+            },
         },
 
         methods: {
-           
+            initialize() {
+                this.project = null
+                this.phase = null
+                this.progress = []
+                this.selectedPhase = null
+            },
+
             async project_listItemClicked(item) {
-                console.log("item", item)
                 this.wait = true
-                this.phases = []
                 this.waitProject = item
-                this.project = item
-                this.progress = await api.getProgress(item.prj_id, null, item.cl_code)
+                this.initialize()
+                const ret = await api.getProjectWithPhase(item.prj_code)
+                this.project = ret[0]
+                this.phases = ret[0].phases
 
-                item && await api.updateTaskList(item)
-                this.phases = item.phases
-
-                this.phases && this.phases.length > 0 && this.phases.forEach(e => {
-                    e.serverItems.length > 0 && this.setIkeyAndName(e.serverItems, 1)
-                    // item.phases = []
-                    // item.phases.push(e)
-                })
-            
-                // console.log("phases", this.phases)
                 this.waitProject = null
                 this.wait = false
             },
@@ -213,36 +391,59 @@
             searchKeyChange: function(event) {
                 this.projects = this.allProjects.filter(item => item.prj_name.toUpperCase().includes(event.toUpperCase()))
             },
-
-            setIkeyAndName: function(items, ikey) {
-                items.forEach((item, index) => {
-                    if (item.level == 0) {
-                        item.ikey = ikey
-                    }else if (item.level == 1) {
-                        item.name = item.TL1_name
-                        item.ikey = ikey
-                    } else if (item.level == 2) {
-                        item.name = item.TL2_name
-                        item.ikey = ikey
-                    } else if (item.level == 3) {
-                        item.name = item.TL3_name
-                        item.ikey = ikey
-                    } else {
-                        item.name = item.TL4_name
-                        item.level = 4
-                        item.ikey = ikey
-                    }
-                    item.hr = ''
-                    item.min = ''
-                    item.pct = ''
-                    item.totalPct = ''
-                    ikey++
-
-                    if (item.children && item.children.length > 0) {
-                        ikey = this.setIkeyAndName(item.children, ikey)
-                    } 
+            
+            getPhaseColor(item) {
+                if (this.selectedPhase == item)
+                    return 'purple'
+                return 'white'
+            },
+            
+            async selectPhase(item) {
+                if (this.wait) return
+                this.wait = true
+                this.phaseLoading = true
+                this.selectedPhase = item
+                const num = this.getPhaseNumber(this.selectedPhase)     
+                this.phase = this.project.phases.find(e => e.phaseNumber == num)
+                if (!this.phase.progress) {
+                    const tempProgress = await api.getProgress(this.phase.phase_id)
+                    this.progress = this.sortProgress(tempProgress)
+                    this.phase.progress = this.progress
+                } else {
+                    this.progress = this.phase.progress
+                }
+                console.log('progress', this.progress)
+                this.wait = false
+                this.phaseLoading = false
+            },
+            
+            sortProgress(item) {
+                if (!item || item.length == 0)
+                    return []
+                let result = []
+                let categoryIds = []
+                item.forEach( e => categoryIds.push(e.taskCategoryID));
+                categoryIds = [...new Set(categoryIds)]
+                categoryIds.forEach( e => {
+                    const temp = item.filter( v => v.taskCategoryID == e)
+                    const categoryName = temp[0].taskCategoryName
+                    const l1 = temp.filter( v => v.level == "L1")
+                    const l2 = temp.filter( v => v.level == "L2")
+                    const l3 = temp.filter( v => v.level == "L3")
+                    const l4 = temp.filter( v => v.level == "L4")
+                    result.push({
+                        "name": categoryName,
+                        "L1": l1,
+                        "L2": l2,
+                        "L3": l3,
+                        "L4": l4
+                    })
                 })
-                return ikey
+                return result
+            },
+            
+            getPhaseNumber(phase) { 
+                return phase
             },
         }
     }

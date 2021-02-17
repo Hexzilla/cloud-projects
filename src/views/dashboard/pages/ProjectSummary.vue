@@ -55,14 +55,14 @@
                         </v-row>
                         <v-row>
                             <v-col class="px-0 py-0 text-center">
-                                <v-btn color="primary" small elevation="10" @click="searchProjects">
+                                <v-btn color="primary" small @click="searchProjects">
                                     <v-icon>mdi-magnify</v-icon>
                                 </v-btn>
                             </v-col>
                         </v-row>
                         <v-row>
                             <v-col class="text-right">
-                                <v-btn color="pink" text small v-on:click="project_addButtonClicked" :disabled="wait">
+                                <v-btn color="blue" small elevation="8" v-on:click="project_addButtonClicked" :disabled="wait">
                                     New Project
                                 </v-btn>
                             </v-col>
@@ -107,10 +107,10 @@
                         <v-col class="text-right">
                             <v-btn
                                 small
-                                color="pink"
-                                text
+                                color="blue"
                                 @click="goToDetail"
                                 :disabled="wait"
+                                elevation="8"
                             >
                                 Project Detail
                             </v-btn>
