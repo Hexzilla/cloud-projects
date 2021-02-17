@@ -14,7 +14,6 @@
                     {{projectName}}
                 </div>
             </template>
-            
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="3">
@@ -46,6 +45,7 @@
                         </v-text-field>
                     </v-col>
                 </v-row>
+                <!--
                 <v-row>
                     <v-col>
                         <v-select
@@ -58,6 +58,12 @@
                         </v-select>
                     </v-col>
                 </v-row>
+                -->
+                <div class="text-center">
+                    <v-btn v-for="(item, i) in phaseItems" :key="i" :color="getPhaseColor(item)" fab small :disabled="wait" @click="selectPhase(item)">
+                     {{ item }}
+                    </v-btn>
+                </div>
             </v-card-text>
         </base-material-card>
         <v-row>
@@ -65,12 +71,12 @@
                 <base-material-card
                     icon="mdi-file-tree"
                     title="Deliverables"
-                    color="warning"
+                    color="blue"
                 >
                     <v-progress-linear
                         class="mb-1"
                         indeterminate
-                        color="warning"
+                        color="blue"
                         v-if="wait1">
                     </v-progress-linear>
                     <v-row>
@@ -93,54 +99,36 @@
                                 open-on-click
                                 activatable>
                                 <template v-slot:prepend="{ item }">
-                                    <v-icon v-if="item.level == 0" color="warning">mdi-cube</v-icon>
-                                    <v-icon v-if="item.level == 1" color="warning">mdi-numeric-1-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 2" color="warning">mdi-numeric-2-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 3" color="warning">mdi-numeric-3-box-outline</v-icon>
-                                    <v-icon v-if="item.level == 4" color="warning">mdi-numeric-4-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 0" color="blue">mdi-cube</v-icon>
+                                    <v-icon v-if="item.level == 1" color="blue">mdi-numeric-1-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 2" color="blue">mdi-numeric-2-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 3" color="blue">mdi-numeric-3-box-outline</v-icon>
+                                    <v-icon v-if="item.level == 4" color="blue">mdi-numeric-4-box-outline</v-icon>
                                 </template>
                                 <template v-slot:label="{ item }">
                                     <v-row>
-                                        <v-col cols="12" sm="12" md="12" >
+                                        <v-col>
                                             <p class="subtitle-1 mb-0">{{ item.name }}
                                                 <v-badge
                                                 v-if="item.state == `newData`"
                                                 content="new"
-                                                color="blue darken-1"
+                                                color="blue"
                                                 ></v-badge>
+                                            </p>
+                                            <p v-if="item.level > 0" class="title mb-0 text--disabled">
+                                                {{ item.description || 'You can input task description.' }}
                                             </p>
                                         </v-col>
                                     </v-row>
                                 </template>
                                 <template v-slot:append="{ item }">
-                                    <!--
                                     <v-icon v-if="item.level > 0"
-                                        color="pink"
-                                    >mdi-square-edit-outline</v-icon>
-                                    -->
-                                    <v-menu
-                                        v-model="menu"
-                                        :close-on-content-click="false"
-                                        offset-x
-                                        >
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-icon 
-                                            v-bind="attrs"
-                                            v-on="on"
-                                            color="pink"
-                                            >
-                                                mdi-format-color-fill
-                                            </v-icon>
-                                        </template>
-                                        <v-card class="my-0">
-                                            <v-card-title>
-                                            </v-card-title>
-                                            <v-card-text>
-                                                <v-color-picker
-                                                ></v-color-picker>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
+                                        color="blue" class="mr-2"
+                                        @click="openTaskEditDialog(item)"
+                                    >mdi-format-color-fill</v-icon>
+                                    <v-icon v-if="item.level > 0"
+                                        @click="selectTask(item)"
+                                        color="purple" title="Estimation">mdi-pencil</v-icon>
                                 </template>
                             </v-treeview>
                         </v-col>
@@ -148,17 +136,37 @@
                 </base-material-card>
             </v-col>
             <v-col cols="12" md="6">
+                <!--
                 <base-material-card
                     icon="mdi-notebook-edit"
                     title="Estimation"
                     color="purple"
                 >
+                    <template v-if="task">
+                        <PEstimation
+                            v-bind:project=project
+                            v-bind:phase=phase
+                            v-bind:task=task
+                        >
+                        </PEstimation>
+                    </template>
+                    <template v-else>
+                        <br>
+                        <p class="text-center purple--text display-2">No Task selected</p>
+                    </template>
                 </base-material-card>
+                -->
+                <PEstimation
+                    v-bind:project=project
+                    v-bind:phase=phase
+                    v-bind:task=task
+                >
+                </PEstimation>
             </v-col>
         </v-row>
 
         <!-- Add tree dialog -->
-        <v-dialog v-model="treeDialog" max-width="600px">
+        <v-dialog v-model="treeDialog" max-width="600px" scrollable>
             <v-card>
                 <v-card-title>
                     <span class="headline">Tasks</span>
@@ -181,11 +189,85 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeTreeDialog">
+                    <v-btn color="blue" text @click="closeTreeDialog">
                         Cancel
                     </v-btn>
-                    <v-btn color="blue darken-1" text @click="saveTreeDialog">
+                    <v-btn color="blue" text @click="saveTreeDialog">
                         Add to phase
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!--Task date dialog-->
+        <v-dialog v-model="taskDialog" max-width="500px" scrollable>
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Task Information</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container v-if="editTask != null">
+                        <v-row>
+                            <v-col cols="12" sm="12" md="12">
+                                <v-text-field
+                                    v-model="editTask.name"
+                                    prepend-icon="mdi-book-lock-outline"
+                                    label="Name"
+                                    readonly
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="12" sm="12" md="12">
+                                <v-text-field
+                                    v-model="editTask.description"
+                                    prepend-icon="mdi-alpha-d-circle-outline"
+                                    label="Description"
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-select
+                                    v-model="editTask.unitOfMeasure"
+                                    :items="units"
+                                    attach
+                                    label="Unit"
+                                    prepend-icon="mdi-menu-right"
+                                ></v-select>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-text-field
+                                    v-model="editTask.quantity"
+                                    prepend-icon="mdi-numeric"
+                                    label="Quantity"
+                                    type="number"
+                                    :rules="qtyRules"
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-color-picker
+                                    style="margin-left: 60px"
+                                ></v-color-picker>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue" text @click="closeTaskEditDialog">
+                        Cancel
+                    </v-btn>
+                    <v-btn
+                        color="blue"
+                        text
+                        @click="saveTaskEditDialog"
+                    >
+                        SAVE
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -208,8 +290,13 @@
 <script>
 import project_api from "@/apis/project.js"
 import associate_api from "@/apis/associate.js";
+import PEstimation from './PEstimation'
 
 export default {
+    components: {
+        PEstimation
+    },
+
     data: () => ({
         wait: false,
         snack: false,
@@ -230,6 +317,11 @@ export default {
         isSetPhase: false,
 
         menu: false,
+
+        task: null,
+        editTask: null,
+        taskDialog: false,
+        units: ["Item", "Nos"]
     }),
 
     computed: {
@@ -277,12 +369,23 @@ export default {
             if (this.project) {
                 let ret = []
                 this.project.phases.forEach( e => {
-                    ret.push("Phase " + e.phaseNumber)
+                    ret.push(e.phaseNumber)
                 })
                 return ret
             }
             return []
-        }
+        },
+        
+        qtyRules() {
+            return [
+                (v) => {
+                    if (!v) return true
+                    else if  (v && v%1 != 0) return "input valid number"
+                    return true
+                }
+            ]
+        },
+
     },
 
     created: async function() {
@@ -293,10 +396,9 @@ export default {
         this.project = temp[0]
 
         this.associates = await associate_api.findAll()
-
         this.treeItems = await project_api.getTree()
 
-        console.log("tree", this.treeItems)
+        // console.log("tree", this.treeItems)
         this.wait = false
     },
 
@@ -312,7 +414,8 @@ export default {
         },
 
         getPhaseNumber(phase) { 
-            return phase.slice(6, phase.length)
+            // return phase.slice(6, phase.length)
+            return phase
         },
 
         async updateProject() {
@@ -839,6 +942,58 @@ export default {
                 this.snackText = "Error";
             }
         },
+
+        selectTask(item) {
+            this.task = item
+        },
+        
+        openTaskEditDialog: function(item) {
+            console.log('open_task_date_dialog', item)
+            this.taskDialog = true
+            this.editTask = item
+            console.log('selected.edittask', this.editTask)
+        },
+
+        saveTaskEditDialog: function() {
+            this.editTask.state = "modified"
+            this.updatePhaseTree(this.editTask)
+            this.taskDialog = false;
+        },
+        
+        updatePhaseTree(item) {
+            this.findModifiedItem(this.phase.tree, item)
+        },
+        
+        findModifiedItem(items, item) {
+            items && items.length > 0 && items.forEach(e => {
+                if (e.ikey == item.ikey) {
+                    e.description = item.description
+                    e.state != 'newData' && (e.state = item.state)
+                    e.datefrom = item.datefrom
+                    e.dateto = item.dateto
+                    e.quantity = item.quantity
+                    e.unitOfMeasure = item.unitOfMeasure
+                    e.level == 1 && (e.people = item.people)
+                    return
+                }
+                e.children && e.children.length > 0 && this.findModifiedItem(e.children, item)
+            })
+        },
+
+        closeTaskEditDialog: function() {
+            this.taskDialog = false;
+        },
+
+        selectPhase(item) {
+            this.selectedPhase = item
+            this.changePhase()
+        },
+
+        getPhaseColor(item) {
+            if (this.selectedPhase == item)
+                return 'primary'
+            return 'white'
+        }
     }
 }
 </script>

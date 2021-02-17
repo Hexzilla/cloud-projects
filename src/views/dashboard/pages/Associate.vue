@@ -25,6 +25,7 @@
                                 class="mb-2"
                                 text
                                 @click="addItem"
+                                :disabled="loading"
                             >
                                 New
                             </v-btn>
@@ -54,7 +55,7 @@
                                 ></v-text-field>
                             </v-col>
                             <v-col style="display:flex; align-items:center; text-align:center;">
-                                <v-btn @click="searchAssociate" color="primary" fab small>
+                                <v-btn @click="searchAssociate" color="primary" fab small :disabled="loading">
                                     <v-icon>mdi-magnify</v-icon>
                                 </v-btn>
                             </v-col>

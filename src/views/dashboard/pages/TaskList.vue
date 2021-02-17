@@ -251,7 +251,8 @@ export default {
 
       if(item.level >= 1) {
         // this.selectedRole = item.roleid
-        this.selectedRole = item.roles
+        if (item.roles && item.roles.length > 0)
+          this.selectedRole = item.roles
       }
       this.openDialog();
     },
@@ -438,7 +439,9 @@ export default {
 
     getRoleName(roleId) {
       const found = this.roles.find( e => e.id == roleId)
-      return found.name
+      if (found)
+        return found.name
+      return ''
     }
   },
 };

@@ -275,7 +275,7 @@
         </v-row>
         
         <!--Add project dialog-->
-        <v-dialog v-model="addDialog" max-width="500px">
+        <v-dialog v-model="addDialog" max-width="500px" scrollable>
             <AddProjectDialog 
                 v-on:save="project_dialogSaveButtonClicked" 
                 v-on:close="addDialog=false"

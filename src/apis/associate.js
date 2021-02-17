@@ -131,9 +131,13 @@ const roleAssign = async function(hrId ,data, date) {
     data.forEach(item => {
         item.data.effectivedate = date
         // item.data.effectivefromdate = date //todo remove
-        if (item.data.recordType != "noAction" && item.data.recordType != "update")
+        if (item.data.recordType != "noAction" && item.data.recordType != "update") {
+            // item.data.id = item.id //todo
+            item.data.rolesid = item.id
             roleAction.push(item.data)
+        }
     })
+    console.log("before save", roleAction)
     let jsonData = {
         "hrid": hrId,
         "roleAction": roleAction

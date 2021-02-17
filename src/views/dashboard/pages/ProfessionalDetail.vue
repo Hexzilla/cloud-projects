@@ -85,7 +85,7 @@
                                                 label="Name"
                                                 filled
                                                 disabled
-                                                :value="ownData[0].personalInfo[0].firstname + ' ' + ownData[0].personalInfo[0].lastname"
+                                                :value="getName"
                                             >
                                             </v-text-field>
                                         </v-col>
@@ -343,6 +343,12 @@ export default {
     }),
 
     computed: {
+        getName() {
+            if (this.ownData && this.ownData.length > 0 && this.ownData[0].personalInfo[0])
+                return this.ownData[0].personalInfo[0].firstname + ' ' + this.ownData[0].personalInfo[0].lastname
+            return ''
+        },
+
         associationType() {
             if (this.ownData && this.ownData[0].assocationType == 'e')
                 return "Employee"
@@ -362,7 +368,7 @@ export default {
         },
 
         designationName() {
-            if (this.ownData[0].designations.length)
+            if (this.ownData && this.ownData.length > 0 && this.ownData[0].designations.length)
                 return this.ownData[0].designations[0].designationname 
             return ''
         },
@@ -383,9 +389,22 @@ export default {
         },
 
         ownScale() {
-            if (this.ownData[0].designations.length)
+            if (this.ownData && this.ownData.length > 0 && this.ownData[0].designations && this.ownData[0].designations.length > 0)
                 return this.ownData[0].designations[0].scaleCode 
             return ''
+        }
+    },
+
+    watch: {
+        item: function(newValue, oldValue) {
+            console.log("new item", newValue)
+            if (newValue) {
+                this.selectedRoles = []
+                this.initialRoles = []
+                this.ownData = newValue
+                this.getData()
+                this.roleDate = ''
+            }
         }
     },
 
@@ -401,25 +420,24 @@ export default {
         },
 
         itemChanged() {
-            this.selectedRoles = []
-            this.initialRoles = []
-            this.ownData = this.item
-            this.getData()
         },
 
         getData() {
-            this.ownData && this.ownData.length >0 && this.ownData[0].assignedRoles.length > 0 && this.ownData[0].assignedRoles.forEach( e => {
-                this.selectedRoles.push(e.rolesid)
-                this.initialRoles.push(e.rolesid)
+            console.log("get data", this.ownData)
+            if (this.ownData && this.ownData.length >0 && this.ownData[0].assignedRoles.length > 0) {
+                this.ownData[0].assignedRoles.forEach( e => {
+                    this.selectedRoles.push(e.rolesid)
+                    this.initialRoles.push(e.rolesid)
 
-                this.roleData.forEach( e1 => {
-                    if (e.rolesid == e1.id) {
-                        e1.data.id = e.id
-                    }
+                    this.roleData.forEach( e1 => {
+                        if (e.rolesid == e1.id) {
+                            e1.data.id = e.id
+                        }
+                    })
                 })
-            })
-            this.designations = this.ownData[0].designations
-            console.log("first role data", this.roleData)
+                this.designations = this.ownData[0].designations
+                console.log("first role data", this.roleData)
+            }
         },
 
         roleSelect(role) {
@@ -433,10 +451,12 @@ export default {
             }
             this.wait = true
             this.setRecordType(this.initialRoles, this.selectedRoles)
+            console.log("before save", this.roleData)
             let result = await associate_api.roleAssign(this.hrId, this.roleData, this.roleDate)
-            this.ownData = result
+            if (result) {
+                this.getData()
+            }
             this.roleData.forEach(e => e.data.recordType ="noAction")
-            this.getData()
 
             this.show_snack(result)
             this.wait = false

@@ -60,7 +60,7 @@ const setServerItem = async function (project) {
     }
 }
 
-const getTaskByKeyInfo = async function(task) {
+const getTaskByKeyInfo = async function (task) {
     if (task.level == 0) return await getTask1(task.info.est_MP_categ_id)
     if (task.level == 1) return await getTask2(task.info.est_MP_TL1_id)
     if (task.level == 2) return await getTask3(task.info.est_MP_TL2_id)
@@ -68,7 +68,8 @@ const getTaskByKeyInfo = async function(task) {
     return null
 }
 
-const getTaskByLevel = async function(task, level) {
+const getTaskByLevel = async function (task, level) {
+    // console.log("----task", task)
     if (level == 1) return await getTask1(task.est_MP_categ_id)
     if (level == 2) return await getTask2(task.est_MP_TL1_id)
     if (level == 3) return await getTask3(task.est_MP_TL2_id)
@@ -76,7 +77,8 @@ const getTaskByLevel = async function(task, level) {
     return null
 }
 
-const updateTasks = async function(tasks, level) {
+const updateTasks = async function (tasks, level) {
+    console.log("tasks", tasks, level)
     for (const i in tasks) {
         const tazk = tasks[i]
         tazk.children = await getTaskByLevel(tazk, level)
@@ -298,7 +300,7 @@ const getTask1 = async function(categoryId) {
     //TOOD---console.log('get_task1', data)
     try {
         const response = await http.post("/plan/projectL1Task", data)
-        console.log('get_task1_response', response.status)
+        console.log('get_task1_response', response)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -319,7 +321,7 @@ const getTask2 = async function(task1Id) {
     }
     try {
         const response = await http.post("/plan/projectL2Task", data)
-        console.log('getTask2_response', response.status)
+        console.log('getTask2_response', response)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -340,6 +342,7 @@ const getTask3 = async function(task2Id) {
     }
     try {
         const response = await http.post("/plan/projectL3Task", data)
+        console.log('getTask3_response', response)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -360,6 +363,7 @@ const getTask4 = async function(task3Id) {
     }
     try {
         const response = await http.post("/plan/projectL4Task", data)
+        console.log('getTask4_response', response)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -397,10 +401,10 @@ const saveTask1 = async function (tazk, state) {
         const datefrom = child.datefrom || moment().format("YYYY-MM-DD")
         const dateto = child.dateto || moment().format("YYYY-MM-DD")
 
-        if (state != 'remove') {
-            child.info.est_MP_TL1_id && allocateResource(child.info.est_MP_TL1_id, child.people, child.initial)
-            child.people && child.people.length && peoples.push(child.people)
-        }
+        // if (state != 'remove') {
+        //     child.info.est_MP_TL1_id && allocateResource(child.info.est_MP_TL1_id, child.people, child.initial)
+        //     child.people && child.people.length && peoples.push(child.people)
+        // }
 
         return {
             "action": child.state,
@@ -427,10 +431,10 @@ const saveTask1 = async function (tazk, state) {
         const response = await http.post("/plan/projectL1TaskSave", jsonData)
         if (response.status == 200) {
             if (response.data && response.data.success) {
-                let ids = response.data.response.allCarrierRecord
-                ids && ids.length > 0 && ids.forEach( (e, i) => {
-                    e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i], [])
-                })
+                // let ids = response.data.response.allCarrierRecord
+                // ids && ids.length > 0 && ids.forEach( (e, i) => {
+                //     e.insertId > 0 && peoples.length > 0 && allocateResource(e.insertId, peoples[i], [])
+                // })
                 return true
             }
         }
@@ -807,6 +811,193 @@ const getDoc = async function (id, doc_id, store_id) {
     return false
 }
 
+const getMpEstimate = async function (phaseId, level, taskId) {
+    let jsonData = {
+        "phaseid": phaseId,
+        "taskLevel_1_2_3_4": level,
+        "est_MP_TLx_id": taskId
+    }
+    try {
+        const response = await http.post("/plan/projectGetmpEstimate", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                return data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const getStaff = async function (roleId, from, to) {
+    let jsonData = {
+        "required_roleid": roleId,
+        "required_dateFrom": from,
+        "required_dateTo": to
+    }
+    try {
+        const response = await http.post("/plan/listOfSuitablePeople", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                return data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const saveRoleData = async function (roleData, level) {
+    let data = []
+    roleData.forEach(e => {
+        const e1 = Object.assign({}, e)
+        e1.estimatedTimeInMinutes = e1.estimatedTimeInMinutes * 60
+        data.push(e1)
+    })
+    console.log("before save data", data)
+    let result
+    if (level == 1) {
+        result = await saveRoleDataL1(data)
+    } else if (level == 2) {
+        result = await saveRoleDataL2(data)
+    } else if (level == 3) {
+        result = await saveRoleDataL3(data)
+    } else if (level == 4) {
+        result = await saveRoleDataL4(data)
+    }
+    return result
+}
+
+const saveRoleDataL1 = async function (roleData) {
+    let jsonData = {
+        "est_MP_TL1_id": roleData[0].est_MP_TL1_id,
+        "dataToSave": roleData
+    }
+    try {
+        const response = await http.post("/plan/projectL1mpSave", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("after save l1", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const saveRoleDataL2 = async function (roleData) {
+    let jsonData = {
+        "est_MP_TL2_id": roleData[0].est_MP_TL2_id,
+        "dataToSave": roleData
+    }
+    try {
+        const response = await http.post("/plan/projectL2mpSave", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("after save l2", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const saveRoleDataL3 = async function (roleData) {
+    let jsonData = {
+        "est_MP_TL3_id": roleData[0].est_MP_TL3_id,
+        "dataToSave": roleData
+    }
+    try {
+        const response = await http.post("/plan/projectL3mpSave", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("after save l3", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const saveRoleDataL4 = async function (roleData) {
+    let jsonData = {
+        "est_MP_TL4_id": roleData[0].est_MP_TL4_id,
+        "dataToSave": roleData
+    }
+    try {
+        const response = await http.post("/plan/projectL4mpSave", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("after save l4", data)
+            return data.success
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return false
+}
+
+const projectResource = async function (taskLevel, taskId, roleId) {
+    let jsonData = {
+        "taskLevel_1_2_3_4": taskLevel,
+        "est_MP_TLx_id": taskId,
+        "roleid": roleId
+    }
+    try {
+        const response = await http.post("/plan/projectResourceAllocateRoleWise", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                //group by date
+                let result = []
+                let days = []
+                const ret = data.response.allCarrierRecord[0]
+                ret && ret.length > 0 && ret.forEach(e => {
+                    days.push(e.workingDate)
+                });
+                [...new Set(days)]
+                days.forEach(e => {
+                    const filtered = ret.filter(v => v.workingDate == e)
+                    const temp = {
+                        "workingDate": e,
+                        "allocatedMinutes": 0,
+                        "ids": [],
+                        // "names": ""
+                        "names": []
+                    }
+                    filtered.forEach( (f, i) => {
+                        temp.allocatedMinutes = f.allocatedMinutes
+                        temp.ids.push(f.hrid)
+                        temp.names.push(f.firstname + ' ' + f.lastname)
+                        // temp.names += (f.firstname + ' ' + f.lastname)
+                        // i != (filtered.length - 1) && (temp.names +=  ', ')
+                    })
+                    result.push(temp)
+                })
+                console.log('resource result', data, result)
+                return result
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 const findPeople = async function () {
     let ret = await associate.findAll()
     let result = []
@@ -826,7 +1017,7 @@ const getProgress = async function (id, date, code) {
     }
     let result = []
     try {
-        const response = await http.post("/reports/projectprogress001", jsonData)
+        const response = await http.post("/reports/project_progress_001", jsonData)
         if (response.status == 200) {
             const data = response.data;
             if (data.success) {
@@ -876,6 +1067,7 @@ export default {
     checkRemoveTask3,
     checkRemoveTask4,
     checkRemoveTaskByLevel,
+    checkRemoveCategory,
     allocateResource,
     findPeople,
     getProgress,
@@ -883,5 +1075,10 @@ export default {
     
     addDoc,
     deleteDoc,
-    getDoc
+    getDoc,
+
+    getMpEstimate,
+    getStaff,
+    saveRoleData,
+    projectResource
 }

@@ -1,29 +1,39 @@
 import http from "./http.js";
 
-const getToday = function() {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
+const dateToString = function (date) {
+    var dd = String(date.getDate()).padStart(2, '0');
+    var mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = date.getFullYear();
 
-    today =  yyyy + '-' + mm + '-' + dd;
-
-    return today
+    return yyyy + '-' + mm + '-' + dd;
 }
 
-const add1 = async function(today, taskId, supervisor, data) {
+const getToday = function() {
+    var today = new Date();
+    return dateToString(today)
+}
+
+const getYesterday = function () {
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    return dateToString(yesterday)
+}
+
+const add1 = async function(today, taskId, roleId, supervisor, self, performer, hrs, mins, pct) {
     const jsonData = {
         "effortdate": today,
         "estimate_MP_taskL1id": taskId,
+        "roleid": roleId,
         "workSupervisor_hrid": supervisor,
-        "workPerformedBy_hrid": data.id,
-        "L1AdditionalTotHrsToday": data.hr,
-        "L1AdditionalTotMinsToday": data.min,
-        "L1AdditionalPctToday": data.pct,
-        "L1TotPctMarkToday": data.totalPct
+        "thisUpdateIsForSelfOther": self ? 'self' : 'other',
+        "workPerformedBy_hrid": performer,
+        "L1AdditionalTotMinsToday": Number(hrs) * 60 + Number(mins),
+        "L1TotPctMarkToday": pct ? pct : null
     }
 
-    console.log("jsonData", jsonData)
+    console.log('add1 data', jsonData)
     try {
         const response = await http.post("/effort/duL1AddOne", jsonData)
         if (response.status == 200) {
@@ -37,16 +47,16 @@ const add1 = async function(today, taskId, supervisor, data) {
     return false
 }
 
-const add2 = async function(today, taskId, supervisor, data) {
+const add2 = async function(today, taskId, roleId, supervisor, self, performer, hrs, mins, pct) {
     const jsonData = {
         "effortdate": today,
         "estimate_MP_taskL2id": taskId,
+        "roleid": roleId,
         "workSupervisor_hrid": supervisor,
-        "workPerformedBy_hrid": data.id,
-        "L2AdditionalTotHrsToday": data.hr,
-        "L2AdditionalTotMinsToday": data.min,
-        "L2AdditionalPctToday": data.pct,
-        "L2TotPctMarkToday": data.totalPct
+        "thisUpdateIsForSelfOther": self ? 'self' : 'other',
+        "workPerformedBy_hrid": performer,
+        "L2AdditionalTotMinsToday": Number(hrs) * 60 + Number(mins),
+        "L2TotPctMarkToday": pct ? pct : null
     }
 
     try {
@@ -62,16 +72,16 @@ const add2 = async function(today, taskId, supervisor, data) {
     return false
 }
 
-const add3 = async function(today, taskId, supervisor, data) {
+const add3 = async function(today, taskId, roleId, supervisor, self, performer, hrs, mins, pct) {
     const jsonData = {
         "effortdate": today,
         "estimate_MP_taskL3id": taskId,
+        "roleid": roleId,
         "workSupervisor_hrid": supervisor,
-        "workPerformedBy_hrid": data.id,
-        "L3AdditionalTotHrsToday": data.hr,
-        "L3AdditionalTotMinsToday": data.min,
-        "L3AdditionalPctToday": data.pct,
-        "L3TotPctMarkToday": data.totalPct
+        "thisUpdateIsForSelfOther": self ? 'self' : 'other',
+        "workPerformedBy_hrid": performer,
+        "L3AdditionalTotMinsToday": Number(hrs) * 60 + Number(mins),
+        "L3TotPctMarkToday": pct ? pct : null
     }
 
     try {
@@ -87,16 +97,16 @@ const add3 = async function(today, taskId, supervisor, data) {
     return false
 }
 
-const add4 = async function(today, taskId, supervisor, data) {
+const add4 = async function(today, taskId, roleId, supervisor, self, performer, hrs, mins, pct) {
     const jsonData = {
         "effortdate": today,
         "estimate_MP_taskL4id": taskId,
+        "roleid": roleId,
         "workSupervisor_hrid": supervisor,
-        "workPerformedBy_hrid": data.id,
-        "L4AdditionalTotHrsToday": data.hr,
-        "L4AdditionalTotMinsToday": data.min,
-        "L4AdditionalPctToday": data.pct,
-        "L4TotPctMarkToday": data.totalPct
+        "thisUpdateIsForSelfOther": self ? 'self' : 'other',
+        "workPerformedBy_hrid": performer,
+        "L4AdditionalTotMinsToday": Number(hrs) * 60 + Number(mins),
+        "L4TotPctMarkToday": pct ? pct : null
     }
 
     try {
@@ -188,6 +198,31 @@ const getUpdate4 = async function(hrId, date) {
     return []
 }
 
+const getUpdated = async function(level, id, type, date) {
+    const jsonData = {
+        "taskLevel_1_2_3_4": level,
+        "est_MP_TLx_id": id,
+        "performed_period": {
+            "periodType": type, //daily
+            "periodValue": date
+        }
+    }
+
+    try {
+        const response = await http.post("/effort/getUpdatedRecords", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            if (data.success) {
+                return data.response.allCarrierRecord
+            }
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 const remove1 = async function(id) {
     const jsonData = {
         "removing_DUL1_id": id
@@ -260,6 +295,29 @@ const remove4 = async function(id) {
     return false
 }
 
+
+const getUpdatedList = async function(hrId, type, date) {
+    const jsonData = {
+        "performBy_hrid": hrId,
+        "performPeriod": {
+            "periodType": type,
+            "value": date
+        }
+    }
+
+    try {
+        const response = await http.post("/effort/getListTasksForMe", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            return data.response.allCarrierRecord[0]
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 export default {
     add1,
     add2,
@@ -273,5 +331,8 @@ export default {
     remove2,
     remove3,
     remove4,
-    getToday
+    getToday,
+    getYesterday,
+    getUpdated,
+    getUpdatedList
 }

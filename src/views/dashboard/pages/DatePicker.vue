@@ -6,7 +6,7 @@
       :return-value.sync="selectedDate"
       transition="scale-transition"
       offset-y
-      min-width="auto"
+      min-width="280px"
     >
       <template v-slot:activator="{ on, attrs }">
         <v-text-field
@@ -27,6 +27,7 @@
         :allowed-dates="allowedDates"
         no-title
         scrollable
+        style="margin: 0"
       >
         <v-spacer></v-spacer>
         <v-btn
