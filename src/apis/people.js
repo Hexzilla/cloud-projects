@@ -188,41 +188,6 @@ const getManPower = async function (from, to) {
         if (response.status == 200) {
             const data = response.data
             if (data.success) {
-                let result = []
-                let ret = data.response.allCarrierRecord.id[0]
-                
-                ret && ret.length > 0 && ret.forEach( (item, i) => {
-                    result.push({
-                        name: item.firstname + ' ' + item.lastname,
-                        total: item.Workingdays,
-                        medLeave: item.MedicalLeaves,
-                        casLeave: item.CasualLeave,
-                        vacation: item.Vacations,
-                        unOccDays: item.UnOccDays,
-                        datewiseDetail: item.datewiseDetail
-                    })
-                })
-                return result
-            }
-        }
-    }
-    catch (error) {
-        console.log(error)
-    }
-    return []
-}
-
-const getCurrentManPower = async function () {
-    let jsonData = {
-        fromdate: getCurrentDate(),
-        todate: getCurrentDate()
-    }
-
-    try {
-        const response = await http.post("/reports/mpForcastView", jsonData)
-        if (response.status == 200) {
-            const data = response.data
-            if (data.success) {
                 return data.response.allCarrierRecord.id[0]
             }
         }

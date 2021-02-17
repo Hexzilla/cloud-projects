@@ -60,7 +60,7 @@
                 </v-row>
                 -->
                 <div class="text-center">
-                    <v-btn v-for="(item, i) in phaseItems" :key="i" :color="getPhaseColor(item)" fab small :disabled="wait" @click="selectPhase(item)">
+                    <v-btn v-for="(item, i) in phaseItems" :key="i" :color="getPhaseColor(item)" fab small @click="selectPhase(item)">
                      {{ item }}
                     </v-btn>
                 </div>
@@ -985,6 +985,7 @@ export default {
         },
 
         selectPhase(item) {
+            if (this.wait) return
             this.selectedPhase = item
             this.changePhase()
         },

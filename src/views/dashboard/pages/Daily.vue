@@ -112,11 +112,11 @@
             >
                 <v-card :loading="sheetLoading">
                     <v-card-title>
-                        <p class="body-1">
+                        <p class="body-1 purple--text font-weight-bold">
                             {{ selectedItem && getTaskName(selectedItem) }}
                         </p>
                     </v-card-title>
-                    <v-card-text style="height: 400px; overflow: auto">
+                    <v-card-text style="height: 500px; overflow: auto">
                         <v-container class="py-0">
                             <v-data-table
                             :headers="headers"
@@ -338,7 +338,7 @@
                 { text: 'Date', align: 'start', sortable: false, value: 'effortdate', class: 'success--text'},
                 { text: 'Hrs', align: 'start', sortable: false, value: 'hrs', class: 'success--text'},
                 { text: 'Mins', align: 'start', sortable: false, value: 'mins', class: 'success--text'},
-                { text: '%', align: 'start', sortable: false, value: 'L1TotPctMarkToday', class: 'success--text'},
+                { text: '%', align: 'start', sortable: false, value: 'pct', class: 'success--text'},
                 { text: '', align: 'start', sortable: false, value: 'remove', class: 'success--text'},
             ],
             updatedData: [],
@@ -646,17 +646,33 @@
                     this.hrs = ''
                     this.mins = ''
                     this.pct = ''
+                }
                     
-                    this.updatedData = []
-                    this.selectedItem.updatedData.length > 0 && this.selectedItem.updatedData.forEach( e => {
-                        let temp = Object.assign({}, e)
+                this.updatedData = []
+                this.selectedItem.updatedData.length > 0 && this.selectedItem.updatedData.forEach( e => {
+                    let temp = Object.assign({}, e)
+                    
+                    if (temp.dailyUpdatesL1_id) {
                         temp.hrs = parseInt(temp.L1AdditionalTotMinsToday / 60)
                         temp.mins = temp.L1AdditionalTotMinsToday % 60
-                        temp.L1TotPctMarkToday = temp.L1TotPctMarkToday * 1
-                        this.updatedData.push(temp)
-                    })
-                    this.selectedItem.updated = true
-                }
+                        temp.pct = temp.L1TotPctMarkToday * 1
+                    } else if (temp.dailyUpdatesL2_id) {
+                        temp.hrs = parseInt(temp.L2AdditionalTotMinsToday / 60)
+                        temp.mins = temp.L2AdditionalTotMinsToday % 60
+                        temp.pct = temp.L2TotPctMarkToday * 1
+                    } else if (temp.dailyUpdatesL3_id) {
+                        temp.hrs = parseInt(temp.L3AdditionalTotMinsToday / 60)
+                        temp.mins = temp.L3AdditionalTotMinsToday % 60
+                        temp.pct = temp.L3TotPctMarkToday * 1
+                    } else if (temp.dailyUpdatesL4_id) {
+                        temp.hrs = parseInt(temp.L4AdditionalTotMinsToday / 60)
+                        temp.mins = temp.L4AdditionalTotMinsToday % 60
+                        temp.pct = temp.L4TotPctMarkToday * 1
+                    }
+                    this.updatedData.push(temp)
+                })
+                this.selectedItem.updated = true
+                
                 this.waitProject = null
             },
 
