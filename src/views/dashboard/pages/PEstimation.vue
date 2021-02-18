@@ -169,12 +169,20 @@
                                 <v-list-item v-for="(item, i) in selectedItem.staffs" :key="i" 
                                             :value="item.hrid"
                                             active-class="deep-purple--text text--accent-4">
-                                    <v-list-item-icon>
-                                        <v-icon>mdi-account</v-icon>
-                                    </v-list-item-icon>
-                                    <v-list-item-content>
-                                        <v-list-item-title>{{ item.firstname + ' ' + item.lastname }}</v-list-item-title>
-                                    </v-list-item-content>
+                                    <template v-slot:default="{ active }">
+                                        <v-list-item-icon>
+                                            <v-icon>mdi-account</v-icon>
+                                        </v-list-item-icon>
+                                        <v-list-item-content>
+                                            <v-list-item-title>{{ item.firstname + ' ' + item.lastname }}</v-list-item-title>
+                                        </v-list-item-content>
+                                        <v-list-item-action>
+                                            <v-checkbox
+                                            :input-value="active"
+                                            color="deep-purple accent-4"
+                                            ></v-checkbox>
+                                        </v-list-item-action>
+                                    </template>
                                 </v-list-item>
                             </v-list-item-group>
                         </v-list>

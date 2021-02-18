@@ -51,7 +51,7 @@
                 class="px-5 py-3"
                 >
                     <v-row>
-                        <v-col>
+                        <v-col cols="12" md="4">
                             <v-text-field
                                 label="Project Code"
                                 v-model="projectCode"
@@ -59,7 +59,7 @@
                             >
                             </v-text-field>
                         </v-col>
-                        <v-col>
+                        <v-col cols="12" md="4">
                             <v-text-field
                                 label="Client"
                                 v-model="clientName"
@@ -67,7 +67,7 @@
                             >
                             </v-text-field>
                         </v-col>
-                        <v-col>
+                        <v-col cols="12" md="4">
                             <v-text-field
                                 label="PM"
                                 v-model="pm"
@@ -100,45 +100,10 @@
                                         </p>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content class="pb-0">
-                                        <div v-for="(e, i) in item.L1" :key="i" class="pl-5">
-                                            <div class="display-1 py-2 my-1">
-                                                {{e.TLx_name}}
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-3 text-center" style="width: 20px">
-                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
-                                                </span>
-                                                <span style="width: 90px" class="text-center">
-                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
-                                                </span>
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-5" style="padding-top: 15px">
-                                                    {{ v.rolename }}
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span style="width: 90px">
-                                                    <Chart></Chart>
-                                                </span>
-                                            </div>
-                                            <v-divider></v-divider>
-                                        </div>
+                                        <ProgressDetail
+                                            v-bind:items="item.L1"
+                                        >
+                                        </ProgressDetail>
                                     </v-expansion-panel-content>
                                 </v-expansion-panel>
 
@@ -149,45 +114,10 @@
                                         </p>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
-                                        <div v-for="(e, i) in item.L2" :key="i" class="pl-5">
-                                            <div class="display-1 py-2 my-1">
-                                                {{e.TLx_name}}
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-3 text-center" style="width: 20px">
-                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
-                                                </span>
-                                                <span style="width: 90px" class="text-center">
-                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
-                                                </span>
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-5" style="padding-top: 15px">
-                                                    {{ v.rolename }}
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span style="width: 90px">
-                                                    <Chart></Chart>
-                                                </span>
-                                            </div>
-                                            <v-divider></v-divider>
-                                        </div>
+                                        <ProgressDetail
+                                            v-bind:items="item.L2"
+                                        >
+                                        </ProgressDetail>
                                     </v-expansion-panel-content>
                                 </v-expansion-panel>
                                 
@@ -198,45 +128,10 @@
                                         </p>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
-                                        <div v-for="(e, i) in item.L3" :key="i" class="pl-5">
-                                            <div class="display-1 py-2 my-1">
-                                                {{e.TLx_name}}
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-3 text-center" style="width: 20px">
-                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
-                                                </span>
-                                                <span style="width: 90px" class="text-center">
-                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
-                                                </span>
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-5" style="padding-top: 15px">
-                                                    {{ v.rolename }}
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span style="width: 90px">
-                                                    <Chart></Chart>
-                                                </span>
-                                            </div>
-                                            <v-divider></v-divider>
-                                        </div>
+                                        <ProgressDetail
+                                            v-bind:items="item.L3"
+                                        >
+                                        </ProgressDetail>
                                     </v-expansion-panel-content>
                                 </v-expansion-panel>
                                 
@@ -247,45 +142,10 @@
                                         </p>
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
-                                        <div v-for="(e, i) in item.L4" :key="i" class="pl-5">
-                                            <div class="display-1 py-2 my-1">
-                                                {{e.TLx_name}}
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-3 text-center" style="width: 20px">
-                                                    <v-icon color="blue" title="Peoples">mdi-account-group</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Minutes">mdi-clock-fast</v-icon>
-                                                </span>
-                                                <span class="mr-3 text-center" style="width: 40px">
-                                                    <v-icon color="blue" title="Days">mdi-calendar-month-outline</v-icon>
-                                                </span>
-                                                <span style="width: 90px" class="text-center">
-                                                    <v-icon color="blue" title="Chart">mdi-chart-arc</v-icon>
-                                                </span>
-                                            </div>
-                                            <div class="pl-5 my-1 text-right d-flex" v-for="(v, j) in e.efforts" :key="`c`+j">
-                                                <v-spacer></v-spacer>
-                                                <span class="mr-5" style="padding-top: 15px">
-                                                    {{ v.rolename }}
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 20px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span class="mr-3" style="padding-top: 15px; width: 40px">
-                                                    
-                                                </span>
-                                                <span style="width: 90px">
-                                                    <Chart></Chart>
-                                                </span>
-                                            </div>
-                                            <v-divider></v-divider>
-                                        </div>
+                                        <ProgressDetail
+                                            v-bind:items="item.L4"
+                                        >
+                                        </ProgressDetail>
                                     </v-expansion-panel-content>
                                 </v-expansion-panel>
                             </v-expansion-panels>
@@ -300,11 +160,13 @@
 <script>
     import api from "@/apis/project.js";
     import Chart from './Chart'
+    import ProgressDetail from './ProgressDetail'
     import associate_api from "@/apis/associate.js";
 
     export default {
         components: {
-            Chart
+            Chart,
+            ProgressDetail,
         },
 
         data: () => ({

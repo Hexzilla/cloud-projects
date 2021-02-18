@@ -1015,6 +1015,8 @@ const getProgress = async function (id, date) {
         "phaseid": id,
         "uptoDate": getCurrentDate()
     }
+    console.log(jsonData)
+
     let result = []
     try {
         const response = await http.post("/reports/projectprogress001", jsonData)
