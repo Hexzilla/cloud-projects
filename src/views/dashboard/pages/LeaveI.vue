@@ -23,6 +23,7 @@
                             dark
                             class="mb-2"
                             text
+                            :disabled="!roles.add"
                             @click="addItem">
                             New
                         </v-btn>
@@ -162,12 +163,12 @@
 
                 <template v-slot:item.actions="{ item }">
                     <template v-if="item.status == `applied`">
-                        <v-btn small color="teal" text title='Modify' @click="modifyLeave(item)">
+                        <v-btn small color="teal" text title='Modify' @click="modifyLeave(item)" :disabled="!roles.edit">
                             <v-icon>
                                 mdi-square-edit-outline
                             </v-icon>
                         </v-btn>
-                        <v-btn small color="red" text title='Cancel' @click="cancelLeave(item)">
+                        <v-btn small color="red" text title='Cancel' @click="cancelLeave(item)" :disabled="!roles.edit">
                             <v-icon>
                                 mdi-tooltip-remove-outline
                             </v-icon>
@@ -196,6 +197,7 @@
     import DatePicker from './DatePicker'
     import leave_api from "@/apis/leave.js"
     import auth_api from "@/apis/auth.js";
+
     export default {
         components: {
             DatePicker,
@@ -241,14 +243,17 @@
             cancelDialog: false,
             cancelReason: "",
             valid1: false,
-            hrId: null
+            hrId: null,
+
+            roles: {}
         }),
 
         async created() {
             this.loading = true
             this.hrId = await auth_api.getOwnId()
             this.leaveData = await leave_api.getMyLeave(this.hrId)
-            console.log("leaveData", this.leaveData)
+            this.roles = auth_api.getRole()
+            console.log("roles", this.roles)
             this.loading = false
         },
 

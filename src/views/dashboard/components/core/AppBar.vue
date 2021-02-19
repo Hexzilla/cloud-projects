@@ -45,6 +45,38 @@
       bottom
       left
       offset-y
+      origin="top left"
+      transition="scale-transition"
+    >
+      <template v-slot:activator="{ attrs, on }">
+        <v-btn
+          class="ml-2"
+          min-width="0"
+          text
+          v-bind="attrs"
+          v-on="on"
+        >
+          <v-icon>mdi-information-outline</v-icon>
+        </v-btn>
+      </template>
+
+      <v-list
+        nav
+      >
+        <div>
+          <app-bar-item v-for="(e, i) in info" :key="i">
+            <v-list-item-title>
+              {{e}}
+            </v-list-item-title>
+          </app-bar-item>
+        </div>
+      </v-list>
+    </v-menu>
+
+    <v-menu
+      bottom
+      left
+      offset-y
       origin="top right"
       transition="scale-transition"
     >
@@ -79,6 +111,7 @@
 </template>
 
 <script>
+  import auth_api from "@/apis/auth.js";
   // Components
   import { VHover, VListItem } from 'vuetify/lib'
 
@@ -122,14 +155,16 @@
     },
 
     data: () => ({
-      notifications: [
-        'Mike John Responded to your email',
-        'You have 5 new tasks',
-        'You\'re now friends with Andrew',
-        'Another Notification',
-        'Another one',
-      ],
+      info: [],
     }),
+
+    async created() {
+      const temp = await auth_api.getInfo()
+      for (const [key, value] of Object.entries(temp)) {
+        console.log(key, value)
+        this.info.push(key + ' : ' + value)
+      }
+    },
 
     computed: {
       ...mapState(['drawer']),

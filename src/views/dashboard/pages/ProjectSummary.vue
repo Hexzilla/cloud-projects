@@ -62,7 +62,7 @@
                         </v-row>
                         <v-row>
                             <v-col class="text-right">
-                                <v-btn color="blue" small elevation="8" v-on:click="project_addButtonClicked" :disabled="wait">
+                                <v-btn color="blue" small elevation="8" v-on:click="project_addButtonClicked" :disabled="wait || !roles.add">
                                     New Project
                                 </v-btn>
                             </v-col>
@@ -109,7 +109,7 @@
                                 small
                                 color="blue"
                                 @click="goToDetail"
-                                :disabled="wait"
+                                :disabled="wait || !roles.edit"
                                 elevation="8"
                             >
                                 Project Detail
@@ -187,6 +187,7 @@
                                 color="purple"
                                 elevation="10"
                                 @click="projectApprove"
+                                :disabled="!roles.edit"
                             >
                                 Approve
                             </v-btn>
@@ -201,7 +202,7 @@
                     </v-row>
                     <v-row>
                         <v-col class="text-right">
-                            <v-btn x-small color="purple" fab @click="phase_addButtonClicked">
+                            <v-btn x-small color="purple" fab @click="phase_addButtonClicked" :disabled="!roles.edit">
                                 <v-icon>mdi-plus</v-icon>
                             </v-btn>
                         </v-col>
@@ -222,7 +223,7 @@
                                             <td>{{item.phase_opendate}}</td>
                                             <td>{{item.phase_closedate}}</td>
                                             <td>    
-                                                <v-icon color="purple" @click="changePhase(item)">
+                                                <v-icon color="purple" @click="changePhase(item)" :disabled="!roles.edit">
                                                     mdi-square-edit-outline
                                                 </v-icon>
                                             </td>
@@ -241,7 +242,7 @@
                     </v-row>
                     <v-row>
                         <v-col class="text-right">
-                            <v-btn x-small color="purple" fab @click="document_addButtonClicked">
+                            <v-btn x-small color="purple" fab @click="document_addButtonClicked" :disabled="!roles.edit">
                                 <v-icon>mdi-plus</v-icon>
                             </v-btn>
                         </v-col>
@@ -262,7 +263,7 @@
                                             <td>{{item.documentStorefileDescription}}</td>
                                             <td>
                                                 <v-icon color="primary" :disabled="docWait" @click="showDoc(item)" class="mr-3">mdi-eye</v-icon>
-                                                <v-icon color="warning" :disabled="docWait" @click="deleteDoc(item)">mdi-delete</v-icon>
+                                                <v-icon color="warning" :disabled="docWait || !roles.edit" @click="deleteDoc(item)" >mdi-delete</v-icon>
                                             </td>
                                         </tr>
                                     </template>
@@ -410,6 +411,7 @@ import client_api from "@/apis/client.js"
 import associate_api from "@/apis/associate.js"
 import AddProjectDialog from './AddProjectDialog'
 import DatePicker from './DatePicker'
+import auth_api from "@/apis/auth.js";
 
 export default {
     components: {
@@ -458,6 +460,7 @@ export default {
         selectedDoc: null,
         dialogDelete: false,
 
+        roles: {}
     }),
 
     computed: {
@@ -542,6 +545,7 @@ export default {
         const temp= await associate_api.findAll('', '')
         this.associates = temp.filter(e => e.assocationStatus == "joined")
         console.log("associates", this.associates)
+        this.roles = auth_api.getRole()
         this.wait = false
     },
     methods: {
@@ -826,9 +830,17 @@ export default {
             this.wait = true
             this.docWait = true
             const result = await project_api.getDoc(this.project.prj_id, item.projectDocsid, item.documentStoreid)
-            console.log(result)
 
-            let blob = new Blob([result.data], {
+            const byteCharacters = window.atob(result.data)
+            //console.log("binary", result.data)
+
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+            let blob = new Blob([byteArray], {
                 type: item.documentStoremimetype
             }); 
             let url = window.URL.createObjectURL(blob); 

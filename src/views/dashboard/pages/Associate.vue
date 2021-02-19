@@ -25,7 +25,7 @@
                                 class="mb-2"
                                 text
                                 @click="addItem"
-                                :disabled="loading"
+                                :disabled="loading || !roles.add"
                             >
                                 New
                             </v-btn>
@@ -72,7 +72,7 @@
                 </template>
                 -->
                 <template v-slot:item.actions="{ item }">
-                    <v-icon small class="mr-2" @click="editItem(item)" title="EDIT" color="primary">
+                    <v-icon small class="mr-2" @click="editItem(item)" title="EDIT" color="primary" :disabled="!roles.edit">
                         mdi-pencil
                     </v-icon>
                     <!--
@@ -338,6 +338,7 @@ import designation_api from "@/apis/designation.js";
 import people_api from "@/apis/people.js";
 import country_api from "@/apis/country.js";
 import calendar_api from "@/apis/calendar.js";
+import auth_api from "@/apis/auth.js";
 
 export default {
     components: {
@@ -417,11 +418,14 @@ export default {
 
         firstNameSearch: null,
         lastNameSearch: null,
+
+        roles: {}
     }),
 
     created: async function () {
         this.editedItem = Object.assign({}, this.defaultItem)
         await this.initialize()
+        this.roles = auth_api.getRole()
     },
 
     computed: {

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import api from "@/apis/auth.js";
 
 Vue.use(Router)
 
@@ -30,41 +31,65 @@ const router = new Router({
           name: 'Client List',
           path: 'pages/client',
           component: () => import('@/views/dashboard/pages/ClientList'),
+          meta: {
+            menuId: 1
+          },
         },
         {
           name: 'Country List',
           path: 'pages/country',
           component: () => import('@/views/dashboard/pages/CountryList'),
+          meta: {
+              menuId: 3
+          },
         },
         {
           name: 'HR- Manpower Associate types',
           path: 'pages/designation',
           component: () => import('@/views/dashboard/pages/Designation'),
+          meta: {
+              menuId: 4
+          },
         },
         {
           name: 'Organization Wide Roles',
           path: 'pages/role',
           component: () => import('@/views/dashboard/pages/RoleList'),
+          meta: {
+              menuId: 5
+          },
         },
         {
           name: 'People',
           path: 'pages/people',
           component: () => import('@/views/dashboard/pages/People'),
+          meta: {
+              menuId: 6
+          },
         },
         {
           name: 'Associate',
           path: 'pages/associate_person',
           component: () => import('@/views/dashboard/pages/Associate'),
+          meta: {
+              menuId: 7
+          },
         },
         {
           name: 'Task List',
           path: 'pages/task',
           component: () => import('@/views/dashboard/pages/TaskList'),
+          meta: {
+              menuId: 10
+          },
         },
         {
           name: 'Project Summary',
           path: 'pages/project_summary',
           component: () => import('@/views/dashboard/pages/ProjectSummary'),
+          meta: {
+              menuId: 11
+          },
         },
         {
           name: 'Project Detail',
@@ -100,50 +125,94 @@ const router = new Router({
           name: 'Daily Update',
           path: 'pages/daily',
           component: () => import('@/views/dashboard/pages/Daily'),
+          meta: {
+              menuId: 12
+          },
         },
         {
           name: 'Progress',
           path: 'pages/progress',
           component: () => import('@/views/dashboard/pages/CheckProgress'),
+          meta: {
+              menuId: 13
+          },
         },
         {
           name: 'ManPower utilization',
           path: 'pages/manpower',
           component: () => import('@/views/dashboard/pages/Manpower'),
+          meta: {
+              menuId: 14
+          },
         },
         {
           name: 'Leave Individual',
           path: 'pages/leave_i',
           component: () => import('@/views/dashboard/pages/LeaveI'),
+          meta: {
+              menuId: 15
+          },
         },
         {
           name: 'Leave Manager',
           path: 'pages/leave_m',
           component: () => import('@/views/dashboard/pages/LeaveM'),
+          meta: {
+              menuId: 8
+          },
         },
         {
           name: 'Leave Balance',
           path: 'pages/leave_b',
           component: () => import('@/views/dashboard/pages/LeaveB'),
+          meta: {
+            menuId: 9
+          },
         },
         {
           name: 'Holiday Calendar',
           path: 'pages/holiday',
           component: () => import('@/views/dashboard/pages/Holiday'),
+          meta: {
+              menuId: 2
+          },
         }
       ],
     }
   ],
 })
 
+let previlage = api.getLocalprevilage()
 router.beforeEach((to, from, next) => {
+  // check login
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (localStorage.getItem('pmFE001') == null) {
       next({name: "Login"})
-    } else {
-      next()
     }
   }
+
+  // role menu id
+  if (to.matched.some(record => record.meta.menuId)) {
+    const menuId = to.matched[1].meta.menuId
+    if (!previlage)
+      previlage = api.getLocalprevilage()
+    
+    let found = null
+    previlage && previlage.length > 0 && (found = previlage.find(p => {
+      if (p.menuid == menuId) {
+        const allowYes = p.privileges.find(a => a.allowed == 'yes')
+        if (!allowYes)
+          return true
+      }
+      return false
+    }))
+    if (found) {
+      next('/')
+    } else {
+      localStorage.setItem('menuId', menuId)
+    }
+  }
+  
   next()
 })
 

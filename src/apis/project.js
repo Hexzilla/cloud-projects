@@ -415,6 +415,8 @@ const saveTask1 = async function (tazk, state) {
             "est_MP_TL1_dateto": dateto,                            //child.info.est_MP_TL1_dateto,  
             "est_MP_TL1_unitOfMeasure": child.unitOfMeasure,        //child.info.est_MP_TL1_unitOfMeasure,
             "est_MP_TL1_qty": child.quantity,                       //child.info.est_MP_TL1_qty
+            "est_MP_TL1_backgroundColor": child.info.est_MP_TL1_backgroundColor,
+            "est_MP_TL1_fontColor": child.info.est_MP_TL1_fontColor
         }
     })
     const postData = data.filter(it => it != null)
@@ -464,6 +466,8 @@ const saveTask2 = async function (tazk, state) {
             "est_MP_TL2_level2taskDesc": child.description, //child.info.est_MP_TL2_level2taskDesc,
             "est_MP_TL2_unitOfMeasure": child.unitOfMeasure, //child.info.est_MP_TL2_unitOfMeasure,
             "est_MP_TL2_qty": child.quantity, //child.info.est_MP_TL2_qty
+            "est_MP_TL2_backgroundColor": child.info.est_MP_TL2_backgroundColor,
+            "est_MP_TL2_fontColor": child.info.est_MP_TL2_fontColor
         }
     })
     const postData = data.filter(it => it != null)
@@ -509,6 +513,8 @@ const saveTask3 = async function (tazk, state) {
             "est_MP_TL3_level3taskDesc": child.description, //child.info.est_MP_TL3_level3taskDesc,
             "est_MP_TL3_unitOfMeasure": child.unitOfMeasure, //child.info.est_MP_TL3_unitOfMeasure,
             "est_MP_TL3_qty": child.quantity, //child.info.est_MP_TL3_qty
+            "est_MP_TL3_backgroundColor": child.info.est_MP_TL3_backgroundColor,
+            "est_MP_TL1=3_fontColor": child.info.est_MP_TL3_fontColor
         }
     })
     const postData = data.filter(it => it != null)
@@ -554,6 +560,8 @@ const saveTask4 = async function (tazk, state) {
             "est_MP_TL4_level4taskDesc": child.description, //child.info.est_MP_TL4_level4taskDesc,
             "est_MP_TL4_unitOfMeasure": child.unitOfMeasure, //child.info.est_MP_TL4_unitOfMeasure,
             "est_MP_TL4_qty": child.quantity, //child.info.est_MP_TL4_qty
+            "est_MP_TL4_backgroundColor": child.info.est_MP_TL4_backgroundColor,
+            "est_MP_TL4_fontColor": child.info.est_MP_TL4_fontColor
         }
     })
     const postData = data.filter(it => it != null)
@@ -801,6 +809,7 @@ const getDoc = async function (id, doc_id, store_id) {
         "projectDocsid": doc_id,
         "documentStoreid": store_id
     }
+    console.log("downl", jsonData)
     try {
         const response = await http.post("/plan/projectGetDoc", jsonData)
         return response
@@ -950,6 +959,24 @@ const saveRoleDataL4 = async function (roleData) {
     return false
 }
 
+const getProjectConfigValues = async function () {
+    let jsonData = {
+        "code":"projectRelated"
+    }
+    try {
+        const response = await http.post("/common/getProjectConfigValues", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("response", data.response)
+            return data.response
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 const projectResource = async function (taskLevel, taskId, roleId) {
     let jsonData = {
         "taskLevel_1_2_3_4": taskLevel,
@@ -1081,5 +1108,6 @@ export default {
     getMpEstimate,
     getStaff,
     saveRoleData,
-    projectResource
+    projectResource,
+    getProjectConfigValues
 }

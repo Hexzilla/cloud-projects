@@ -86,6 +86,8 @@
     mapState,
   } from 'vuex'
 
+  import api from "@/apis/auth.js";
+  
   export default {
     name: 'DashboardCoreDrawer',
 
@@ -94,6 +96,33 @@
         type: Boolean,
         default: false,
       },
+    },
+
+    async created() {
+      let previlage = api.getLocalprevilage()
+      if (!previlage) {
+        let result = await api.getPrevilage()
+        previlage = result
+        localStorage.setItem('previlage', JSON.stringify(result))
+      }
+
+      this.items.forEach( e => {
+        if (e.children && e.children.length > 0) {
+          for(let i = e.children.length - 1; i >= 0; i--) {
+            let c = e.children[i]
+            const found = previlage.find(p => {
+              if (p.menuid == c.id) {
+                const allowYes = p.privileges.find(a => a.allowed == 'yes')
+                if (!allowYes)
+                  return true
+              }
+              return false
+            })
+            if (found)
+              e.children.splice(i, 1)
+          }
+        }
+      })
     },
 
     data: () => ({
@@ -110,16 +139,19 @@
             icon: 'mdi-account',
             title: 'client',
             to: '/pages/client',
+            id: 1
           },
           {
             icon: 'mdi-map-marker',
             title: 'country',
             to: '/pages/country',
+            id: 3
           },
           {
             icon: 'mdi-calendar-month',
             title: 'holiday_calendar',
             to: '/pages/holiday',
+            id: 2
           }]
         },
         {
@@ -129,31 +161,37 @@
             icon: 'mdi-order-bool-ascending',
             title: 'designation',
             to: '/pages/designation',
+            id: 4
           },
           {
             icon: 'mdi-orbit',
             title: 'role',
             to: '/pages/role',
+            id: 5
           },
           {
             icon: 'mdi-account-supervisor-circle',
             title: 'people',
             to: '/pages/people',
+            id: 6
           },
           {
             icon: 'mdi-account-tie',
             title: 'associate_person',
             to: '/pages/associate_person',
+            id: 7
           },
           {
             icon: 'mdi-account-clock',
             title: 'leavem',
-            to: '/pages/leave_m'
+            to: '/pages/leave_m',
+            id: 8
           },
           {
             icon: 'mdi-alarm-panel',
             title: 'leaveb',
-            to: '/pages/leave_b'
+            to: '/pages/leave_b',
+            id: 9
           }]
         },
         {
@@ -163,11 +201,13 @@
               icon: 'mdi-file-tree',
               title: 'task',
               to: '/pages/task',
+              id: 10
             },
             {
               icon: 'mdi-semantic-web',
               title: 'project',
               to: '/pages/project_summary',
+              id: 11
             },
           ]
         },
@@ -177,7 +217,8 @@
             {
               icon: 'mdi-calendar-edit',
               title: 'daily_update',
-              to: '/pages/daily'
+              to: '/pages/daily',
+              id: 12
             }
           ]
         },
@@ -187,12 +228,14 @@
             {
               icon: 'mdi-chart-line',
               title: 'progress',
-              to: '/pages/progress'
+              to: '/pages/progress',
+              id: 13
             },
             {
               icon: 'mdi-text-account',
               title: 'manpower',
-              to: '/pages/manpower'
+              to: '/pages/manpower',
+              id: 14
             },
           ]
         },
@@ -202,43 +245,45 @@
             {
               icon: 'mdi-account-clock-outline',
               title: 'leavea',
-              to: '/pages/leave_i'
+              to: '/pages/leave_i',
+              id: 15
             }
           ]
         },
       ],
+
     }),
 
-    computed: {
-      ...mapState(['barColor', 'barImage']),
-      drawer: {
-        get () {
-          return this.$store.state.drawer
+      computed: {
+        ...mapState(['barColor', 'barImage']),
+        drawer: {
+          get () {
+            return this.$store.state.drawer
+          },
+          set (val) {
+            this.$store.commit('SET_DRAWER', val)
+          },
         },
-        set (val) {
-          this.$store.commit('SET_DRAWER', val)
+        computedItems () {
+          return this.items.map(this.mapItem)
+        },
+        profile () {
+          return {
+            avatar: true,
+            title: this.$t('avatar'),
+          }
         },
       },
-      computedItems () {
-        return this.items.map(this.mapItem)
-      },
-      profile () {
-        return {
-          avatar: true,
-          title: this.$t('avatar'),
-        }
-      },
-    },
 
-    methods: {
-      mapItem (item) {
-        return {
-          ...item,
-          children: item.children ? item.children.map(this.mapItem) : undefined,
-          title: this.$t(item.title),
-        }
+      methods: {
+        mapItem (item) {
+          return {
+            ...item,
+            children: item.children ? item.children.map(this.mapItem) : undefined,
+            title: this.$t(item.title),
+          }
+        },
       },
-    },
   }
 </script>
 

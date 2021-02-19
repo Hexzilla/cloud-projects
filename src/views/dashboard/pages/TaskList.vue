@@ -15,6 +15,7 @@
             color="pink"
             text
             @click="addCategory"
+            :disabled="!proles.add"
           >
             New Category
           </v-btn>
@@ -103,7 +104,7 @@
         activatable
       >
         <template v-slot:prepend="{ item }">
-          <v-icon v-if="item.level < 4" color="green" @click="addTask(item)">
+          <v-icon v-if="item.level < 4" color="green" @click="addTask(item)" :disabled="!proles.add">
             mdi-playlist-plus
           </v-icon>
         </template>
@@ -124,7 +125,7 @@
           </v-row>
         </template>
         <template v-slot:append="{ item }">
-          <v-icon v-if="item.ikey != 0" color="green" @click="editTask(item)">
+          <v-icon v-if="item.ikey != 0" color="green" @click="editTask(item)" :disabled="!proles.edit">
             mdi-playlist-edit
           </v-icon>
         </template>
@@ -148,6 +149,7 @@
 <script>
 import api from "@/apis/task.js";
 import roleApi from "@/apis/role.js";
+import auth_api from "@/apis/auth.js";
 
 export default {
   data: () => ({
@@ -169,6 +171,7 @@ export default {
     snackColor: "success",
     snackText: "",
     saveBtnStatus: true,
+    proles: []
   }),
 
   computed: {
@@ -204,6 +207,7 @@ export default {
 
   created: async function () {
     this.items = await api.findAll();
+    this.proles = auth_api.getRole()
 
     this.uniqueTreeId = this.setUniqueId(this.items)
     console.log("uniqueTreeId:", this.uniqueTreeId, this.items)

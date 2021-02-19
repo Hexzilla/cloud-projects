@@ -28,6 +28,7 @@
               class="mb-2"
               text
               @click="addItem"
+              :disabled="!roles.add"
             >
               New
             </v-btn>
@@ -61,10 +62,20 @@
                 -->
 
             <template v-slot:item.actions="{ item }">
-              <v-icon small class="mr-2" @click="editItem(item)" color="primary">
+              <v-icon small class="mr-2" @click="editItem(item)" color="primary" title="Edit" :disabled="!roles.edit">
                 mdi-pencil
               </v-icon>
-              <v-icon small @click="deleteItem(item)" color="warning" disabled> mdi-delete </v-icon>
+              <v-icon v-if="!(clickMenuLoading == item)" small @click="setMenu(item)" color="cyan" title="Menu" :disabled="!roles.edit"> mdi-menu-open </v-icon>
+              <v-progress-circular
+                  v-if="clickMenuLoading == item"
+                  indeterminate
+                  color="cyan"
+                  :width="2"
+                  :size="16"
+              ></v-progress-circular>
+              <!--
+              <v-icon small @click="deleteItem(item)" color="warning" disabled title="Delete"> mdi-delete </v-icon>
+              -->
             </template>
             <template v-slot:item.name="props">
               <v-edit-dialog large @save="updateItemName(props.item)" @open="inlineEditedName = props.item.name">
@@ -146,15 +157,42 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!--Delete Dialog End-->
-    <!--
-    <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
-      {{ snackText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
-    -->
+    
+    <v-dialog v-model="menuDialog" max-width="600px" scrollable>
+      <v-card :loading="menuLoading">
+        <v-card-title>
+          <span class="headline">Menu Previlage</span><br>
+          <span class="title">{{ selectedItem && selectedItem.name + '(' + selectedItem.roleType + ')' }}</span>
+        </v-card-title>
+        <v-card-text>
+          <template v-for="(item, i) in menus">
+            <v-row :key="i">
+              <v-col class="py-0" style="display: flex; align-items:center;">
+                <span>{{item.menuname}}</span>
+              </v-col>
+              <v-col class="d-flex py-0">
+                <template v-for="(e, j) in item.privileges">
+                  <template v-if="item.selected && item.selected.length > 0">
+                    <v-checkbox 
+                      :key="j"
+                      :label="e"
+                      v-model="item.selected[j]"
+                      class="mr-2"
+                    >
+                    </v-checkbox>
+                  </template>
+                </template>
+              </v-col>
+            </v-row>
+          </template>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="menuDialog = false"> Cancel </v-btn>
+          <v-btn color="blue darken-1" text @click="saveMenu"> Save </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     
     <base-material-snackbar
       v-model="snack"
@@ -172,6 +210,7 @@
 </template>
 
 <script>
+import auth_api from "@/apis/auth.js";
 import api from "@/apis/role.js";
 
 export default {
@@ -191,9 +230,10 @@ export default {
         text: "Name",
         align: "start",
         value: "name",
-        class: "body-1"
+        class: "body-1",
+        cellClass: "px-1" 
       },
-      { text: "Actions", align: "right", value: "actions", sortable: false, class: "body-1" },
+      { text: "Actions", align: "right", value: "actions", sortable: false, cellClass: "px-1" },
     ],
     clients: [],
     editedIndex: -1,
@@ -207,7 +247,14 @@ export default {
     },
     roleTypes: [],
 
-    snackbar: true
+    snackbar: true,
+
+    selectedItem: null,
+    menuDialog: false,
+    menus: [],
+    menuLoading: false,
+    clickMenuLoading: false,
+    roles: {}
   }),
 
   computed: {
@@ -241,6 +288,7 @@ export default {
 
   created: async function () {
     await this.initialize()
+    this.roles = auth_api.getRole()
   },
 
   methods: {
@@ -248,6 +296,9 @@ export default {
       this.loading = true
       this.clients = await api.findAll()
       this.roleTypes = await api.findAllRoles()
+      this.menus = await api.findAllMenus()
+      this.initializeMenu()
+      console.log("first menus", this.menus)
       this.loading = false;
     },
 
@@ -360,6 +411,62 @@ export default {
     filteredItems(clients, item) {
       const filtered = clients.filter(e=> e.roleType == item)
       return filtered
+    },
+
+    initializeMenu() {
+      this.menus.forEach( e => {
+        e.selected = []
+        e.privileges.forEach(v => {
+          e.selected.push(false)
+        })
+      })
+    },
+
+    async setMenu(item) {
+      this.loading = true
+      this.clickMenuLoading = item
+      const detail = await api.findOne(item.id)
+      // this.selectedItem = detail
+      this.selectedItem = detail[0]
+      console.log(detail)
+      this.initializeMenu()
+      const selected = detail[0].privilegesAssigned
+      selected.length > 0 && selected.forEach( e => {
+        this.menus.forEach(v => {
+          if(v.menuid == e.menuid) {
+            v.selected = []
+            v.privileges.forEach(p => {
+              const found = e.privileges.find(p1 => p1 == p)
+              if (found)
+                v.selected.push(true)
+              else
+                v.selected.push(false)
+            })
+          }
+        })
+      })
+      console.log("menus", this.menus)
+      this.menuDialog = true
+      this.clickMenuLoading = null 
+      this.loading = false
+    },
+
+    async saveMenu() {
+      this.menuLoading = true
+      let data = []
+      this.menus.forEach(e => {
+        // const found = e.selected.find( v => v == true)
+        // if (found) {
+          let temp = Object.assign({}, e)
+          data.push(temp)
+        // }
+      })
+      console.log("save menus", data)
+
+      const result = await api.saveMenu(this.selectedItem.id, data)
+
+      this.show_snack(result)
+      this.menuLoading = false
     }
   },
 };

@@ -26,6 +26,7 @@
                 class="mb-2"
                 @click="addItem"
                 text
+                :disabled="!roles.add"
               >
                 New
               </v-btn>
@@ -104,7 +105,7 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)" color="primary">
+          <v-icon small class="mr-2" @click="editItem(item)" color="primary" :disabled="!roles.edit">
             mdi-pencil
           </v-icon>
           <v-icon small disabled @click="deleteItem(item)"> mdi-delete </v-icon>
@@ -167,6 +168,7 @@
 
 <script>
 import api from "@/apis/client.js";
+import auth_api from "@/apis/auth.js";
 
 export default {
   data: () => ({
@@ -203,6 +205,7 @@ export default {
       code: "",
       name: "",
     },
+    roles: {}
   }),
 
   computed: {
@@ -240,6 +243,8 @@ export default {
 
   created: async function () {
     await this.initialize()
+    this.roles = auth_api.getRole()
+    console.log("roles", this.roles)
   },
 
   methods: {

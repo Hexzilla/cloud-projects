@@ -301,6 +301,8 @@
                         "L4": l4
                     })
                 })
+
+                console.log("progress", result)
                 return result
             },
             

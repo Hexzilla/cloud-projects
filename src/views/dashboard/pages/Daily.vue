@@ -70,7 +70,10 @@
                                                                     <v-icon>mdi-semantic-web</v-icon>
                                                                 </v-list-item-icon>
                                                                 <v-list-item-content>
-                                                                    <v-list-item-title>{{ getTaskName(item) }}</v-list-item-title>
+                                                                    <v-list-item-title>
+                                                                        <span v-if="item.backgroundColor" :style="setBackgroundColor(item)">I</span>
+                                                                        <span class="ml-2" :style="setFontColor(item)">{{ getTaskName(item) }}</span>
+                                                                    </v-list-item-title>
                                                                 </v-list-item-content>
                                                                 <v-list-item-icon>
                                                                     <v-progress-circular
@@ -124,7 +127,7 @@
                             hide-default-footer
                             >
                                 <template v-slot:item.remove="{ item }">
-                                    <v-icon small title="remove" color="warning" @click="removeUpdated(item)">
+                                    <v-icon small title="remove" color="warning" @click="removeUpdated(item)" :disabled="!roles.delete">
                                         mdi-delete
                                     </v-icon>
                                 </template>
@@ -218,7 +221,7 @@
                         <v-btn color="blue" class="mr-5" small text @click="sheet = false">
                             Cancel
                         </v-btn>
-                        <v-btn color="blue" small elevation="7" @click="save">
+                        <v-btn color="blue" small elevation="7" @click="save" :disabled="!roles.add">
                             Save
                         </v-btn>
                     </v-card-actions>
@@ -342,7 +345,8 @@
                 { text: '', align: 'start', sortable: false, value: 'remove', class: 'success--text'},
             ],
             updatedData: [],
-            removeItem: null
+            removeItem: null,
+            roles: {}
         }),
         
         watch: {
@@ -359,6 +363,7 @@
         created: async function() {
             this.wait = true
             this.hrId = await auth_api.getOwnId()
+            this.roles = auth_api.getRole()
 
             this.today = daily_api.getToday()
             this.selectedDay = daily_api.getToday()
@@ -672,13 +677,25 @@
                     this.updatedData.push(temp)
                 })
                 this.selectedItem.updated = true
-                
+                this.$refs.form && this.$refs.form.resetValidation()
                 this.waitProject = null
             },
 
             removeUpdated(item) {
                 this.removeItem = item
                 this.deleteDialog = true
+            },
+
+            setBackgroundColor(item) {
+                if (item.backgroundColor)
+                    return 'background-color: ' + item.backgroundColor + '; width: 4px; color: ' + item.backgroundColor
+                return ''
+            },
+
+            setFontColor(item) {
+                if (item.fontColor)
+                    return 'color: ' + item.fontColor + ';'
+                return ''
             }
         }
     }

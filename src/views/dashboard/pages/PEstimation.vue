@@ -168,18 +168,37 @@
                             <v-list-item-group multiple v-model="selectedStaff">
                                 <v-list-item v-for="(item, i) in selectedItem.staffs" :key="i" 
                                             :value="item.hrid"
-                                            active-class="deep-purple--text text--accent-4">
+                                            active-class="text--accent-4">
                                     <template v-slot:default="{ active }">
                                         <v-list-item-icon>
-                                            <v-icon>mdi-account</v-icon>
+                                            <v-icon :color="getStaffColor(item)">mdi-account</v-icon>
                                         </v-list-item-icon>
                                         <v-list-item-content>
-                                            <v-list-item-title>{{ item.firstname + ' ' + item.lastname }}</v-list-item-title>
+                                            <v-list-item-title>
+                                                {{ item.firstname + ' ' + item.lastname }}
+                                            </v-list-item-title>
+                                            <v-list-item-subtitle class="pl-5">
+                                                <template v-if="item.leave && item.leave.length > 0">
+                                                    <span v-for="(e, i) in item.leave" :key="`l` + i"> {{ e.leaveDateFrom + ' ~ ' + e.leaveDateTo + ' '}} (leave)<br></span>
+                                                </template>
+                                                <template v-if="item.task1 && item.task1.length > 0">
+                                                    <span v-for="(e, i) in item.task1" :key="`t1` + i">{{  e.estimatedStartDate + ' ~ ' + e.estimatedEndDate + ' (' + e.TaskL1name + ')' }}<br></span>
+                                                </template>
+                                                <template v-if="item.task2 && item.task2.length > 0">
+                                                    <span v-for="(e, i) in item.task2" :key="`t2` + i">{{  e.estimatedStartDate + ' ~ ' + e.estimatedEndDate + ' (' + e.TaskL2name + ')' }}<br></span>
+                                                </template>
+                                                <template v-if="item.task3 && item.task3.length > 0">
+                                                    <span v-for="(e, i) in item.task3" :key="`t3` + i">{{  e.estimatedStartDate + ' ~ ' + e.estimatedEndDate + ' (' + e.TaskL3name + ')' }}<br></span>
+                                                </template>
+                                                <template v-if="item.task4 && item.task4.length > 0">
+                                                    <span v-for="(e, i) in item.task4" :key="`t4` + i">{{  e.estimatedStartDate + ' ~ ' + e.estimatedEndDate + ' (' + e.TaskL4name + ')' }}<br></span>
+                                                </template>
+                                            </v-list-item-subtitle>
                                         </v-list-item-content>
                                         <v-list-item-action>
                                             <v-checkbox
                                             :input-value="active"
-                                            color="deep-purple accent-4"
+                                            color="green accent-4"
                                             ></v-checkbox>
                                         </v-list-item-action>
                                     </template>
@@ -377,13 +396,40 @@
                     const staff = await project_api.getStaff(item.roleid, item.estimatedStartDate, item.estimatedEndDate)
                     console.log("staff", staff)
                     if (staff && staff.length > 0 && staff[0].length > 0 && staff[0][0]) {
-                        const temp = staff[0][0]
-                        this.selectedItem.staffs = temp.peopleWithThisRole 
+                        this.setStaffWithOverlap(staff[0][0])
                     }
-                    this.selectedItem.staffGet = true
+                    console.log("filter staff", this.selectedItem)
                 }
                 this.staffDialog = true
                 this.loading = false
+            },
+
+            setStaffWithOverlap(data) {
+                let staffs = data.peopleWithThisRole
+                staffs && staffs.length > 0 && staffs.forEach ( v => {
+                    if (data.overlapping_TaskSummaryL1 && data.overlapping_TaskSummaryL1.length > 0) {
+                        const filtered = data.overlapping_TaskSummaryL1.filter(e => e.hrid == v.hrid)
+                        v.task1 = filtered
+                    }
+                    if (data.overlapping_TaskSummaryL2 && data.overlapping_TaskSummaryL2.length > 0) {
+                        const filtered = data.overlapping_TaskSummaryL2.filter(e => e.hrid == v.hrid)
+                        v.task2 = filtered
+                    }
+                    if (data.overlapping_TaskSummaryL3 && data.overlapping_TaskSummaryL3.length > 0) {
+                        const filtered = data.overlapping_TaskSummaryL3.filter(e => e.hrid == v.hrid)
+                        v.task3 = filtered
+                    }
+                    if (data.overlapping_TaskSummaryL4 && data.overlapping_TaskSummaryL4.length > 0) {
+                        const filtered = data.overlapping_TaskSummaryL4.filter(e => e.hrid == v.hrid)
+                        v.task4 = filtered
+                    }
+                    if (data.overlapping_LeaveApplications && data.overlapping_LeaveApplications.length > 0) {
+                        const filtered = data.overlapping_LeaveApplications.filter(e => e.hrid == v.hrid)
+                        v.leave = filtered
+                    }
+                })
+                this.selectedItem.staffs = staffs
+                this.selectedItem.staffGet = true
             },
 
             async saveRoleData() {
@@ -439,6 +485,16 @@
                 })
                 this.resourceLoading = false
                 this.loading = false
+            },
+
+            getStaffColor(item) {
+                if (item.leave && item.leave.length > 0 ||
+                    item.task1 && item.task1.length > 0 || 
+                    item.task2 && item.task2.length > 0 || 
+                    item.task3 && item.task3.length > 0 || 
+                    item.task4 && item.task4.length > 0)
+                    return 'pink'
+                return ''
             }
         }
     }

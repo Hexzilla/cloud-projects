@@ -25,6 +25,7 @@
                                 class="mb-2"
                                 text
                                 @click="addItem"
+                                :disabled="!roles.add"
                             >
                                 New
                             </v-btn>
@@ -355,10 +356,10 @@
                 </template>
 
                 <template v-slot:item.actions="{ item }">
-                    <v-icon small class="mr-2" @click="editItem(item)" title="edit" color="primary">
+                    <v-icon small class="mr-2" @click="editItem(item)" title="edit" color="primary" :disabled="!roles.edit">
                         mdi-pencil
                     </v-icon>
-                    <v-icon small class="mr-2" @click="editAddress(item)" title="Address" color="cyan">
+                    <v-icon small class="mr-2" @click="editAddress(item)" title="Address" color="cyan" :disabled="!roles.edit">
                         mdi-map-marker
                     </v-icon>
                     <v-icon small disabled @click="deleteItem(item)">
@@ -390,6 +391,7 @@
 import DatePicker from './DatePicker'
 import people_api from "@/apis/people.js";
 import country_api from "@/apis/country.js";
+import auth_api from "@/apis/auth.js";
 
 export default {
     components: {
@@ -453,12 +455,14 @@ export default {
         permanentAddressItem: {},
         tabModel: null,
         passwordShow: false,
-        emailError: ""
+        emailError: "",
+        roles: {}
     }),
 
     created: async function () {
         this.editedItem = Object.assign({}, this.defaultItem)
         await this.initialize()
+        this.roles = auth_api.getRole()
     },
 
     computed: {

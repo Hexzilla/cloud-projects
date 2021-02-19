@@ -88,7 +88,6 @@ export default {
 
   methods: {
     save: function() {
-      console.log('this.submit', this.selectedDate)
       this.submit(this.selectedDate)
       this.pickerOpened = false
     },

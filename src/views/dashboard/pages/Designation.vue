@@ -25,6 +25,7 @@
                 class="mb-2"
                 text
                 @click="addItem"
+                :disabled="!roles.add"
               >
                 New
               </v-btn>
@@ -121,7 +122,7 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)" color="primary">
+          <v-icon small class="mr-2" @click="editItem(item)" color="primary" :disabled="!roles.edit">
             mdi-pencil
           </v-icon>
           <v-icon small @click="deleteItem(item)" color="warning" disabled> mdi-delete </v-icon>
@@ -192,6 +193,7 @@
 </template>
 
 <script>
+import auth_api from "@/apis/auth.js";
 import api from "@/apis/designation.js";
 
 export default {
@@ -235,6 +237,7 @@ export default {
       level: "",
       scalecodes: [1]
     },
+    roles: {}
   }),
 
   computed: {
@@ -280,6 +283,7 @@ export default {
 
   created: async function () {
     await this.initialize()
+    this.roles = auth_api.getRole()
   },
 
   methods: {

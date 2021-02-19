@@ -18,7 +18,7 @@
                     </template>
                     <v-card-title>
                         <div style="width: 100%; text-align: right">
-                            <v-btn color="pink" text @click="newCalendarClicked">
+                            <v-btn color="pink" text @click="newCalendarClicked" :disabled="!roles.add">
                                 New Calendar
                             </v-btn>
                         </div>
@@ -83,7 +83,7 @@
                         </template>
 
                         <template v-slot:item.edit="{ item }">
-                            <v-btn small color="primary" title='Edit' text @click="editCalendar(item)">
+                            <v-btn small color="primary" title='Edit' text @click="editCalendar(item)" :disabled="!roles.edit">
                                 EDIT
                             </v-btn>
                         </template>
@@ -152,10 +152,10 @@
                                         <td class="px-1">{{ item.reason }}</td>
                                         <td class="px-1">
                                             <v-icon color="primary" class="mr-2" @click="editDate(item)"
-                                                    title="Edit" style="cursor: pointer">
+                                                    title="Edit" style="cursor: pointer" :disabled="!roles.edit">
                                                 mdi-pencil
                                             </v-icon>
-                                            <v-icon color="warning" title="Remove" @click="deleteDate(item)"
+                                            <v-icon color="warning" title="Remove" @click="deleteDate(item)" :disabled="!roles.edit">
                                                     style="cursor: pointer">
                                                 mdi-delete
                                             </v-icon>
@@ -314,6 +314,7 @@
 <script>
     import DatePicker from './DatePicker'
     import api from "@/apis/calendar.js";
+    import auth_api from "@/apis/auth.js";
 
     export default {
         components: {
@@ -361,13 +362,15 @@
             selectedDateItem: null,
             deleteDialog: false,
             searchKey: "",
-            searchYears: []
+            searchYears: [],
+            roles: {}
         }),
 
         created: async function() {
             this.loading = true
             this.calendars = await api.findAllCalendar()
             console.log("calendar", this.calendars)
+            this.roles = auth_api.getRole()
             this.loading = false
         },
 
@@ -379,7 +382,9 @@
                 ];
             },
             dateBtnValid() {
-                return this.calId == null
+                if (this.roles && this.roles.add)
+                    return this.calId == null
+                return true
             }
         },
 

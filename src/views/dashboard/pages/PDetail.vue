@@ -124,7 +124,7 @@
                                 <template v-slot:append="{ item }">
                                     <v-icon v-if="item.level > 0"
                                         color="blue" class="mr-2"
-                                        @click="openTaskEditDialog(item)"
+                                        @click="openTaskEditDialog($event, item)"
                                     >mdi-format-color-fill</v-icon>
                                     <v-icon v-if="item.level > 0"
                                         @click="selectTask(item)"
@@ -200,61 +200,51 @@
         </v-dialog>
 
         <!--Task date dialog-->
-        <v-dialog v-model="taskDialog" max-width="500px" scrollable>
+        <v-dialog v-model="taskDialog" max-width="600px" scrollable>
             <v-card>
                 <v-card-title>
                     <span class="headline">Task Information</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container v-if="editTask != null">
-                        <v-row>
-                            <v-col cols="12" sm="12" md="12">
-                                <v-text-field
-                                    v-model="editTask.name"
-                                    prepend-icon="mdi-book-lock-outline"
-                                    label="Name"
-                                    readonly
-                                ></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="12" sm="12" md="12">
-                                <v-text-field
-                                    v-model="editTask.description"
-                                    prepend-icon="mdi-alpha-d-circle-outline"
-                                    label="Description"
-                                ></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col>
-                                <v-select
-                                    v-model="editTask.unitOfMeasure"
-                                    :items="units"
-                                    attach
-                                    label="Unit"
-                                    prepend-icon="mdi-menu-right"
-                                ></v-select>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col>
-                                <v-text-field
-                                    v-model="editTask.quantity"
-                                    prepend-icon="mdi-numeric"
-                                    label="Quantity"
-                                    type="number"
-                                    :rules="qtyRules"
-                                ></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col>
-                                <v-color-picker
-                                    style="margin-left: 60px"
-                                ></v-color-picker>
-                            </v-col>
-                        </v-row>
+                        <v-text-field
+                            v-model="editTask.name"
+                            prepend-icon="mdi-book-lock-outline"
+                            label="Name"
+                            readonly
+                        ></v-text-field>
+                        <v-text-field
+                            v-model="editTask.description"
+                            prepend-icon="mdi-alpha-d-circle-outline"
+                            label="Description"
+                        ></v-text-field>
+                        <v-select
+                            v-model="editTask.unitOfMeasure"
+                            :items="units"
+                            attach
+                            label="Unit"
+                            prepend-icon="mdi-menu-right"
+                        ></v-select>
+                        <v-text-field
+                            v-model="editTask.quantity"
+                            prepend-icon="mdi-numeric"
+                            label="Quantity"
+                            type="number"
+                            :rules="qtyRules"
+                        ></v-text-field>
+                        <br>
+                        <ColorPicker
+                            :label="`Background Color`"
+                            :initial = "setBackgroundColor(editTask)"
+                            :submit="(color) => {this.setBackTempColor(color)}"
+                            :task = "editTask"
+                        ></ColorPicker>
+                        <ColorPicker
+                            :label="`Font Color`"
+                            :initial = "setFontColor(editTask)"
+                            :submit="(color) => {this.setFontTempColor(color)}"
+                            :task = "editTask"
+                        ></ColorPicker>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -291,10 +281,12 @@
 import project_api from "@/apis/project.js"
 import associate_api from "@/apis/associate.js";
 import PEstimation from './PEstimation'
+import ColorPicker from './ColorPicker'
 
 export default {
     components: {
-        PEstimation
+        PEstimation,
+        ColorPicker
     },
 
     data: () => ({
@@ -321,8 +313,17 @@ export default {
         task: null,
         editTask: null,
         taskDialog: false,
-        units: ["Item", "Nos"]
+        units: ["Item", "Nos"],
+
+        bTempColor: null,
+        fTempColor: null
     }),
+
+    watch: {
+        bColor: function(newValue, oldValue) {
+            console.log("bColor new", newValue)
+        }
+    },
 
     computed: {
 
@@ -947,8 +948,9 @@ export default {
             this.task = item
         },
         
-        openTaskEditDialog: function(item) {
-            console.log('open_task_date_dialog', item)
+        openTaskEditDialog: function(event, item) {
+            event.preventDefault();
+            console.log('open_task_date_dialog', event, item)
             this.taskDialog = true
             this.editTask = item
             console.log('selected.edittask', this.editTask)
@@ -957,6 +959,14 @@ export default {
         saveTaskEditDialog: function() {
             this.editTask.state = "modified"
             this.updatePhaseTree(this.editTask)
+            if (this.bTempColor) {
+                this.getBackColor(this.bTempColor)
+                this.bTempColor = null
+            }
+            if (this.fTempColor) {
+                this.getFontColor(this.fTempColor)
+                this.fTempColor = null
+            }
             this.taskDialog = false;
         },
         
@@ -994,7 +1004,64 @@ export default {
             if (this.selectedPhase == item)
                 return 'primary'
             return 'white'
+        },
+
+        setBackTempColor(color) {
+            this.bTempColor = color
+        },
+
+        setFontTempColor(color) {
+            this.fTempColor = color
+        },
+
+        getBackColor(color) {
+            if (this.editTask.level == 1) {
+                this.editTask.info.est_MP_TL1_backgroundColor = color
+            } else if (this.editTask.level == 2) {
+                this.editTask.info.est_MP_TL2_backgroundColor = color
+            } else if (this.editTask.level == 3) {
+                this.editTask.info.est_MP_TL3_backgroundColor = color
+            } else if (this.editTask.level == 4) {
+                this.editTask.info.est_MP_TL4_backgroundColor = color
+            }
+        },
+
+        getFontColor(color) {
+            if (this.editTask.level == 1) {
+                this.editTask.info.est_MP_TL1_fontColor = color
+            } else if (this.editTask.level == 2) {
+                this.editTask.info.est_MP_TL2_fontColor = color
+            } else if (this.editTask.level == 3) {
+                this.editTask.info.est_MP_TL3_fontColor = color
+            } else if (this.editTask.level == 4) {
+                this.editTask.info.est_MP_TL4_fontColor = color
+            }
+        },
+
+        setBackgroundColor(item) {
+            if (item.level == 1) {
+                return [item.info.est_MP_TL1_backgroundColor, item.ikey]
+            } else if (item.level == 2) {
+                return [item.info.est_MP_TL2_backgroundColor, item.ikey]
+            } else if (item.level == 3) {
+                return [item.info.est_MP_TL3_backgroundColor, item.ikey]
+            } else if (item.level == 4) {
+                return [item.info.est_MP_TL4_backgroundColor, item.ikey]
+            }
+        },
+
+        setFontColor(item) {
+            if (item.level == 1) {
+                return [item.info.est_MP_TL1_fontColor, item.ikey]
+            } else if (item.level == 2) {
+                return [item.info.est_MP_TL2_fontColor, item.ikey]
+            } else if (item.level == 3) {
+                return [item.info.est_MP_TL3_fontColor, item.ikey]
+            } else if (item.level == 4) {
+                return [item.info.est_MP_TL4_fontColor, item.ikey]
+            }
         }
+
     }
 }
 </script>

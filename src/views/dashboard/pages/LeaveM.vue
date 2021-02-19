@@ -140,7 +140,7 @@
 
                 <template v-slot:item.action="{ item }">
                     <template v-if="item.status == `applied`">
-                        <v-btn small color="teal" text title='Approve' @click="approveLeave(item)">
+                        <v-btn small color="teal" text title='Approve' @click="approveLeave(item)" :disabled="!roles.edit">
                             <v-icon>
                                 mdi-check
                             </v-icon>
@@ -175,6 +175,7 @@
 <script>
     import DatePicker from './DatePicker'
     import leave_api from "@/apis/leave.js";
+    import auth_api from "@/apis/auth.js";
 
     export default {
         components: {
@@ -220,12 +221,14 @@
             snackColor: "success",
             snackText: "",
             selectedItem: null,
-            balance: null
+            balance: null,
+            roles: {}
         }),
 
         async created() {
             this.loading = true
             this.leaveData = await leave_api.getAllLeave()
+            this.roles = auth_api.getRole()
             console.log("leaveData", this.leaveData)
             this.loading = false
         },

@@ -71,7 +71,7 @@
                 >
                     <v-card-title>
                         <div style="text-align: right; width: 100%">
-                            <v-btn text color="pink" @click="addBalance" :disabled="addBtnValid">
+                            <v-btn text color="pink" @click="addBalance" :disabled="addBtnValid || !roles.add">
                                 Add
                             </v-btn>
                         </div>
@@ -187,6 +187,7 @@
 <script>
     import DatePicker from './DatePicker'
     import leave_api from "@/apis/leave.js";
+    import auth_api from "@/apis/auth.js";
 
     export default {
         components: {
@@ -223,12 +224,14 @@
             snack: false,
             snackColor: "success",
             snackText: "",
+            roles: {}
         }),
 
         async created() {
             this.loading = true
             this.selectedDate = leave_api.getCurrentDate()
             this.leaveBalances = await leave_api.allLeaveBalance(this.selectedDate)
+            this.roles = auth_api.getRole()
             console.log("balances", this.leaveBalances)
             this.loading = false
         },
