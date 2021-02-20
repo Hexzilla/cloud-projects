@@ -357,6 +357,12 @@
                     await this.getUpdate()
                     this.sheet = !this.sheet
                 }
+            },
+
+            selectedDay: async function(newValue, oldValue) {
+                this.wait = true
+                await this.setTaskList()
+                this.wait = false
             }
         },
 
@@ -369,17 +375,7 @@
             this.selectedDay = daily_api.getToday()
 
             this.yesterday = daily_api.getYesterday()
-    
-            const ret = await daily_api.getUpdatedList(this.hrId, "daily", this.today)
-            const list = ret[0]
-
-            list.TaskSummaryL1 && list.TaskSummaryL1.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL1))
-            list.TaskSummaryL2 && list.TaskSummaryL2.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL2))
-            list.TaskSummaryL3 && list.TaskSummaryL3.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL3))
-            list.TaskSummaryL4 && list.TaskSummaryL4.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL4))
-            this.taskList = this.allTaskList
-            console.log("task list", this.taskList)
-
+            await this.setTaskList()
             const associates = await associate_api.findAll()
             let filtered = associates.filter( e => e.assocationStatus == 'joined')
             filtered && filtered.length > 0 && filtered.forEach( e => {
@@ -487,6 +483,19 @@
         },
 
         methods: {
+            async setTaskList() {
+                const ret = await daily_api.getUpdatedList(this.hrId, "daily", this.selectedDay)
+                const list = ret[0]
+
+                this.allTaskList = []
+                list.TaskSummaryL1 && list.TaskSummaryL1.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL1))
+                list.TaskSummaryL2 && list.TaskSummaryL2.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL2))
+                list.TaskSummaryL3 && list.TaskSummaryL3.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL3))
+                list.TaskSummaryL4 && list.TaskSummaryL4.length > 0 && (this.allTaskList = this.allTaskList.concat(list.TaskSummaryL4))
+                this.taskList = this.allTaskList
+                console.log("task list", this.taskList)
+            },
+
             async save() {
                 // this.confirmDialog = true
                 if (!this.$refs.form.validate()) {
@@ -639,19 +648,19 @@
 
             async getUpdate() {
                 this.waitProject = this.selectedItem
-                if (!this.selectedItem.updated) {
+                // if (!this.selectedItem.updated) {
                     const level = this.getItemLevel(this.selectedItem)
                     const id = this.getItemId(this.selectedItem)
-                    const ret1 = await daily_api.getUpdated(level, id, 'daily', this.yesterday)
-                    const ret2 = await daily_api.getUpdated(level, id, 'daily', this.today)
-                    this.selectedItem.updatedData = ret1.concat(ret2)
-
+                    const ret1 = await daily_api.getUpdated(level, id, 'daily', this.selectedDay)
+                    // const ret2 = await daily_api.getUpdated(level, id, 'daily', this.today)
+                    // this.selectedItem.updatedData = ret1.concat(ret2)
+                    this.selectedItem.updatedData = ret1
                     this.selectedPerformer = null
                     this.selectedSupervisor = null
                     this.hrs = ''
                     this.mins = ''
                     this.pct = ''
-                }
+                // }
                     
                 this.updatedData = []
                 this.selectedItem.updatedData.length > 0 && this.selectedItem.updatedData.forEach( e => {

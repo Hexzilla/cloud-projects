@@ -24,7 +24,8 @@ export default {
             // colors:['rgb(0, 227, 150)', 'rgb(0, 143, 251)']
         },
 
-        chartOptions: {
+        chartOptions: {            
+            colors: ['#33b2df', '#90ee7e', '#f48024'],
             chart: {
                 type: 'bar',
                 toolbar: {
@@ -32,15 +33,20 @@ export default {
                 },
             },
             plotOptions: {
-                bar: {
-                    horizontal: true,
-                }
+              bar: {
+                barHeight: '100%',
+                distributed: true,
+                horizontal: true,
+                dataLabels: {
+                  position: 'bottom'
+                },
+              }
             },
             dataLabels: {
                 enabled: false
             },
             xaxis: {
-                categories: ['Total', 'Elapsed', 'Effort'],
+                categories: ['Allotted', 'Elapsed', 'Effort'],
                 labels: {
                     show: false
                 }
@@ -72,6 +78,9 @@ export default {
                 let total = parseInt(this.data.estimatedTimeInMinutes / 60)
                 let spent = parseInt(this.data.total_minutes_to_be_spent / 60)
                 let effort = parseInt(this.data.TotMinsUpToday / 60)
+                if (effort > total) {
+                    this.chartOptions.colors = ['#33b2df', '#90ee7e', '#d4526e']
+                }
                 return [{data: [total, spent, effort]}]
             }
             return [{data: [0, 0, 0]}]

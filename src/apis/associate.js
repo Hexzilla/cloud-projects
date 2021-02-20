@@ -77,13 +77,15 @@ const add = async function(person) {
         const response = await http.post("/hr/hrAddOne", data)
         if (response.status == 200) {
             const data = response.data
-            if (person.assocationStatus == 'toBeJoined' || person.assocationStatus == 'seperated') {
-                console.log("add no design")
-                return true
-            } else {
-                // const ret = await addDesignation(data.response.data.insertId, person.designationDate, person.designation, 0)
-                // return ret
-            }
+            // if (person.assocationStatus == 'toBeJoined' || person.assocationStatus == 'seperated') {
+            //     console.log("add no design")
+            //     return true
+            // } else {
+            //     const ret = await addDesignation(data.response.data.insertId, person.designationDate, person.designation, 0)
+            //     return ret
+            // }
+            console.log("after add data", data)
+            return data.success
         }
     }
     catch (error) {

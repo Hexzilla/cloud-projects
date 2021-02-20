@@ -75,6 +75,10 @@
                                             <td>{{ item && item[0].personalInfo[0].fullNameOfMother }}</td>
                                         </tr>
                                         <tr>
+                                            <td>Code</td>
+                                            <td>{{ item && item[0].personalInfo[0].code }}</td>
+                                        </tr>
+                                        <tr>
                                             <td>Password</td>
                                             <td>{{ item && item[0].personalInfo[0].pwd }}</td>
                                         </tr>

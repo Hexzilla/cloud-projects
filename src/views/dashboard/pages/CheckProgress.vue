@@ -76,6 +76,14 @@
                             </v-text-field>
                         </v-col>
                     </v-row>
+                    <div>
+                        <DatePicker
+                            textName="Date"
+                            :date="selectedDate"
+                            :submit="(date) => selectedDate = date"
+                            :type="datePickeerStatus"
+                        ></DatePicker>
+                    </div>
                     <div class="text-center">
                         <v-btn v-for="(item, i) in phaseItems" :key="i" :color="getPhaseColor(item)" fab small @click="selectPhase(item)">
                         {{ item }}
@@ -158,13 +166,16 @@
 </template>
 
 <script>
+    import DatePicker from './DatePicker'
     import api from "@/apis/project.js";
     import Chart from './Chart'
     import ProgressDetail from './ProgressDetail'
     import associate_api from "@/apis/associate.js";
+    import daily_api from "@/apis/daily.js";
 
     export default {
         components: {
+            DatePicker,
             Chart,
             ProgressDetail,
         },
@@ -180,15 +191,35 @@
             waitProject: null,
             progress:[],
             phaseLoading: false,
+            selectedDate: null
         }),
         
         created: async function() {
             this.wait = true
+            this.selectedDate = daily_api.getToday()
             this.allProjects = await api.findAll()
             this.associates = await associate_api.findAll()
             this.projects = this.allProjects
 
             this.wait = false
+        },
+
+        watch: {
+            selectedDate: async function(n, o) {
+                if (o) {
+                    if (this.project.phases.length == 0)
+                        return
+                    if (!this.selectedPhase) {
+                        this.selectedPhase = 1
+                    }
+
+                    this.wait = true
+                    this.phaseLoading = true
+                    await this.getProgress()
+                    this.wait = false
+                    this.phaseLoading = false
+                }
+            }
         },
 
         computed: {
@@ -228,6 +259,12 @@
                 }
                 return ''
             },
+
+            datePickeerStatus() {
+                if (!this.project || this.wait)
+                    return 'disable'
+                return ''
+            }
         },
 
         methods: {
@@ -265,20 +302,25 @@
                 this.wait = true
                 this.phaseLoading = true
                 this.selectedPhase = item
-                const num = this.getPhaseNumber(this.selectedPhase)     
-                this.phase = this.project.phases.find(e => e.phaseNumber == num)
-                if (!this.phase.progress) {
-                    const tempProgress = await api.getProgress(this.phase.phase_id)
-                    this.progress = this.sortProgress(tempProgress)
-                    this.phase.progress = this.progress
-                } else {
-                    this.progress = this.phase.progress
-                }
-                console.log('progress', this.progress)
+                await this.getProgress()
                 this.wait = false
                 this.phaseLoading = false
             },
             
+            async getProgress() {
+                const num = this.getPhaseNumber(this.selectedPhase)     
+                this.phase = this.project.phases.find(e => e.phaseNumber == num)
+                if (!this.phase.progress || this.phase.progressDate != this.selectedDate) {
+                    const tempProgress = await api.getProgress(this.phase.phase_id, this.selectedDate)
+                    this.progress = this.sortProgress(tempProgress)
+                    this.phase.progress = this.progress
+                    this.phase.progressDate = this.selectedDate
+                } else {
+                    this.progress = this.phase.progress
+                }
+                console.log('progress', this.progress)
+            },
+
             sortProgress(item) {
                 if (!item || item.length == 0)
                     return []

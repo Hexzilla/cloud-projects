@@ -71,7 +71,7 @@
                 >
                     <v-card-title>
                         <div style="text-align: right; width: 100%">
-                            <v-btn text color="pink" @click="addBalance" :disabled="addBtnValid || !roles.add">
+                            <v-btn color="blue" @click="addBalance" :disabled="addBtnValid || !roles.add" fab small>
                                 Add
                             </v-btn>
                         </div>

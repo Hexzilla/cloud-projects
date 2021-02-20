@@ -21,8 +21,8 @@
           <v-container>
             <div class="d-flex flex-row-reverse" flat tile>
               <v-btn
-                color="pink"
-                text
+                color="blue"
+                fab
                 dark
                 class="mb-2"
                 @click="addItem"

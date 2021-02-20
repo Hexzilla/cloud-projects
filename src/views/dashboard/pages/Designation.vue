@@ -21,11 +21,11 @@
           <v-container>
             <div class="d-flex flex-row-reverse" flat tile>
               <v-btn
-                color="pink"
+                color="blue"
                 class="mb-2"
-                text
                 @click="addItem"
                 :disabled="!roles.add"
+                fab
               >
                 New
               </v-btn>
@@ -135,43 +135,7 @@
             </v-btn>
           </template>
         </template>
-        
-        <!--
-        <template v-slot:item.code="props">
-          <v-edit-dialog large @save="updateItemCode(props.item)" @open="inlineEditedCode = props.item.code">
-            {{ props.item.code.toUpperCase() }}
-            <template v-slot:input>
-              <div class="mt-4 title">Update Code</div>
-              <v-text-field
-                v-model="inlineEditedCode"
-                :rules="codeRules"
-                :counter="maxCodeLength"
-                label="Edit"
-                class="input-uppercase"
-                single-line
-                autofocus
-                @keydown.space.prevent
-              ></v-text-field>
-            </template>
-          </v-edit-dialog>
-        </template>
-        <template v-slot:item.name="props">
-          <v-edit-dialog large @save="updateItemName(props.item)" @open="inlineEditedName = props.item.name">
-            <div>{{ props.item.name }}</div>
-            <template v-slot:input>
-              <div class="mt-4 title">Update Name</div>
-              <v-text-field
-                v-model="inlineEditedName"
-                :rules="nameRules"
-                :counter="maxNameLength"
-                label="Edit"
-                single-line
-                autofocus
-              ></v-text-field>
-            </template>
-          </v-edit-dialog>
-        </template>
-        -->
+
         <template v-slot:no-data>
           <v-btn color="primary" small outlined @click="initialize"> Reset </v-btn>
         </template>
@@ -220,6 +184,7 @@ export default {
       // },
       { text: "Name", value: "name", class: 'success--text' },
       { text: "Level", value: "level", class: 'success--text' },
+      { text: "Code", value: "code", class: 'success--text' },
       { text: "", value: "codes", class: 'success--text', width:"50%", sortable: false},
       { text: "Actions", align: "right", value: "actions", sortable: false, class: 'success--text' },
     ],
@@ -266,7 +231,7 @@ export default {
       return [
         (v) => !!v || "Level is required",
         (v) => v >= 1 || " >= 1",
-        (v) => v < 1000 || " < 1000",
+        (v) => v <= 999999 || " <= 999999",
         (v) => v % 1 == 0 || "invalid"
       ]
     }

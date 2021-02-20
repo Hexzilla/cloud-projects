@@ -147,7 +147,8 @@ export default {
     clients: Array,
     project: Object,
     edit: Boolean,
-    associates: Array
+    associates: Array,
+    dialogStatus: Boolean,
   },
   components: {
     DatePicker,
@@ -164,6 +165,12 @@ export default {
     warrantyFromMenu: false,
     warrantyToMenu: false,
   }),
+
+  watch: {
+    dialogStatus: function(n, o)  {
+      if (n) this.reset()
+    }
+  },
 
   mounted: function() {
     this.clientList = this.clients.map((it) => {

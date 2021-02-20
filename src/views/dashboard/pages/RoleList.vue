@@ -24,9 +24,9 @@
         <v-col>
           <div class="d-flex flex-row-reverse" flat tile>
             <v-btn
-              color="pink"
+              color="blue"
               class="mb-2"
-              text
+              fab
               @click="addItem"
               :disabled="!roles.add"
             >

@@ -259,9 +259,9 @@
                                 <tbody>
                                     <template v-if="project">
                                         <tr v-for="(item, i) in project.documents" :key="i">
-                                            <td>{{i + 1}}</td>
-                                            <td>{{item.documentStorefileDescription}}</td>
-                                            <td>
+                                            <td class="text-left">{{i + 1}}</td>
+                                            <td class="text-left">{{item.documentStorefileDescription}}</td>
+                                            <td class="text-center">
                                                 <v-icon color="primary" :disabled="docWait" @click="showDoc(item)" class="mr-3">mdi-eye</v-icon>
                                                 <v-icon color="warning" :disabled="docWait || !roles.edit" @click="deleteDoc(item)" >mdi-delete</v-icon>
                                             </td>
@@ -284,6 +284,7 @@
                 v-bind:project="project"
                 v-bind:edit="editProject"
                 v-bind:associates="associates"
+                v-bind:dialogStatus="addDialog"
             ></AddProjectDialog>
         </v-dialog>
         
@@ -627,12 +628,15 @@ export default {
             this.wait = true
 
             const result = await project_api.addProject(project)
-            if (result) {
+            if (result == true) {
                 const updated = await project_api.getProjectWithPhase(project.prj_code)
-                    if (updated && updated.length > 0) {
-                        this.projects.push(updated[0])
-                    }
-            }
+                if (updated && updated.length > 0) {
+                    this.projects.push(updated[0])
+                }
+                this.show_snack(result)
+            }else {
+                this.snack_message('error', 'Project code already exist')  
+            } 
             // this.project_reset()
             this.wait = false
         },

@@ -81,8 +81,8 @@
                     </v-progress-linear>
                     <v-row>
                         <v-col class="text-right">
-                            <v-btn small class="mr-5" text width="70px" @click="openTreeDialog()" color="pink">Add Task</v-btn>
-                            <v-btn small elevation="10" width="70px" @click="saveTask()" color="primary" :disabled="saveBtnStatus()">Save Task</v-btn>
+                            <v-btn small class="mr-5" width="70px" @click="openTreeDialog()" color="blue" elevation="8">Add Task</v-btn>
+                            <v-btn small elevation="8" width="70px" @click="saveTask()" color="primary" :disabled="saveBtnStatus()">Save Task</v-btn>
                         </v-col>
                     </v-row>
 
@@ -96,7 +96,6 @@
                                 :filter="filterTreeItems"
                                 :open-all="true"
                                 item-key="ikey"
-                                open-on-click
                                 activatable>
                                 <template v-slot:prepend="{ item }">
                                     <v-icon v-if="item.level == 0" color="blue">mdi-cube</v-icon>
@@ -180,6 +179,7 @@
                                 :items="treeItems"
                                 item-key="ikey"
                                 selectable
+                                dense
                                 selection-type="independent"
                                 @input="treeSelectChanged"
                             >

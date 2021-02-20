@@ -160,9 +160,7 @@ const addProject = async function(project) {
     }
     try {
         const response = await http.post("/plan/projectAddOne", data)
-        if (response.status == 200) {
-            return true
-        }
+        return response.data.response.success
     }
     catch (error) {
         console.log(error)
@@ -1040,7 +1038,7 @@ const findPeople = async function () {
 const getProgress = async function (id, date) {
     let jsonData = {
         "phaseid": id,
-        "uptoDate": getCurrentDate()
+        "uptoDate": date ? date : getCurrentDate()
     }
     console.log(jsonData)
 

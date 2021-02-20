@@ -19,7 +19,12 @@
           required
           :rules="dateRules"
           :filled="fillStatus"
-        ></v-text-field>
+          :disabled="type == 'disable'"
+        >
+          <template v-if="deletable" v-slot:append>
+            <v-icon color="warning" @click="deleteDate()">mdi-delete</v-icon>
+          </template>
+        </v-text-field>
       </template>
       <v-date-picker
         v-model="selectedDate"
@@ -51,7 +56,7 @@
 <script>
 export default {
   name: 'DatePicker',
-  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ,'type', 'fill'],
+  props: [ 'date', 'textName', 'submit', 'startDate', 'endDate' ,'type', 'fill', 'deletable'],
 
   data: () => ({
     pickerOpened: false,
@@ -90,6 +95,10 @@ export default {
     save: function() {
       this.submit(this.selectedDate)
       this.pickerOpened = false
+    },
+    deleteDate: function() {
+      this.selectedDate = ''
+      this.submit(this.selectedDate)
     },
     allowedDates: function(val) {
       if (this.type == "birth") {

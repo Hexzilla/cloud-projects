@@ -18,29 +18,6 @@
             >
                 <template v-slot:top>
                     <v-container>
-                        <div class="d-flex flex-row-reverse" flat tile>
-                            <v-btn
-                                color="pink"
-                                dark
-                                class="mb-2"
-                                text
-                                @click="addItem"
-                                :disabled="loading || !roles.add"
-                            >
-                                New
-                            </v-btn>
-                        </div>
-                        <!--
-                        <div flat tile>
-                            <v-text-field
-                                v-model="search"
-                                append-icon="mdi-magnify"
-                                label="Search"
-                                single-line
-                                hide-details
-                            ></v-text-field>
-                        </div>
-                        -->
                         <v-row>
                             <v-col>
                                 <v-text-field
@@ -55,8 +32,19 @@
                                 ></v-text-field>
                             </v-col>
                             <v-col style="display:flex; align-items:center; text-align:center;">
-                                <v-btn @click="searchAssociate" color="primary" fab small :disabled="loading">
+                                <v-btn @click="searchAssociate" color="purple" fab small :disabled="loading">
                                     <v-icon>mdi-magnify</v-icon>
+                                </v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="blue"
+                                    dark
+                                    class="mb-2"
+                                    fab
+                                    @click="addItem"
+                                    :disabled="loading || !roles.add"
+                                >
+                                    New
                                 </v-btn>
                             </v-col>
                         </v-row>
@@ -181,39 +169,51 @@
                         </v-row>
                         -->
                         <v-row>
-                            <DatePicker
-                                textName="Joining Date"
-                                :date="editedItem.JoinDateForResourcePlanning"
-                                :submit="(date) => editedItem.JoinDateForResourcePlanning = date"
-                                :endDate="editedItem.joinDate"
-                                v-bind:type="joiningType"
-                            ></DatePicker>
-                            <DatePicker
-                                textName="Separating Date"
-                                :date="editedItem.SeperationDateForResourcePlanning"
-                                :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
-                                :startDate="editedItem.joinDate"
-                                :endDate="editedItem.seperation"
-                                v-bind:type="`optional`"
-                            ></DatePicker>
+                            <v-col cols="12" md="6">
+                                <DatePicker
+                                    textName="Joining Date"
+                                    :date="editedItem.JoinDateForResourcePlanning"
+                                    :submit="(date) => editedItem.JoinDateForResourcePlanning = date"
+                                    :endDate="editedItem.joinDate"
+                                    v-bind:type="joiningType"
+                                    v-bind:deletable="true"
+                                ></DatePicker>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <DatePicker
+                                    textName="Separating Date"
+                                    :date="editedItem.SeperationDateForResourcePlanning"
+                                    :submit="(date) => editedItem.SeperationDateForResourcePlanning = date"
+                                    :startDate="editedItem.joinDate"
+                                    :endDate="editedItem.seperation"
+                                    v-bind:type="`optional`"
+                                    v-bind:deletable="true"
+                                ></DatePicker>
+                            </v-col>
                             <!-- v-bind:type="`optional`" -->
                         </v-row>
                         <v-row>
-                            <DatePicker
-                                textName="Joined Date"
-                                :date="editedItem.joinDate"
-                                :submit="(date) => {editedItem.joinDate = date; joinedDateChanged(editedItem)}"
-                                :startDate="editedItem.JoinDateForResourcePlanning"
-                                :endDate="editedItem.SeperationDateForResourcePlanning"
-                                v-bind:type="joinType"
-                            ></DatePicker>
-                            <DatePicker
-                                textName="Separated Date"
-                                :date="editedItem.seperation"
-                                :submit="(date) => editedItem.seperation = date"
-                                :startDate="editedItem.SeperationDateForResourcePlanning ? editedItem.SeperationDateForResourcePlanning : editedItem.joinDate"
-                                v-bind:type="seperateType"
-                            ></DatePicker>
+                            <v-col cols="12" md="6">
+                                <DatePicker
+                                    textName="Joined Date"
+                                    :date="editedItem.joinDate"
+                                    :submit="(date) => {editedItem.joinDate = date; joinedDateChanged(editedItem)}"
+                                    :startDate="editedItem.JoinDateForResourcePlanning"
+                                    :endDate="editedItem.SeperationDateForResourcePlanning"
+                                    v-bind:type="joinType"
+                                    v-bind:deletable="true"
+                                ></DatePicker>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <DatePicker
+                                    textName="Separated Date"
+                                    :date="editedItem.seperation"
+                                    :submit="(date) => editedItem.seperation = date"
+                                    :startDate="editedItem.SeperationDateForResourcePlanning ? editedItem.SeperationDateForResourcePlanning : editedItem.joinDate"
+                                    v-bind:type="seperateType"
+                                    v-bind:deletable="true"
+                                ></DatePicker>
+                            </v-col>
                         </v-row>
                     </v-form>
                 </v-card-text>

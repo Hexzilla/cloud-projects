@@ -18,8 +18,8 @@
                     </template>
                     <v-card-title>
                         <div style="width: 100%; text-align: right">
-                            <v-btn color="pink" text @click="newCalendarClicked" :disabled="!roles.add">
-                                New Calendar
+                            <v-btn color="blue" fab @click="newCalendarClicked" :disabled="!roles.add">
+                                New
                             </v-btn>
                         </div>
                     </v-card-title>
@@ -123,8 +123,8 @@
                                 </v-select>
                             </v-col>
                             <v-col style="text-align:right">
-                                <v-btn color="pink" text @click="newDateClicked" :disabled=dateBtnValid>
-                                    New Date
+                                <v-btn color="purple" @click="newDateClicked" :disabled=dateBtnValid fab>
+                                    New
                                 </v-btn>
                             </v-col>
                         </v-row>
@@ -249,7 +249,8 @@
         <v-dialog v-model="addDateDialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Add Date</span>
+                    <span class="headline">{{ dateFormTitle }}</span><br>
+                    <span class="title">{{ dateTitle }}</span>
                 </v-card-title>
                 <v-card-text>
                     <v-form ref="form1" lazy-validation>
@@ -363,6 +364,9 @@
             deleteDialog: false,
             searchKey: "",
             searchYears: [],
+
+            dItem: null,            
+            dateTitle: "Add Date",
             roles: {}
         }),
 
@@ -385,12 +389,19 @@
                 if (this.roles && this.roles.add)
                     return this.calId == null
                 return true
+            },
+
+            dateFormTitle() {
+                if (this.dItem)
+                    return this.dItem.name
+                return ''
             }
         },
 
         methods: {
             async showDetail(item) {
                 this.wait = true
+                this.dItem = item
                 this.calId = item.id
                 this.allDates = await api.getHolidayList(this.calId)
                 this.dates = this.allDates
@@ -486,6 +497,7 @@
                 this.selectedDate = null
                 this.reason = null
                 this.selectedDateItem = null
+                this.dateTitle = "Add Date"
                 this.addDateDialog = true
             },
 
@@ -522,6 +534,7 @@
                 this.selectedDateItem = item
                 this.selectedDate = item.dt
                 this.reason = item.reason
+                this.dateTitle = "Edit Date"
                 this.addDateDialog = true
             },
 

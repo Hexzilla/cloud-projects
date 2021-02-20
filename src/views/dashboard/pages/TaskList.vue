@@ -12,17 +12,19 @@
         <div>
           <v-btn
             class="mx-4"
-            color="pink"
-            text
+            color="blue"
             @click="addCategory"
             :disabled="!proles.add"
+            elevation="8"
+            small
           >
             New Category
           </v-btn>
           <v-btn
             class="px-2"
-            color="primary"
-            elevation="10"
+            color="pink"
+            elevation="8"
+            small
             @click="saveAll"
             :disabled="saveBtnStatus"
           >
@@ -99,7 +101,6 @@
         :search="search"
         :open="initiallyOpen"
         :items="items"
-        open-on-click
         item-key="ikey"
         activatable
       >

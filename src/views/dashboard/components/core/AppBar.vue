@@ -161,7 +161,6 @@
     async created() {
       const temp = await auth_api.getInfo()
       for (const [key, value] of Object.entries(temp)) {
-        console.log(key, value)
         this.info.push(key + ' : ' + value)
       }
     },
