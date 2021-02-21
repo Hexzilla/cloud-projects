@@ -436,6 +436,13 @@ export default {
                     })
                 })
                 this.designations = this.ownData[0].designations
+                this.designations.sort((a, b) => {
+                    if (a.effectivefromdate > b.effectivefromdate)
+                        return -1
+                    if (a.effectivefromdate < b.effectivefromdate)
+                        return 1
+                    return 0
+                })
                 console.log("first role data", this.roleData)
             }
         },
@@ -521,9 +528,8 @@ export default {
             this.designationDialog = false
         },
 
-        saveDesignation() {
+        async saveDesignation() {
             if (!this.$refs.form.validate()) return
-            console.log("---------", this.designations)
 
             this.designationWait = true
             let success
@@ -532,6 +538,7 @@ export default {
             } else {
                 success = associate_api.addDesignation(this.hrId, this.designationDate, this.des, 0, this.scale)
             }
+            // success = await associate_api.addDesignation(this.hrId, this.designationDate, this.des, this.scale)
             if (success) {
                 const found = this.allDes.find( e => e.id == this.des)
                 console.log("found", found)

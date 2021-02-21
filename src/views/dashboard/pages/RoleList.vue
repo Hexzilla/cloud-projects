@@ -129,6 +129,18 @@
                 ></v-select>
               </v-col>
             </v-row>
+            <v-row>
+              <v-col cols="12" sm="12" md="12">
+                <v-text-field
+                  v-model="editedItem.code"
+                  :counter="20"
+                  :rules="codeRules"
+                  label="Code"
+                  required
+                  class="input-uppercase"
+                ></v-text-field>
+              </v-col>
+            </v-row>
           </v-form>
         </v-card-text>
 
@@ -275,6 +287,15 @@ export default {
         (v) => !!v || "Role is required",
       ];
     },
+    codeRules() {
+      return [
+        (v) => !!v || "Code is required",
+        (v) => /^[a-zA-Z0-9]+$/.test(v) || 'Code must only contain letters',
+        (v) =>
+          (v && v.length <= 20) ||
+          `Code must be less than 20 characters`,
+      ];
+    }
   },
 
   watch: {
@@ -298,7 +319,7 @@ export default {
       this.roleTypes = await api.findAllRoles()
       this.menus = await api.findAllMenus()
       this.initializeMenu()
-      console.log("first menus", this.menus)
+      console.log("role data", this.clients)
       this.loading = false;
     },
 
@@ -391,7 +412,10 @@ export default {
             this.clients.push(addedItem);
           }
         }
-        this.show_snack(success)
+        if (success)
+          this.show_snack(success)
+        else
+          this.snack_message('error', 'code is already exist')
       }
       this.loading = false
     },
@@ -406,6 +430,12 @@ export default {
         this.snackColor = "error";
         this.snackText = "Error";
       }
+    },
+
+    snack_message(color, text) {
+      this.snack = true;
+      this.snackColor = color
+      this.snackText = text
     },
 
     filteredItems(clients, item) {

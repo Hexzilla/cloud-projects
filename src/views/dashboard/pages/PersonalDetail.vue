@@ -76,7 +76,7 @@
                                         </tr>
                                         <tr>
                                             <td>Code</td>
-                                            <td>{{ item && item[0].personalInfo[0].code }}</td>
+                                            <td>{{ item && item[0].code }}</td>
                                         </tr>
                                         <tr>
                                             <td>Password</td>

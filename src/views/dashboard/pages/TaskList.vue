@@ -54,7 +54,7 @@
       ></v-progress-linear>
 
       <!--Add, Edit dialog-->
-      <v-dialog v-model="dialog" max-width="600px">
+      <v-dialog v-model="dialog" max-width="700px" scrollable>
         <v-card>
           <v-card-title>
             <span class="headline">{{ formTitle }}</span>
@@ -70,6 +70,7 @@
                   label="Name"
                   required
                 ></v-text-field>
+                <!--
                 <v-select
                   v-if="isTask"
                   :items="roles"
@@ -81,6 +82,52 @@
                   chips
                   multiple
                 ></v-select>
+                -->
+                <div v-if="isTask">
+                  <p class="py-1 mt-3 mb-0 text--disabled body-1">Please select roles</p>
+                  <v-expansion-panels flat hover multiple>
+                    <template v-for="(type, i) in roleTypes">
+                      <v-expansion-panel :key="i">
+                        <v-expansion-panel-header ripple class="px-1 py-1">
+                            <p class="body-1 mb-0">
+                                <v-icon color="purple">mdi-pen</v-icon>
+                                <span class="ml-3">{{type}}</span>
+                            </p>
+                        </v-expansion-panel-header>
+                        <v-expansion-panel-content class="pt-5">
+                          <!--
+                          <v-row>
+                            <v-col class="py-0 my-0 px-1">
+                              <v-checkbox
+                                label="Select All"
+                                class="mt-0"
+                                @change="selectAllChanged($event, type)"
+                              >
+                              </v-checkbox>
+                            </v-col>
+                          </v-row>
+                          -->
+                          <v-row>
+                            <v-col 
+                              cols="12"
+                              md="4"
+                              sm="6"
+                              class="py-0 my-0 px-1"
+                              v-for="(item, j) in getRolesByType(type)"
+                              :key="j">
+                                <v-checkbox
+                                  class="mt-0"
+                                  :label="item.name"
+                                  v-model="item.selected"
+                                >
+                                </v-checkbox>
+                            </v-col>
+                          </v-row>
+                        </v-expansion-panel-content>
+                      </v-expansion-panel>
+                    </template>
+                  </v-expansion-panels>
+                </div>
               </v-form>
             </v-container>
           </v-card-text>
@@ -167,6 +214,7 @@ export default {
     editName: "",
     valid: false,
     roles: [],
+    roleTypes: [],
     selectedRole: null,
     snack: false,
     snackColor: "success",
@@ -207,12 +255,15 @@ export default {
   },
 
   created: async function () {
-    this.items = await api.findAll();
+    localStorage.removeItem("dataChange")
+
+    this.items = await api.findAll()
     this.proles = auth_api.getRole()
 
     this.uniqueTreeId = this.setUniqueId(this.items)
     console.log("uniqueTreeId:", this.uniqueTreeId, this.items)
 
+    this.roleTypes = await roleApi.findAllRoles()
     this.roles = await roleApi.findAll();
     this.roles.sort( (a, b) => {
       let comp = 0
@@ -222,16 +273,20 @@ export default {
         comp = -1
       return comp
     })
+    // console.log("role types:", this.roleTypes)
+    this.initilizeRoleSelect()
     console.log("roles:", this.roles)
-
-    this.roles.forEach( e => {
-      e.nameWithType = '(' + e.roleType + ')  ' + e.name
-    })
 
     this.loading = false;
   },
 
   methods: {
+    initilizeRoleSelect() {
+      this.roles.forEach( e => {
+        e.selected = false
+      })
+    },
+
     addCategory() {
       this.actionMode = "add_category";
       this.editName = "";
@@ -243,23 +298,37 @@ export default {
       this.actionMode = "add_task";
       this.editName = "";
       this.selectedItem = item;
-      this.selectedRole = null
+      // this.selectedRole = null
+      this.initilizeRoleSelect()
       this.openDialog();
     },
 
     editTask(item) {
-      console.log("editTask", item);
       this.actionMode = "edit_task";
       this.editName = item.name;
       this.selectedItem = item;
-      console.log("editTask", this.editName);
 
       if(item.level >= 1) {
+        this.initilizeRoleSelect()
         // this.selectedRole = item.roleid
-        if (item.roles && item.roles.length > 0)
-          this.selectedRole = item.roles
+        if (item.roles && item.roles.length > 0) {
+          // this.selectedRole = item.roles
+          this.roles.forEach( e => {
+            const found = item.roles.find(v => v == e.id)
+            if (found) e.selected = true
+          })
+        }
       }
+      
       this.openDialog();
+    },
+
+    getSelectedRoles() {
+      return this.roles.reduce((acc, cur) => {
+        if (cur.selected)
+          acc.push(cur.id)
+        return acc
+      }, [])
     },
 
     openDialog() {
@@ -344,7 +413,8 @@ export default {
       };
       if (level >= 1) {
         // tazk["roleid"] = this.selectedRole
-        tazk["roles"] = this.selectedRole
+        // tazk["roles"] = this.selectedRole
+        tazk["roles"] = this.getSelectedRoles()
       }
       return tazk
     },
@@ -359,6 +429,7 @@ export default {
       if (saved) {
         this.setItemUserActionState(this.items, "nochange")
         this.saveBtnStatus = true
+        localStorage.removeItem("dataChange");
       }
       console.log("saveAll", saved);
       this.loading = false
@@ -382,27 +453,20 @@ export default {
       else {
         this.selectedItem.userAction = "modified"
         this.selectedItem.name = this.editName;
-        this.selectedItem.roles = this.selectedRole
-        // if (this.selectedItem.level && this.selectedItem.level >= 1) {
-        //   this.selectedItem.roles = "{rolesidlist=["
-        //   this.selectedRole.forEach( (e, i) => {
-        //     this.selectedItem.roles += e
-        //     if (i != this.selectedRole.length - 1)
-        //       this.selectedItem.roles += ','
-        //   })
-        //   this.selectedItem.roles += "]}"
-        // }
-
-        console.log("save.edit.tazk", this.selectedItem)
+        // this.selectedItem.roles = this.selectedRole
+        this.selectedItem.roles = this.getSelectedRoles()
+        // console.log("save.edit.tazk", this.selectedItem)
       }
       this.saveBtnStatus = false
+      localStorage.setItem('dataChange', true) 
       this.close();
     },
 
     close() {
       this.dialog = false
       this.selectedItem = null
-      this.selectedRole = null
+      // this.selectedRole = null
+      this.initilizeRoleSelect()
     },
 
     show_snack(success) {
@@ -447,7 +511,24 @@ export default {
       if (found)
         return found.name
       return ''
-    }
+    },
+
+    getRolesByType(type) {
+      return this.roles.reduce((acc, cur) => {
+        if (cur.roleType == type)
+          acc.push(cur)
+        return acc
+      }, [])
+    },
+
+    // selectAllChanged(event, type) {
+    //   this.roles.forEach( e => {
+    //     if (e.roleType == type) {
+    //       e.selected = event
+    //     }
+    //   })
+    // }
+
   },
 };
 </script>

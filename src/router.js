@@ -213,7 +213,21 @@ router.beforeEach((to, from, next) => {
     }
   }
   
-  next()
+  if (from && from.meta.menuId && from.meta.menuId == 10) {
+    const dataChange = localStorage.getItem('dataChange') 
+    if (dataChange) {
+      if (confirm('Some data is changed. Please click save button')) {
+        next()
+      } else {
+        next(false)
+      }
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
+
 })
 
 export default router

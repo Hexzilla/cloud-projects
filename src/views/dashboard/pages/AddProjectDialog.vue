@@ -45,10 +45,10 @@
               <v-col>
                 <v-select
                   v-model="project.prj_projectmanagerhrid"
-                  :items="associates"
+                  :items="sortedAssociates"
                   :rules="projectManagerRules"
                   item-value="id"
-                  item-text="firstname"
+                  item-text="name"
                   label="Project Manager"
                   attach
                   required
@@ -164,6 +164,7 @@ export default {
     billingToMenu: false,
     warrantyFromMenu: false,
     warrantyToMenu: false,
+    sortedAssociates: []
   }),
 
   watch: {
@@ -183,6 +184,25 @@ export default {
   },
 
   created() {
+    this.sortedAssociates = this.associates.reduce((acc, v) => {
+      v.name = v.firstname + " " + v.lastname
+      acc.push(v)
+      return acc
+    }, [])
+    
+    this.sortedAssociates.sort((a, b) => {
+      const nameA = a.firstname.toUpperCase(); // ignore upper and lowercase
+      const nameB = b.firstname.toUpperCase(); // ignore upper and lowercase
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+
+      // names must be equal
+      return 0;
+    })
     this.reset()
   },
 
