@@ -282,7 +282,15 @@
                 const ret = await api.getProjectWithPhase(item.prj_code)
                 this.project = ret[0]
                 this.phases = ret[0].phases
-
+                
+                this.phases && this.phases.length > 0 && this.phases.forEach( e => {
+                    if (e.setAsDefault == 1) {
+                        this.selectedPhase = e.phaseNumber
+                        return
+                    }
+                })
+                if (this.selectedPhase)
+                    await this.getProgress()
                 this.waitProject = null
                 this.wait = false
             },

@@ -296,7 +296,7 @@
                 </v-card-title>
                 <v-card-text>
                     <v-container>
-                        <v-row>
+                        <div>
                             <DatePicker
                                 textName="Date From"
                                 :date="phaseFromDate"
@@ -304,15 +304,25 @@
                                 :startDate="maxPhaseDate && maxPhaseDate"
                                 :endDate="phaseToDate"
                             ></DatePicker>
-                        </v-row>
-                        <v-row>
+                        </div>
+                        <div>
                             <DatePicker
                                 textName="Date To"
                                 :date="phaseToDate"
                                 :submit="(date) => phaseToDate = date"
                                 :startDate="phaseFromDate"
                             ></DatePicker>
-                        </v-row>
+                        </div>
+                        <div>
+                            <v-checkbox
+                                v-model="defaultPhase"
+                                :disabled="defaultDisable"
+                            >
+                                <template v-slot:label>
+                                    <span style="color: #555">Default</span>
+                                </template>
+                            </v-checkbox>
+                        </div>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -451,6 +461,7 @@ export default {
 
         phase: null,
         phaseEdit: false,
+        defaultPhase: false,
 
         associates: [],
 
@@ -538,6 +549,22 @@ export default {
             if (this.phaseEdit)
                 return "Edit Phase"
             return "Add Phase"
+        },
+
+        defaultDisable() {
+            if (!this.project || !this.project.phases)
+                return false
+            let find = false
+            console.log("_____________", this.project.phases, this.phase)
+            this.project.phases.forEach( e => {
+                if (e != this.phase) {
+                    if (e.setAsDefault == 1) {
+                        find = true
+                        return
+                    }
+                }
+            })
+            return find
         }
     },
 
@@ -677,9 +704,11 @@ export default {
         phase_addButtonClicked: function() {
             if (!this.project)
                 return
+            this.phase = null
             this.phaseFromDate = ''
             this.phaseToDate = ''
             this.phaseDialog = true
+            this.defaultPhase = false
             this.phaseEdit = false
         },
 
@@ -703,14 +732,16 @@ export default {
 
             if (this.phaseEdit) {
                 let newPhase = {
-                    "phase_opendate": this.phase.phase_opendate,
-                    "phase_closedate": this.phase.phase_closedate,
+                    "phase_opendate": this.phaseFromDate,
+                    "phase_closedate": this.phaseToDate,
                     "phase_id": this.phase.phase_id,
                     "phaseNumber": this.phase.phaseNumber,
-                    "phase_allowdEdit": 1
+                    "phase_allowdEdit": 1,
+                    "phase_setAsDefault": this.defaultPhase ? 1 : 0
                 }
                 const tempPhases = [newPhase]
                 const result = await project_api.phaseSet(this.project.prj_id, tempPhases)
+                this.show_snack(result)
             } else {
                 const number = this.getPhaseNumber(this.project.phases) + 1
                 if (number <= 5) {
@@ -719,7 +750,8 @@ export default {
                         "phase_closedate": this.phaseToDate,
                         "phase_id": 0,
                         "phaseNumber": number,
-                        "phase_allowdEdit": 1
+                        "phase_allowdEdit": 1,
+                        "phase_setAsDefault": this.defaultPhase ? 1: 0
                     }
                     const tempPhases = [newPhase]
                     // [...this.selectedProject.phases, newPhase]
@@ -753,6 +785,7 @@ export default {
             console.log("item", item)
             this.phase = item
             this.phaseDialog = true
+            this.defaultPhase = item.setAsDefault ? true : false
             this.phaseEdit = true
 
             this.phaseFromDate = item.phase_opendate
