@@ -12,7 +12,7 @@
         </v-col>
       </v-row>
     </v-card-title>
-
+    <v-btn>back</v-btn>
     <v-form ref="details_form" @submit.prevent="submit">
       <v-container>
         <v-row>

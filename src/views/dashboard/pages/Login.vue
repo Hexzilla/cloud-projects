@@ -179,6 +179,8 @@ export default {
             if (status) {
                 localStorage.setItem('code', this.code)
                 localStorage.setItem('pmFE001', status)
+                const now = new Date()
+                localStorage.setItem('time', now.getTime() + 24 * 60 * 60 * 3 * 1000)
 
                 if (localStorage.getItem('pmFE001') != null){
                     // this.$router.push('/')

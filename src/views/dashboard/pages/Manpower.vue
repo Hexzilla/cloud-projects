@@ -67,9 +67,6 @@
                                 Detail
                             </v-btn>
                         </template>                                        
-                        <template v-slot:item.name="{ item }">
-                            {{ item.firstname + ' ' + item.lastname}}
-                        </template>                                        
                         <template :style="getOccStyle(item)" v-slot:item.occ="{ item }">
                             {{ item.effortTimedDays }}
                         </template>                                        
@@ -380,7 +377,11 @@
                 this.setDate(month - 1)
                 console.log('date', this.fromDate, this.toDate)
                 if (!this.yearData[month]) {
-                    this.yearData[month] = await people_api.getManPower(this.fromDate, this.toDate)
+                    let result = await people_api.getManPower(this.fromDate, this.toDate)
+                    result.forEach(e => {
+                        e.name = e.firstname + ' ' + e.lastname
+                    })
+                    this.yearData[month] = result
                 }
                 this.persons = this.yearData[month]
                 this.loading = false

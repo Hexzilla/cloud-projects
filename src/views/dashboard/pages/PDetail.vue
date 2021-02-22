@@ -14,6 +14,10 @@
                     {{projectName}}
                 </div>
             </template>
+            <v-btn color="pink" @click="goBack()" text title="Back">
+                <v-icon>mdi-arrow-left-bold</v-icon>
+            </v-btn>
+
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="3">
@@ -1060,6 +1064,10 @@ export default {
             } else if (item.level == 4) {
                 return [item.info.est_MP_TL4_fontColor, item.ikey]
             }
+        },
+
+        goBack() {
+            this.$router.push('/pages/project_summary?prj_code=' + this.project.prj_code)
         }
 
     }

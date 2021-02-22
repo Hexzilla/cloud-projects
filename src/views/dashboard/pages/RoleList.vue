@@ -190,6 +190,7 @@
                       :label="e"
                       v-model="item.selected[j]"
                       class="mr-2"
+                      @change="checkBoxChanged(item, j, item.selected[j])"
                     >
                     </v-checkbox>
                   </template>
@@ -497,6 +498,25 @@ export default {
 
       this.show_snack(result)
       this.menuLoading = false
+    },
+
+    checkBoxChanged(item, i, selected) {
+      let temp = this.menus
+      this.menus = []
+      console.log("selected changed", item, i, selected)
+      if (item.privileges[i] != 'view' && selected) {
+        item.privileges.forEach((e, j) => {
+          if (e == 'view')
+            item.selected[j] = selected
+        })
+      } else if (item.privileges[i] == 'view' && !selected) {
+        item.privileges.forEach((e, j) => {
+          if (e != 'view')
+            item.selected[j] = selected
+        })
+      }
+
+      this.menus = temp
     }
   },
 };

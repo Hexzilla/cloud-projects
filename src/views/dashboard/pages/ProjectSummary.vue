@@ -461,7 +461,8 @@ export default {
         selectedDoc: null,
         dialogDelete: false,
 
-        roles: {}
+        roles: {},
+        queryCode: null
     }),
 
     computed: {
@@ -542,6 +543,15 @@ export default {
 
     created: async function() {
         this.wait = true
+        this.queryCode = this.$route.query.prj_code
+        if (this.queryCode) {
+            this.search_code = this.queryCode
+            this.searchProjects()
+            // const project = this.projects.find(e => e.prj_code == this.queryCode)
+            // this.getProject(project)
+            const temp = await project_api.getProjectWithPhase(this.queryCode)
+            this.project = temp[0]
+        }
         this.clients = await client_api.findAll()
         const temp= await associate_api.findAll('', '')
         this.associates = temp.filter(e => e.assocationStatus == "joined")
@@ -549,6 +559,7 @@ export default {
         this.roles = auth_api.getRole()
         this.wait = false
     },
+
     methods: {
         show_snack(success) {
             this.snack = true;

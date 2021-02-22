@@ -85,28 +85,22 @@
                 -->
                 <div v-if="isTask">
                   <p class="py-1 mt-3 mb-0 text--disabled body-1">Please select roles</p>
+                  <v-text-field
+                    label="Role Search"
+                    prepend-icon="mdi-magnify"
+                    v-model="roleSearch"
+                  >
+                  </v-text-field>
                   <v-expansion-panels flat hover multiple>
                     <template v-for="(type, i) in roleTypes">
                       <v-expansion-panel :key="i">
                         <v-expansion-panel-header ripple class="px-1 py-1">
                             <p class="body-1 mb-0">
-                                <v-icon color="purple">mdi-pen</v-icon>
-                                <span class="ml-3">{{type}}</span>
+                                <v-icon color="purple">mdi-check</v-icon>
+                                <span class="ml-3">{{type + ' (' + getRolesCountByType(type) + ' selected )'}}</span>
                             </p>
                         </v-expansion-panel-header>
                         <v-expansion-panel-content class="pt-5">
-                          <!--
-                          <v-row>
-                            <v-col class="py-0 my-0 px-1">
-                              <v-checkbox
-                                label="Select All"
-                                class="mt-0"
-                                @change="selectAllChanged($event, type)"
-                              >
-                              </v-checkbox>
-                            </v-col>
-                          </v-row>
-                          -->
                           <v-row>
                             <v-col 
                               cols="12"
@@ -117,9 +111,11 @@
                               :key="j">
                                 <v-checkbox
                                   class="mt-0"
-                                  :label="item.name"
                                   v-model="item.selected"
                                 >
+                                  <template v-slot:label>
+                                    <span style="color: #555">{{item.name}}</span>
+                                  </template>
                                 </v-checkbox>
                             </v-col>
                           </v-row>
@@ -220,7 +216,8 @@ export default {
     snackColor: "success",
     snackText: "",
     saveBtnStatus: true,
-    proles: []
+    proles: [],
+    roleSearch: ""
   }),
 
   computed: {
@@ -251,6 +248,15 @@ export default {
       if (this.selectedItem && this.actionMode === "add_task" || this.selectedItem && this.actionMode === "edit_task" && this.selectedItem.level >= 1)
         return true
       return false
+    }
+  },
+
+  watch: {
+    roleSearch(n, o) {
+      // let temp = this.roles
+      // console.log("watch role search", n)
+      // this.roles = []
+      // this.roles = temp
     }
   },
 
@@ -337,6 +343,7 @@ export default {
       }
       this.valid = true;
       this.dialog = true;
+      this.roleSearch = ''
     },
 
     setUniqueId(_items) {
@@ -515,20 +522,23 @@ export default {
 
     getRolesByType(type) {
       return this.roles.reduce((acc, cur) => {
-        if (cur.roleType == type)
-          acc.push(cur)
+        if (cur.roleType == type) {
+          if (cur.name.toUpperCase().includes(this.roleSearch.toUpperCase()))
+            acc.push(cur)
+        }
         return acc
       }, [])
     },
 
-    // selectAllChanged(event, type) {
-    //   this.roles.forEach( e => {
-    //     if (e.roleType == type) {
-    //       e.selected = event
-    //     }
-    //   })
-    // }
-
+    getRolesCountByType(type) {
+      let count = 0
+      this.roles.forEach( e => {
+        if (e.roleType == type && e.selected) {
+          count++
+        }
+      })
+      return count
+    }
   },
 };
 </script>

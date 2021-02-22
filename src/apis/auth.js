@@ -1,9 +1,5 @@
 import http from "./http.js";
 
-// {
-//     "code":"AD00014",
-//     "pwd":"BrL$MMm("
-// }
 const login = async function (code, password) {
     let jsonData = {
         "code": code,

@@ -160,7 +160,8 @@ const addProject = async function(project) {
     }
     try {
         const response = await http.post("/plan/projectAddOne", data)
-        return response.data.response.success
+        console.log("----------- save response", response)
+        return response.data.success
     }
     catch (error) {
         console.log(error)

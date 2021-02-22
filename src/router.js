@@ -182,11 +182,23 @@ const router = new Router({
   ],
 })
 
+const getToken = () => {
+  const value = localStorage.getItem('pmFE001')
+  const now = new Date()
+  if (!value)
+    return null
+  if (now.getTime() > localStorage.getItem('time')) {
+    localStorage.clear()
+    return null
+  }
+  return value
+}
+
 let previlage = api.getLocalprevilage()
 router.beforeEach((to, from, next) => {
   // check login
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (localStorage.getItem('pmFE001') == null) {
+    if (getToken() == null) {
       next({name: "Login"})
     }
   }
