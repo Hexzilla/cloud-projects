@@ -301,6 +301,7 @@
                 v-bind:edit="editProject"
                 v-bind:associates="associates"
                 v-bind:dialogStatus="addDialog"
+                v-bind:lastProject="lastProject"
             ></AddProjectDialog>
         </v-dialog>
         
@@ -501,7 +502,8 @@ export default {
         dialogDelete: false,
 
         roles: {},
-        queryCode: null
+        queryCode: null,
+        lastProject: null
     }),
 
     computed: {
@@ -539,6 +541,7 @@ export default {
         projectEnqNumber() {
             return (this.project) ? this.project.prj_refEnqNumber : ''
         },
+        
         projectPM() {
             // return (this.project) ? this.project.prj_projectmanagerhrid : ''
             if (this.project) {
@@ -607,9 +610,13 @@ export default {
             this.project = temp[0]
         }
         this.clients = await client_api.findAll()
-        const temp= await associate_api.findAll('', '')
-        this.associates = temp.filter(e => e.assocationStatus == "joined")
-        console.log("associates", this.associates)
+        
+        this.associates= await project_api.getProjectManager()
+        // this.associates = temp.filter(e => e.assocationStatus == "joined")
+        // console.log("associates", this.associates)
+        this.lastProject = await project_api.getLastProject()
+        console.log("lastProject", this.lastProject)
+
         this.roles = auth_api.getRole()
         this.wait = false
     },
@@ -668,11 +675,16 @@ export default {
 
             const project = Object.assign(selected, updated)
             const result = await project_api.updateProject(project)
-            if (result) {
+            if (result == 1) {
                 const index = this.projects.indexOf(selected)
                 if (index >= 0) {
                     this.projects[index] = Object.assign({}, selected, updated)
                 }
+                this.show_snack(true)
+            } else if (result == -1) {
+                this.snack_message('error', 'Project code already exist')  
+            } else {
+                this.show_snack(false)
             }
             
             this.waitProject = null
@@ -698,11 +710,11 @@ export default {
                 if (updated && updated.length > 0) {
                     this.projects.push(updated[0])
                 }
-                this.show_snack('success', 'Data Saved')
+                this.show_snack(true)
             }else if (result == -1) {
                 this.snack_message('error', 'Project code already exist')  
             }  else {
-                this.show_snack('error', 'Failed')
+                this.show_snack(false)
             }
             // this.project_reset()
             this.wait = false
@@ -946,7 +958,8 @@ export default {
                 return
             }
             this.$router.push('/pages/project_detail?prj_code=' + this.project.prj_code)
-        }
+        },
+
     }
 }
 </script>

@@ -191,13 +191,14 @@ const updateProject = async function(project) {
     try {
         const response = await http.post("/plan/projectUpdateOne", data)
         if (response.status == 200) {
-            return true
+            return 1
         }
     }
     catch (error) {
         console.log(error)
+        return -1
     }
-    return false
+    return 0
 }
 
 const getProjectWithPhase = async function(projectCode) {
@@ -229,13 +230,14 @@ const phaseSet = async function(projectId, phases) {
     try {
         const response = await http.post("/plan/projectPhaseSet", jsonData)
         if (response.status == 200) {
-            return response.data.success
+            return 1
         }
     }
     catch (error) {
         console.log(error)
+        return -1
     }
-    return false
+    return 0
 }
 
 const getProjectCategory = async function(prjCode, phaseNumber) {
@@ -1027,6 +1029,39 @@ const projectResource = async function (taskLevel, taskId, roleId) {
     return []
 }
 
+const getProjectManager = async function () {
+    let jsonData = {
+        "specificType":"role",
+        "specificValue":"project manager"
+    }
+    try {
+        const response = await http.post("/hr/hrFindSpecific", jsonData)
+        if (response.status == 200) {
+            const data = response.data
+            console.log("response", data.response)
+            return data.response.allCarrierRecord
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
+const getLastProject = async function () {
+    try {
+        const response = await http.post("/plan/findsLastProjectCodes")
+        if (response.status == 200) {
+            const data = response.data
+            return data.response.allCarrierRecord
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 const findPeople = async function () {
     let ret = await associate.findAll()
     let result = []
@@ -1111,5 +1146,7 @@ export default {
     getStaff,
     saveRoleData,
     projectResource,
-    getProjectConfigValues
+    getProjectConfigValues,
+    getProjectManager,
+    getLastProject
 }

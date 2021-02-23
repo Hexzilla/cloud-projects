@@ -423,7 +423,8 @@ export default {
       //this.selectedItem.userAction = "modified"
       const level = this.selectedItem.level + 1
       let tazk = {
-        id: this.nextId(this.selectedItem.children),
+        // id: this.nextId(this.selectedItem.children),
+        id: 0,
         ikey: this.uniqueId(),
         name: this.editName,
         level: level,

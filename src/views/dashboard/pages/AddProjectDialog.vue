@@ -28,6 +28,8 @@
                   label="Code"
                   class="input-uppercase"
                   required
+                  :hint="lastProjectCode"
+                  persistent-hint
                   @keydown.space.prevent
                 ></v-text-field>
               </v-col>
@@ -37,6 +39,8 @@
                   v-model="project.prj_refEnqNumber"
                   :rules="enqRules"
                   label="Enquiry Number"
+                  :hint="lastProjectEnqNumber"
+                  persistent-hint
                   required
                 ></v-text-field>
               </v-col>
@@ -149,6 +153,7 @@ export default {
     edit: Boolean,
     associates: Array,
     dialogStatus: Boolean,
+    lastProject: Array
   },
   components: {
     DatePicker,
@@ -219,6 +224,7 @@ export default {
           `Name must be less than ${this.Length} characters`,
       ]
     },
+
     projectCodeRules() {
       return [
         (v) => !!v || "Code is required",
@@ -228,12 +234,21 @@ export default {
           `Code must be less than ${this.Length} characters`,
       ];
     },
+
     enqRules() {
       return [
-        (v) => !!v || "Enquiry Number is required",
-        (v) =>
-          (v && v.length <= this.maxCodeLength) ||
-          `Enquiry Number must be less than ${this.Length} characters`,
+        // (v) => !!v || "Enquiry Number is required",
+        // (v) =>
+        //   (v && v.length <= this.maxCodeLength) ||
+        //   `Enquiry Number must be less than ${this.Length} characters`,
+        (v) => {
+          if (!v) return "Enquiry Number is required"
+          if (v.length > this.maxCodeLength)
+            return `Enquiry Number must be less than ${this.Length} characters`
+          if (!this.edit && this.lastProject && this.lastProject.length > 0 && v < this.lastProject[0].refEnqNumber)
+            return ' > ' + this.lastProject[0].refEnqNumber
+          return true
+        }
       ];
     },
     clientSelectRules() {
@@ -245,7 +260,25 @@ export default {
       return [
         (v) => !!v || "Projetc manager is required"
       ];
-    }
+    },
+
+    lastProjectCode() {
+      if (!this.edit) {
+        if (this.lastProject && this.lastProject.length > 0) {
+          return 'Last code: ' + this.lastProject[0].code
+        }
+      }
+      return ''
+    },
+
+    lastProjectEnqNumber() {
+      if (!this.edit) {
+        if (this.lastProject && this.lastProject.length > 0) {
+          return 'Last number: ' + this.lastProject[0].refEnqNumber
+        }
+      }
+      return ''
+    },
   },
 
   methods: {

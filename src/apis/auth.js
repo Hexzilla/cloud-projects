@@ -86,11 +86,36 @@ const getRole = function () {
     return result
 }
 
+const changePassword = async function (current, newPassword) {
+    let jsonData = {
+        "currentPassword": current,
+        "newPassword": newPassword
+    }
+    try {
+        const response = await http.post("/hr/hrUpdateUserPWD", jsonData)
+
+        if (response.status == 200 && response.statusText == "OK") {
+            // console.log('after change ', response.data)
+            // return 1
+            if (response.data.response.code == 'error')
+                return -1
+            else
+                return 1
+        }
+    }
+    catch (error) {
+        console.log(error)
+        return -1
+    }
+    return 0
+}
+
 export default {
     login,
     getOwnId,
     getPrevilage,
     getLocalprevilage,
     getRole,
-    getInfo
+    getInfo,
+    changePassword
 }

@@ -104,9 +104,83 @@
               </div>
             </v-list-item-title>
           </app-bar-item>
+          <app-bar-item>
+            <v-list-item-title>
+              <div @click="changePassword">
+                Change Password<v-icon>mdi-pen-lock</v-icon>
+              </div>
+            </v-list-item-title>
+          </app-bar-item>
         </div>
       </v-list>
     </v-menu>
+
+    <template>
+      <v-dialog v-model="passwordDialog" max-width="500px">
+        <v-card :loading="wait">
+          <v-card-title>
+            <span class="headline"> Change Password</span><br>
+            <span class="title">{{getCode}}</span>
+          </v-card-title>
+
+          <v-card-text>
+            <v-form  ref="form" lazy-validation>
+              <v-text-field
+                  label="Current Password"
+                  :append-icon="currentShow ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="currentShow ? 'text' : 'password'"
+                  @click:append="currentShow = !currentShow"
+                  prepend-icon="mdi-account-lock"
+                  v-model="currentPassword"
+                  :rules="currentRules"
+                  counter
+              ></v-text-field>
+
+              <v-text-field
+                  label="Password"
+                  :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show ? 'text' : 'password'"
+                  @click:append="show = !show"
+                  prepend-icon="mdi-pen-lock"
+                  v-model="password"
+                  :rules="passwordRules"
+                  counter
+              ></v-text-field>
+              <v-text-field
+                  label="Confirm"
+                  :append-icon="confirmShow ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="confirmShow ? 'text' : 'password'"
+                  @click:append="confirmShow = !confirmShow"
+                  prepend-icon="mdi-pen-lock"
+                  v-model="confirmPassword"
+                  :rules="confirmRules"
+                  counter
+              ></v-text-field>
+            </v-form>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="passwordDialog = false"> Cancel </v-btn>
+            <v-btn color="blue darken-1" text @click="savePassword">
+                Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+        
+        <base-material-snackbar
+            v-model="snack"
+            :type="snackColor"
+            v-bind="{
+                bottom: true,
+                center: true,
+                color: snackColor
+            }"
+            >
+            {{ snackText }}
+        </base-material-snackbar>
+      </v-dialog>
+    </template>
   </v-app-bar>
 </template>
 
@@ -156,6 +230,23 @@
 
     data: () => ({
       info: [],
+      passwordDialog: false,
+
+      currentShow: false,
+      currentPassword: '',
+
+      show: false,
+      password: '',
+
+      confirmShow: false,
+      confirmPassword: '',
+
+      wait:false,
+
+      snack: false,
+      snackColor: "success",
+	    snackText: "",
+
     }),
 
     async created() {
@@ -169,7 +260,34 @@
       ...mapState(['drawer']),
       getCode() {
         return localStorage.getItem('code')
-      }
+      },
+      
+      passwordRules() {
+          return [
+              (v) => !!v || "Password is required",
+              (v) => (v && v.trim().length > 0) || "Password is required",
+              (v) =>
+                  (v && v.length >= 6) ||
+                  `Password must be greater than 8 characters`,
+          ];
+      },
+      
+      confirmRules() {
+          return [
+              (v) => !!v || "Confrim Password is required",
+              (v) => (v && v.trim().length > 0) || "Confirm Password is required",
+              (v) =>
+                  (v == this.password) ||
+                  `Confirm password is not same`,
+          ];
+      },
+      
+      currentRules() {
+          return [
+              (v) => !!v || "Current Password is required",
+              (v) => (v && v.trim().length > 0) || "Current Password is required"
+          ];
+      },
     },
 
     methods: {
@@ -180,6 +298,34 @@
       logout: () => {
         localStorage.clear()
         window.location.href = "/"
+      },
+
+      changePassword() {
+        this.$refs.form && this.$refs.form.resetValidation()
+        this.passwordDialog = true
+        this.password = ''
+        this.confirmPassword = ''
+        this.currentPassword = ''
+      },
+
+      async savePassword() {
+        if (!this.$refs.form.validate()) return
+        this.wait = true
+        const result = await auth_api.changePassword(this.currentPassword, this.password)
+        if (result == 1) {
+          this.snack = true
+          this.snackColor = "success"
+          this.snackText = "Success! Password is changed"
+        } else if (result == 0) {
+          this.snack = true
+          this.snackColor = "error"
+          this.snackText = "Failed"
+        } else if (result == -1) {
+          this.snack = true
+          this.snackColor = "warning"
+          this.snackText = "Please input correct information"
+        }
+        this.wait = false
       }
     },
   }
