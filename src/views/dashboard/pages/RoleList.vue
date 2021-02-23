@@ -399,24 +399,26 @@ export default {
 
       this.loading = true
       {
-        let success = false
+        let success = 0
         if (selectedIndex > -1) {
           success = await api.update(item) 
-          if (success) {
+          if (success == 1) {
             Object.assign(this.clients[selectedIndex], item);
           }
         } 
         else {
           const addedItem = await api.add(item)
           if (addedItem) {
-            success = true
+            success = 1
             this.clients.push(addedItem);
           }
         }
-        if (success)
-          this.show_snack(success)
+        if (success == 1)
+          this.show_snack(true)
+        else if (success == -1)
+          this.snack_message('error', 'Code is already exist')
         else
-          this.snack_message('error', 'code is already exist')
+          this.snack_message('error', 'Failed')
       }
       this.loading = false
     },

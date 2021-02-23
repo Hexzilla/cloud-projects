@@ -216,12 +216,28 @@
                                 v-if="phaseWait">
                             </v-progress-linear>
                             <v-simple-table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Active</th>
+                                        <th>Editable</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
                                 <tbody>
                                     <template v-if="project">
                                         <tr v-for="(item, i) in project.phases" :key="i">
                                             <td>{{item.phaseNumber}}</td>
                                             <td>{{item.phase_opendate}}</td>
                                             <td>{{item.phase_closedate}}</td>
+                                            <td>
+                                                <v-icon color="primary" v-if="item.setAsDefault">mdi-check</v-icon>
+                                            </td>
+                                            <td>
+                                                <v-icon color="primary" v-if="item.allowdEdit">mdi-check</v-icon>
+                                            </td>
                                             <td>    
                                                 <v-icon color="purple" @click="changePhase(item)" :disabled="!roles.edit">
                                                     mdi-square-edit-outline
@@ -234,7 +250,7 @@
                         </v-col>
                     </v-row>
 
-                    <hr>
+                    <br><hr>
                     <v-row>
                         <v-col>
                             <p class="text--disabled">DOCUMENTS</p>
@@ -313,16 +329,27 @@
                                 :startDate="phaseFromDate"
                             ></DatePicker>
                         </div>
-                        <div>
-                            <v-checkbox
-                                v-model="defaultPhase"
-                                :disabled="defaultDisable"
-                            >
-                                <template v-slot:label>
-                                    <span style="color: #555">Default</span>
-                                </template>
-                            </v-checkbox>
-                        </div>
+                        <v-row>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="defaultPhase"
+                                    :disabled="defaultDisable"
+                                >
+                                    <template v-slot:label>
+                                        <span style="color: #555">Active</span>
+                                    </template>
+                                </v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox
+                                    v-model="allowEditPhase"
+                                >
+                                    <template v-slot:label>
+                                        <span style="color: #555">Allow Edit</span>
+                                    </template>
+                                </v-checkbox>
+                            </v-col>
+                        </v-row>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -462,6 +489,7 @@ export default {
         phase: null,
         phaseEdit: false,
         defaultPhase: false,
+        allowEditPhase: false,
 
         associates: [],
 
@@ -555,7 +583,6 @@ export default {
             if (!this.project || !this.project.phases)
                 return false
             let find = false
-            console.log("_____________", this.project.phases, this.phase)
             this.project.phases.forEach( e => {
                 if (e != this.phase) {
                     if (e.setAsDefault == 1) {
@@ -666,15 +693,17 @@ export default {
             this.wait = true
 
             const result = await project_api.addProject(project)
-            if (result == true) {
+            if (result == 1) {
                 const updated = await project_api.getProjectWithPhase(project.prj_code)
                 if (updated && updated.length > 0) {
                     this.projects.push(updated[0])
                 }
-                this.show_snack(result)
-            }else {
+                this.show_snack('success', 'Data Saved')
+            }else if (result == -1) {
                 this.snack_message('error', 'Project code already exist')  
-            } 
+            }  else {
+                this.show_snack('error', 'Failed')
+            }
             // this.project_reset()
             this.wait = false
         },
@@ -709,6 +738,7 @@ export default {
             this.phaseToDate = ''
             this.phaseDialog = true
             this.defaultPhase = false
+            this.allowEditPhase = false
             this.phaseEdit = false
         },
 
@@ -736,11 +766,17 @@ export default {
                     "phase_closedate": this.phaseToDate,
                     "phase_id": this.phase.phase_id,
                     "phaseNumber": this.phase.phaseNumber,
-                    "phase_allowdEdit": 1,
+                    "phase_allowdEdit": this.allowEditPhase ? 1 : 0,
                     "phase_setAsDefault": this.defaultPhase ? 1 : 0
                 }
                 const tempPhases = [newPhase]
                 const result = await project_api.phaseSet(this.project.prj_id, tempPhases)
+                if (result) {
+                    this.phase.phase_opendate = this.phaseFromDate
+                    this.phase.phase_closedate = this.phaseToDate
+                    this.phase.allowdEdit = this.allowEditPhase ? 1 : 0
+                    this.phase.setAsDefault = this.defaultPhase ? 1 : 0
+                }
                 this.show_snack(result)
             } else {
                 const number = this.getPhaseNumber(this.project.phases) + 1
@@ -750,7 +786,7 @@ export default {
                         "phase_closedate": this.phaseToDate,
                         "phase_id": 0,
                         "phaseNumber": number,
-                        "phase_allowdEdit": 1,
+                        "phase_allowdEdit": this.allowEditPhase ? 1 : 0,
                         "phase_setAsDefault": this.defaultPhase ? 1: 0
                     }
                     const tempPhases = [newPhase]
@@ -786,6 +822,7 @@ export default {
             this.phase = item
             this.phaseDialog = true
             this.defaultPhase = item.setAsDefault ? true : false
+            this.allowEditPhase = item.allowdEdit ? true : false
             this.phaseEdit = true
 
             this.phaseFromDate = item.phase_opendate

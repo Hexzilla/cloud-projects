@@ -19,6 +19,22 @@ const resetKeys = function(items, index) {
     return {tasks, index};
 }
 
+const sortTask = async function(items) {
+    items && items.length > 0 && items.sort((a, b) => {
+        if (a.sortorder > b.sortorder)
+            return 1
+        if (a.sortorder < b.sortorder)
+            return -1
+        return 0
+    })
+    for (const key in items) {
+        const data = items[key]
+        if (data.hasOwnProperty("children")) {
+            await sortTask(data.children)
+        }
+    }
+}
+
 const findAll = async function() {
     try {
         const response = await http.post("/taskCat/findAllTaskAndSubTasksF2")
@@ -26,6 +42,7 @@ const findAll = async function() {
             const data = response.data;
             if (data.success) {
                 let items = data.response.allCarrierRecord.TaskCategory
+                await sortTask(items)
                 let {tasks, index} = resetKeys(items, 1)
                 return tasks
             }
@@ -47,6 +64,7 @@ const update = async function(tasks) {
     const data = JSON.stringify(postData)
     try {
         const response = await http.post("/taskCat/updateAllTaskAndSubTasksF2", data)
+        console.log(response)
         if (response.status == 200) {
             return true
         }
@@ -60,4 +78,5 @@ const update = async function(tasks) {
 export default {
     findAll,
     update,
+    sortTask
 }

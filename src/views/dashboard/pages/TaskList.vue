@@ -83,6 +83,13 @@
                   multiple
                 ></v-select>
                 -->
+                <v-text-field
+                  v-model="order"
+                  :rules="orderRules"
+                  label="order"
+                  type="number"
+                >
+                </v-text-field>
                 <div v-if="isTask">
                   <p class="py-1 mt-3 mb-0 text--disabled body-1">Please select roles</p>
                   <v-text-field
@@ -154,11 +161,12 @@
         </template>
         <template v-slot:label="{ item }">
           <v-row>
-            <v-col>
-              {{ item.name }}
+            <v-col cols="12" md="4" class="d-flex align-center">
+              <span class="mr-1">{{ item.sortorder }}. </span>
+              <span>{{ item.name }}</span>
             </v-col>
             <template v-if="item.roles">
-              <v-col>
+              <v-col cols="12" md="8">
                   <v-chip
                     color="purple darken-1"
                     class="white--text mr-1"
@@ -217,7 +225,8 @@ export default {
     snackText: "",
     saveBtnStatus: true,
     proles: [],
-    roleSearch: ""
+    roleSearch: "",
+    order: 1
   }),
 
   computed: {
@@ -248,16 +257,18 @@ export default {
       if (this.selectedItem && this.actionMode === "add_task" || this.selectedItem && this.actionMode === "edit_task" && this.selectedItem.level >= 1)
         return true
       return false
+    },
+
+    orderRules() {
+      return [
+        (v) => !!v || "Order is required",
+        (v) => v > 0 || "> 0",
+        (v) => v % 1 == 0 || "Order is not valid",
+      ]
     }
   },
 
   watch: {
-    roleSearch(n, o) {
-      // let temp = this.roles
-      // console.log("watch role search", n)
-      // this.roles = []
-      // this.roles = temp
-    }
   },
 
   created: async function () {
@@ -281,7 +292,7 @@ export default {
     })
     // console.log("role types:", this.roleTypes)
     this.initilizeRoleSelect()
-    console.log("roles:", this.roles)
+    // console.log("roles:", this.roles)
 
     this.loading = false;
   },
@@ -304,6 +315,7 @@ export default {
       this.actionMode = "add_task";
       this.editName = "";
       this.selectedItem = item;
+      this.order = 1
       // this.selectedRole = null
       this.initilizeRoleSelect()
       this.openDialog();
@@ -312,6 +324,7 @@ export default {
     editTask(item) {
       this.actionMode = "edit_task";
       this.editName = item.name;
+      this.order = item.sortorder
       this.selectedItem = item;
 
       if(item.level >= 1) {
@@ -402,6 +415,7 @@ export default {
         dataClass: 'Category',
         userAction: 'newData',
         children: [],
+        sortorder: this.order
       };
     },
 
@@ -417,6 +431,7 @@ export default {
         dataClass: 'Task-Level-' + level,
         userAction: 'newData',
         children: [],
+        sortorder: this.order
       };
       if (level >= 1) {
         // tazk["roleid"] = this.selectedRole
@@ -430,6 +445,7 @@ export default {
       if (this.getChangeState(this.items) == false) {
         return
       }
+      console.log("before save", this.items)
       this.loading = true     
       const saved = await api.update(this.items);
       this.show_snack(saved)
@@ -442,7 +458,7 @@ export default {
       this.loading = false
     },
 
-    save() {
+    async save() {
       if (!this.$refs.form.validate()) {
         return;
       }
@@ -460,12 +476,15 @@ export default {
       else {
         this.selectedItem.userAction = "modified"
         this.selectedItem.name = this.editName;
-        // this.selectedItem.roles = this.selectedRole
+        this.selectedItem.sortorder = this.order
         this.selectedItem.roles = this.getSelectedRoles()
         // console.log("save.edit.tazk", this.selectedItem)
       }
       this.saveBtnStatus = false
       localStorage.setItem('dataChange', true) 
+      this.wait = true
+      await api.sortTask(this.items)
+      this.wait = false
       this.close();
     },
 

@@ -24,6 +24,7 @@
                         <v-text-field
                             label="Project Code"
                             v-model="projectCode"
+                            readonly
                         >
                         </v-text-field>
                     </v-col>
@@ -31,6 +32,7 @@
                         <v-text-field
                             label="Client"
                             v-model="client"
+                            readonly
                         >
                         </v-text-field>
                     </v-col>
@@ -38,6 +40,7 @@
                         <v-text-field
                             label="PM"
                             v-model="pm"
+                            readonly
                         >
                         </v-text-field>
                     </v-col>
@@ -45,6 +48,7 @@
                         <v-text-field
                             label="Approval Status"
                             v-model="approvalStatus"
+                            readonly
                         >
                         </v-text-field>
                     </v-col>
@@ -85,8 +89,8 @@
                     </v-progress-linear>
                     <v-row>
                         <v-col class="text-right">
-                            <v-btn small class="mr-5" width="70px" @click="openTreeDialog()" color="blue" elevation="8">Add Task</v-btn>
-                            <v-btn small elevation="8" width="70px" @click="saveTask()" color="primary" :disabled="saveBtnStatus()">Save Task</v-btn>
+                            <v-btn small class="mr-5" width="150px" @click="openTreeDialog()" color="blue" elevation="8">Manage Deliverable</v-btn>
+                            <v-btn small elevation="8" width="150px" @click="saveTask()" color="primary" :disabled="saveBtnStatus()">Save Task</v-btn>
                         </v-col>
                     </v-row>
 
@@ -402,7 +406,15 @@ export default {
 
         this.associates = await associate_api.findAll()
         this.treeItems = await project_api.getTree()
-
+                
+        this.project.phases && this.project.phases.length > 0 && this.project.phases.forEach( e => {
+            if (e.setAsDefault == 1) {
+                this.selectedPhase = e.phaseNumber
+                return
+            }
+        })
+        if (this.selectedPhase)
+            await this.changePhase()
         // console.log("tree", this.treeItems)
         this.wait = false
     },

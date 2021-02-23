@@ -55,12 +55,13 @@ const add = async function(item) {
 const update = async function(item) {
     try {
         const response = await http.post("/common/roleUpdateOne", item)
-        return (response.status == 200);
+        if (response.status == 200) return 1
     }
     catch (error) {
         console.log(error)
+        return -1
     }
-    return false
+    return 0
 }
 
 const findAllRoles = async function() {
