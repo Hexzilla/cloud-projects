@@ -161,25 +161,38 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="passwordDialog = false"> Cancel </v-btn>
-            <v-btn color="blue darken-1" text @click="savePassword">
-                Save
+            <v-btn small color="blue darken-1" text @click="passwordDialog = false"> Cancel </v-btn>
+            <v-btn small color="ml-5 blue darken-1" @click="savePassword">
+                Change Password
             </v-btn>
           </v-card-actions>
-        </v-card>
-        
+        </v-card>      
         <base-material-snackbar
-            v-model="snack"
-            :type="snackColor"
-            v-bind="{
-                bottom: true,
-                center: true,
-                color: snackColor
-            }"
-            >
-            {{ snackText }}
+          v-model="snack"
+          :type="snackColor"
+          v-bind="{
+              bottom: true,
+              center: true,
+              color: snackColor
+          }"
+          style="bottom: -50px"
+          >
+          {{ snackText }}
         </base-material-snackbar>
       </v-dialog>
+
+      <base-material-snackbar
+          v-model="snack1"
+          :type="snackColor1"
+          v-bind="{
+              bottom: true,
+              center: true,
+              color: snackColor1
+          }"
+          style="bottom: -50px"
+          >
+          {{ snackText1 }}
+      </base-material-snackbar>
     </template>
   </v-app-bar>
 </template>
@@ -247,6 +260,9 @@
       snackColor: "success",
 	    snackText: "",
 
+      snack1: false,
+      snackColor1: "success",
+	    snackText1: "",
     }),
 
     async created() {
@@ -313,9 +329,10 @@
         this.wait = true
         const result = await auth_api.changePassword(this.currentPassword, this.password)
         if (result == 1) {
-          this.snack = true
-          this.snackColor = "success"
-          this.snackText = "Success! Password is changed"
+          this.passwordDialog = false 
+          this.snack1 = true
+          this.snackColor1 = "success"
+          this.snackText1 = "Success! Password is changed"
         } else if (result == 0) {
           this.snack = true
           this.snackColor = "error"

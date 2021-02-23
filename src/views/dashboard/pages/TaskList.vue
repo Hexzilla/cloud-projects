@@ -226,7 +226,8 @@ export default {
     saveBtnStatus: true,
     proles: [],
     roleSearch: "",
-    order: 1
+    order: 1,
+    maxOrder: 1
   }),
 
   computed: {
@@ -304,9 +305,26 @@ export default {
       })
     },
 
+    getMaxOrder(item) {
+      let arr = [0]
+      if (!item) {
+        this.items && this.items.length > 0 && this.items.forEach( e => {
+          arr.push(e.sortorder)
+        })
+        return Math.max(...arr)
+      } else {
+        item.children && item.children.length > 0 && item.children.forEach( e => {
+          arr.push(e.sortorder)
+        })
+        return Math.max(...arr)
+      }
+    },
+
     addCategory() {
       this.actionMode = "add_category";
       this.editName = "";
+      this.order = this.getMaxOrder() + 1
+      console.log("max order ", this.maxOrder)
       this.openDialog();
     },
 
@@ -315,7 +333,9 @@ export default {
       this.actionMode = "add_task";
       this.editName = "";
       this.selectedItem = item;
-      this.order = 1
+      // this.order = 1
+      this.order = this.getMaxOrder(item) + 1
+      console.log("max order ", this.maxOrder)
       // this.selectedRole = null
       this.initilizeRoleSelect()
       this.openDialog();

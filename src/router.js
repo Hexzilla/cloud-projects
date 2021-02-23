@@ -228,7 +228,7 @@ router.beforeEach((to, from, next) => {
   if (from && from.meta.menuId && from.meta.menuId == 10) {
     const dataChange = localStorage.getItem('dataChange') 
     if (dataChange) {
-      if (confirm('Some data is changed. Please click save button')) {
+      if (confirm("Some data is changed. \nPlease click save button. \nAre you sure?")) {
         next()
       } else {
         next(false)

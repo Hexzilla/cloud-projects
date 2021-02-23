@@ -451,6 +451,7 @@ import associate_api from "@/apis/associate.js"
 import AddProjectDialog from './AddProjectDialog'
 import DatePicker from './DatePicker'
 import auth_api from "@/apis/auth.js";
+import daily_api from "@/apis/daily.js";
 
 export default {
     components: {
@@ -503,7 +504,7 @@ export default {
 
         roles: {},
         queryCode: null,
-        lastProject: null
+        lastProject: null,
     }),
 
     computed: {
@@ -595,7 +596,8 @@ export default {
                 }
             })
             return find
-        }
+        },
+
     },
 
     created: async function() {
@@ -616,7 +618,6 @@ export default {
         // console.log("associates", this.associates)
         this.lastProject = await project_api.getLastProject()
         console.log("lastProject", this.lastProject)
-
         this.roles = auth_api.getRole()
         this.wait = false
     },
@@ -746,12 +747,17 @@ export default {
             if (!this.project)
                 return
             this.phase = null
-            this.phaseFromDate = ''
-            this.phaseToDate = ''
+            this.setPhaseDate()
             this.phaseDialog = true
             this.defaultPhase = false
             this.allowEditPhase = false
             this.phaseEdit = false
+        },
+
+        setPhaseDate() {
+            this.setMaxPhaseDate()
+            this.phaseFromDate = this.maxPhaseDate
+            this.phaseToDate = this.project.prj_executionclosedate
         },
 
         closePhaseDialog: function() {
@@ -825,8 +831,11 @@ export default {
         },
 
         setMaxPhaseDate () {
+            // this.billEndDate = this.project.prj_executionclosedate
             if (this.project.phases.length > 0 && this.project.phases[this.project.phases.length - 1].phase_closedate)            
-                this.maxPhaseDate = this.project.phases[this.project.phases.length - 1].phase_closedate
+                this.maxPhaseDate = daily_api.getDayByDiff(this.project.phases[this.project.phases.length - 1].phase_closedate, 1)
+            else
+                this.maxPhaseDate = this.project.prj_executionopendate
         },
 
         changePhase(item) {
@@ -842,7 +851,7 @@ export default {
             this.project.phases.forEach( (e, i) => {
                 if (e == item) {
                     if (i == 0) {
-                        this.maxPhaseDate = null
+                        this.maxPhaseDate = this.project.prj_executionopendate
                         return
                     }
                     this.maxPhaseDate = this.project.phases[i - 1].phase_closedate

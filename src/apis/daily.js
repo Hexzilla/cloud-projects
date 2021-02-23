@@ -21,6 +21,14 @@ const getYesterday = function () {
     return dateToString(yesterday)
 }
 
+const getDayByDiff = function (date, diff) {
+    const day = new Date(date)
+    const result = new Date(day)
+    result.setDate(result.getDate() + diff)
+
+    return dateToString(result)
+}
+
 const add1 = async function(today, taskId, roleId, supervisor, self, performer, hrs, mins, pct) {
     const jsonData = {
         "effortdate": today,
@@ -334,5 +342,6 @@ export default {
     getToday,
     getYesterday,
     getUpdated,
-    getUpdatedList
+    getUpdatedList,
+    getDayByDiff
 }

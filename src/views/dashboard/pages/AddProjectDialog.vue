@@ -7,40 +7,39 @@
       <v-card-text>
         <v-container>
           <v-form ref="projectForm" lazy-validation>
-            <v-row>
-              <v-col cols="12" sm="12" md="12">
-                <v-text-field
-                  :counter="maxNameLength"
-                  v-model="project.prj_name"
-                  :rules="projectNameRules"
-                  label="Name"
-                  required
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
+            <div>
+              <v-text-field
+                :counter="maxNameLength"
+                v-model="project.prj_name"
+                :rules="projectNameRules"
+                label="Name"
+                required
+                dense
+              ></v-text-field>
+            </div>
             <v-row>
               <v-col cols="12" sm="12" md="6">
+                <span class="title">{{lastProjectCode}}</span>
                 <v-text-field
                   :counter="maxCodeLength"
                   v-model="project.prj_code"
                   :rules="projectCodeRules"
                   label="Code"
-                  class="input-uppercase"
+                  class="input-uppercase pt-0"
                   required
-                  :hint="lastProjectCode"
                   persistent-hint
                   @keydown.space.prevent
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="12" md="6">
+                <span class="title">{{lastProjectEnqNumber}}</span>
                 <v-text-field
                   :counter="maxCodeLength"
                   v-model="project.prj_refEnqNumber"
                   :rules="enqRules"
+                  class="pt-0"
                   label="Enquiry Number"
-                  :hint="lastProjectEnqNumber"
-                  persistent-hint
+                  persistent-hint 
                   required
                 ></v-text-field>
               </v-col>
@@ -74,7 +73,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Pre sale date from"
                   :date="this.project.prj_presalesopendate"
@@ -83,7 +82,7 @@
                   :type="`optional`"
                 ></DatePicker>
               </v-col>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Pre sale date to"
                   :date="this.project.prj_presalesclosedate"
@@ -94,7 +93,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Billing date from"
                   :date="this.project.prj_executionopendate"
@@ -102,7 +101,7 @@
                   :endDate="this.project.prj_executionclosedate"
                 ></DatePicker>
               </v-col>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Billing date to"
                   :date="this.project.prj_executionclosedate"
@@ -112,7 +111,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Warranty date from"
                   :date="this.project.prj_warrantyopendate"
@@ -121,7 +120,7 @@
                   :type="`optional`"
                 ></DatePicker>
               </v-col>
-              <v-col>
+              <v-col class="py-0">
                 <DatePicker
                   textName="Warranty date to"
                   :date="this.project.prj_warrantyclosedate"
