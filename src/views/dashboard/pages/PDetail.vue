@@ -176,7 +176,7 @@
         <v-dialog v-model="treeDialog" max-width="600px" scrollable>
             <v-card>
                 <v-card-title>
-                    <span class="headline">Tasks</span>
+                    <span class="headline">Deliverables</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
@@ -191,6 +191,10 @@
                                 selection-type="independent"
                                 @input="treeSelectChanged"
                             >
+                                <template v-slot:label="{ item }">
+                                    <span class="mr-1">{{ item.sortorder }}. </span>
+                                    <span>{{ item.name }}</span>
+                                </template>
                             </v-treeview>
                         </v-form>
                     </v-container>
@@ -230,6 +234,7 @@
                             v-model="editTask.unitOfMeasure"
                             :items="units"
                             attach
+                            dense
                             label="Unit"
                             prepend-icon="mdi-menu-right"
                         ></v-select>
@@ -321,7 +326,7 @@ export default {
         task: null,
         editTask: null,
         taskDialog: false,
-        units: ["Item", "Nos"],
+        units: ["Item", "Nos",'Sq-Mtr','QV-Mtr','Ltr','Lum'],
 
         bTempColor: null,
         fTempColor: null

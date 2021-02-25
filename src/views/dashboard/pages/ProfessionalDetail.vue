@@ -135,7 +135,7 @@
                                     <v-list>
                                         <v-list-item-group
                                             v-model="selectedRoles"
-                                            color="pink"
+                                            color="primary"
                                             multiple
                                         >
                                             <template v-for="(role, i) in getRoles(type)">
