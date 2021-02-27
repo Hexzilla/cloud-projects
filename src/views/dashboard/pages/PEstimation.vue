@@ -40,7 +40,7 @@
                             <v-card flat>
                                 <v-card-text style="min-height: 400px">
                                     <div class="text-right">
-                                        <v-btn small color="pink" text @click="saveRoleData" :disabled="saveBtnStatus">
+                                        <v-btn small color="blue" @click="saveRoleData" elevation="8" :disabled="saveBtnStatus">
                                             Save
                                         </v-btn>
                                     </div>

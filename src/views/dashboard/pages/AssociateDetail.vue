@@ -110,7 +110,6 @@ export default {
             console.log("item", this.item)
             console.log("detail", this.detail)
         }
-
     }
 }
 </script>

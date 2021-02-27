@@ -17,7 +17,7 @@
         </h3>
       </div>
     </template>
-
+    <!--
     <v-col
       cols="12"
       class="px-0"
@@ -38,6 +38,51 @@
       class="caption grey--text font-weight-light"
       v-text="subText"
     />
+    -->
+    <v-col
+      cols="12"
+      class="px-0"
+      v-show="!this.detailDisable"
+    >
+      <v-divider />
+    </v-col>
+
+    <div class="text-right" style="width: 100%" v-if="!this.detailDisable">
+      <v-menu
+        offset-x
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            color="primary"
+            dark
+            text
+            v-bind="attrs"
+            v-on="on"
+            style="padding: 10px 5px !important"
+          >
+            Show Details <v-icon class="ml-2">mdi-arrow-right-bold</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item
+            v-for="(item, index) in items"
+            :key="index"
+          >
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <template v-if="item.date">
+                <v-list-item-subtitle>{{ item.date }}</v-list-item-subtitle>
+              </template>
+              <template v-if="item.name">
+                <v-list-item-subtitle>{{ item.name }}</v-list-item-subtitle>
+              </template>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+
   </base-material-card>
 </template>
 
@@ -83,7 +128,10 @@
         type: String,
         default: undefined,
       },
+      detailDisable: Boolean,
+      items: Array
     },
+
   }
 </script>
 

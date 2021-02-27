@@ -1,9 +1,6 @@
 <template>
-  <v-container
-    id="dashboard"
-    fluid
-    tag="section"
-  >
+  <v-container> 
+
     <v-row>
       <v-col
         cols="12"
@@ -12,11 +9,10 @@
       >
         <base-material-stats-card
           color="info"
-          icon="mdi-twitter"
-          title="Followers"
-          value="+245"
-          sub-icon="mdi-clock"
-          sub-text="Just Updated"
+          icon="mdi-excavator"
+          title="Projects"
+          :value="projectCount"
+          :items="getProjectItems"
         />
       </v-col>
 
@@ -27,11 +23,10 @@
       >
         <base-material-stats-card
           color="primary"
-          icon="mdi-poll"
-          title="Website Visits"
-          value="75.521"
-          sub-icon="mdi-tag"
-          sub-text="Tracked from Google Analytics"
+          icon="mdi-shield-check"
+          title="Roles"
+          :value="roleCount"
+          :items="getRoleItems"
         />
       </v-col>
 
@@ -42,11 +37,10 @@
       >
         <base-material-stats-card
           color="success"
-          icon="mdi-store"
-          title="Revenue"
-          value="$ 34,245"
-          sub-icon="mdi-calendar"
-          sub-text="Last 24 Hours"
+          icon="mdi-rowing"
+          title="Planned Leaves"
+          :value="myLeaveCount"
+          :items="getMyLeaveItems"
         />
       </v-col>
 
@@ -57,15 +51,122 @@
       >
         <base-material-stats-card
           color="orange"
-          icon="mdi-sofa"
-          title="Bookings"
-          value="184"
-          sub-icon="mdi-alert"
-          sub-icon-color="red"
-          sub-text="Get More Space..."
+          icon="mdi-sail-boat "
+          title="Collegue Leaves"
+          :value="collegueLeaveCount"
+          :items="getCollegueLeaveItems"
         />
       </v-col>
+    </v-row>
+    
+    <v-row>
+      <v-col class="py-0">
+        <v-menu
+          bottom
+          right
+          offset-y
+          origin="top left"
+          transition="scale-transition"
+        >
+          <template v-slot:activator="{ attrs, on }">
+            <v-btn
+              class="ml-2"
+              min-width="0"
+              text
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>
+                mdi-account-star
+              </v-icon>
+            </v-btn>
+          </template>
 
+          <v-list>
+            <div>
+              <span class="px-3">
+                Grade Points: {{gradePoints}}
+              </span>
+            </div>
+          </v-list>
+        </v-menu>
+      </v-col>
+      <v-col class="text-right py-0">
+        <v-menu
+          bottom
+          left
+          offset-y
+          origin="top left"
+          transition="scale-transition"
+        >
+          <template v-slot:activator="{ attrs, on }">
+            <v-btn
+              class="ml-2"
+              min-width="0"
+              text
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-badge color="pink" :content="messageCount" overlap>
+                <v-icon>
+                  mdi-bell
+                </v-icon>
+              </v-badge>
+            </v-btn>
+          </template>
+
+          <v-list
+            nav
+          >
+            <template v-for="(e, i) in messages">
+              <div  :key="i">
+                <v-list-item class="py-0">
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      <span class="body-1" :style="getStyle(e.markAsRead)">{{e.shortDesc}}</span>
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{`Published Date: ` + e.publishedDate.substring(0, 10)}}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider></v-divider>
+              </div>
+            </template>
+            <!--
+            <div>
+              <app-bar-item v-for="(e, i) in messages" :key="i">
+                <v-list-item-title>
+                  {{e.description}}
+                </v-list-item-title>
+              </app-bar-item>
+            </div>
+            -->
+          </v-list>
+        </v-menu>
+      </v-col>
+    </v-row>
+
+    
+    <v-row>
+      <v-spacer></v-spacer>
+      <v-col
+        cols="12"
+        sm="6"
+        lg="4"
+      >
+        <base-material-stats-card
+          color="purple"
+          icon="mdi-text-account"
+          title="Task"
+          :value="taskCount"
+          :detailDisable="true"
+        />
+      </v-col>
+      <v-spacer></v-spacer>
+    </v-row>
+    
+    <v-row>      
       <v-col
         cols="12"
         md="6"
@@ -76,17 +177,13 @@
         >
           <template v-slot:heading>
             <div class="display-2 font-weight-light">
-              Employees Stats
-            </div>
-
-            <div class="subtitle-1 font-weight-light">
-              New employees on 15th September, 2016
+              Active Tasks and Allocated Tasks
             </div>
           </template>
           <v-card-text>
             <v-data-table
               :headers="headers"
-              :items="items"
+              :items="activeTask"
             />
           </v-card-text>
         </base-material-card>
@@ -96,87 +193,38 @@
         cols="12"
         md="6"
       >
-        <base-material-card class="px-5 py-3">
+        <base-material-card
+          color="pink"
+          class="px-5 py-3"
+        >
           <template v-slot:heading>
-            <v-tabs
-              v-model="tabs"
-              background-color="transparent"
-              slider-color="white"
-            >
-              <span
-                class="subheading font-weight-light mx-3"
-                style="align-self: center"
-              >Tasks:</span>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">
-                  mdi-bug
-                </v-icon>
-                Bugs
-              </v-tab>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">
-                  mdi-code-tags
-                </v-icon>
-                Website
-              </v-tab>
-              <v-tab>
-                <v-icon class="mr-2">
-                  mdi-cloud
-                </v-icon>
-                Server
-              </v-tab>
-            </v-tabs>
+            <div class="display-2 font-weight-light">
+              Overdue Tasks
+            </div>
           </template>
+          <v-card-text>
+            <v-data-table
+              :headers="headers"
+              :items="dueTask"
+            />
+          </v-card-text>
+        </base-material-card>
 
-          <v-tabs-items
-            v-model="tabs"
-            class="transparent"
-          >
-            <v-tab-item
-              v-for="n in 3"
-              :key="n"
-            >
-              <v-card-text>
-                <template v-for="(task, i) in tasks[tabs]">
-                  <v-row
-                    :key="i"
-                    align="center"
-                  >
-                    <v-col cols="1">
-                      <v-list-item-action>
-                        <v-checkbox
-                          v-model="task.value"
-                          color="secondary"
-                        />
-                      </v-list-item-action>
-                    </v-col>
-
-                    <v-col cols="9">
-                      <div
-                        class="font-weight-light"
-                        v-text="task.text"
-                      />
-                    </v-col>
-
-                    <v-col
-                      cols="2"
-                      class="text-right"
-                    >
-                      <v-icon class="mx-1">
-                        mdi-pencil
-                      </v-icon>
-                      <v-icon
-                        color="error"
-                        class="mx-1"
-                      >
-                        mdi-close
-                      </v-icon>
-                    </v-col>
-                  </v-row>
-                </template>
-              </v-card-text>
-            </v-tab-item>
-          </v-tabs-items>
+        <base-material-card
+          color="primary"
+          class="px-5 py-3"
+        >
+          <template v-slot:heading>
+            <div class="display-2 font-weight-light">
+              New Tasks for next Week
+            </div>
+          </template>
+          <v-card-text>
+            <v-data-table
+              :headers="headers"
+              :items="futureTask"
+            />
+          </v-card-text>
         </base-material-card>
       </v-col>
     </v-row>
@@ -184,135 +232,180 @@
 </template>
 
 <script>
-  export default {
-    name: 'DashboardDashboard',
+import auth_api from "@/apis/auth.js";
 
-    data () {
-      return {
-        headers: [
-          {
-            sortable: false,
-            text: 'ID',
-            value: 'id',
-          },
-          {
-            sortable: false,
-            text: 'Name',
-            value: 'name',
-          },
-          {
-            sortable: false,
-            text: 'Salary',
-            value: 'salary',
-            align: 'right',
-          },
-          {
-            sortable: false,
-            text: 'Country',
-            value: 'country',
-            align: 'right',
-          },
-          {
-            sortable: false,
-            text: 'City',
-            value: 'city',
-            align: 'right',
-          },
-        ],
-        items: [
-          {
-            id: 1,
-            name: 'Dakota Rice',
-            country: 'Niger',
-            city: 'Oud-Tunrhout',
-            salary: '$35,738',
-          },
-          {
-            id: 2,
-            name: 'Minerva Hooper',
-            country: 'Cura�ao',
-            city: 'Sinaai-Waas',
-            salary: '$23,738',
-          },
-          {
-            id: 3,
-            name: 'Sage Rodriguez',
-            country: 'Netherlands',
-            city: 'Overland Park',
-            salary: '$56,142',
-          },
-          {
-            id: 4,
-            name: 'Philip Chanley',
-            country: 'Korea, South',
-            city: 'Gloucester',
-            salary: '$38,735',
-          },
-          {
-            id: 5,
-            name: 'Doris Greene',
-            country: 'Malawi',
-            city: 'Feldkirchen in Karnten',
-            salary: '$63,542',
-          },
-        ],
-        tabs: 0,
-        tasks: {
-          0: [
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: true,
-            },
-            {
-              text: 'Lines From Great Russian Literature? Or E-mails From My Boss?',
-              value: false,
-            },
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: false,
-            },
-            {
-              text: 'Create 4 Invisible User Experiences you Never Knew About',
-              value: true,
-            },
-          ],
-          1: [
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: true,
-            },
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: false,
-            },
-          ],
-          2: [
-            {
-              text: 'Lines From Great Russian Literature? Or E-mails From My Boss?',
-              value: false,
-            },
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: true,
-            },
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: true,
-            },
-          ],
-        },
-        list: {
-          0: false,
-          1: false,
-          2: false,
-        },
-      }
-    },
+export default {
+  data: () => ({
+    hrId: 0,
+    data: {},
+    activeTask: [],
+    dueTask: [],
+    futureTask: [],
 
-    methods: {
-      complete (index) {
-        this.list[index] = !this.list[index]
+    headers: [
+      {
+        sortable: false,
+        text: 'No',
+        value: 'no',
       },
+      {
+        sortable: false,
+        text: 'Project',
+        value: 'projectname',
+      },
+      {
+        sortable: false,
+        text: 'Task',
+        value: 'TaskName',
+      },
+      {
+        sortable: false,
+        text: 'Date',
+        value: 'date',
+        align: 'center',
+      }
+    ]
+  }),
+
+  async created() {
+    this.data = await auth_api.getDashBoardData('2021-02-01', '2021-03-31')
+
+    if (this.data.my_tasks.length > 0) {
+      this.activeTask = this.data.my_tasks.reduce((acc, cur)=> {
+        if (cur.showThisLine_Category == "Active-and-allocated-task") {
+          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+          cur.no = acc.length + 1
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+    
+      this.dueTask = this.data.my_tasks.reduce((acc, cur)=> {
+        if (cur.showThisLine_Category == "Task.Due") {
+          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+          cur.no = acc.length + 1
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+    
+      this.futureTask = this.data.my_tasks.reduce((acc, cur)=> {
+        if (cur.showThisLine_Category == "My.futureTasks") {
+          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+          cur.no = acc.length + 1
+          acc.push(cur)
+        }
+        return acc
+      }, [])
+    }
+    console.log('data: ', this.data)
+  },
+
+  computed: {
+    projectCount() {
+      console.log('projects', this.data.my_projects)
+      if (this.data && this.data.my_projects)
+        return this.data.my_projects.length.toString()
+      return '0'
     },
+
+    myLeaveCount() {
+      if (this.data && this.data.leaves_of_me)
+        return this.data.leaves_of_me.length.toString()
+      return '0'
+    },
+
+    collegueLeaveCount() {
+      if (this.data && this.data.leaves_of_mycolleagues)
+        return this.data.leaves_of_mycolleagues.length.toString()
+      return '0'
+    },
+
+    roleCount() {
+      if (this.data && this.data._my_roles)
+        return this.data._my_roles.length.toString()
+      return '0'
+    },
+    
+    taskCount() {
+      if (this.data && this.data.my_tasks)
+        return this.data.my_tasks.length.toString()
+      return '0'
+    },
+
+    messages() {
+      let result = []
+      if (this.data && this.data.notifications) {
+        // return this.data.notifications
+        this.data.notifications.forEach(e => {
+          result.push(e)
+          result.push(e)
+        })
+        return result
+      }
+      return []
+    },
+
+    messageCount() {
+      if (this.data && this.data.notifications)
+        return this.data.notifications.length.toString()
+      return '0'
+    },
+
+    gradePoints() {
+      if (this.data && this.data.PersonDetails)
+        return this.data.PersonDetails[0].gradePoints
+      return null
+    },
+
+    getProjectItems() {
+      if (this.data && this.data.my_projects && this.data.my_projects.length > 0) {
+        return this.data.my_projects.reduce((acc, cur) => {
+          acc.push({ title: cur.projectname })
+          return acc
+        }, [])
+      }
+      return [{title: "no data"}]
+    },
+
+    getRoleItems() {
+      if (this.data && this.data._my_roles && this.data._my_roles.length > 0) {
+        return this.data._my_roles.reduce((acc, cur) => {
+          acc.push({ title: cur.rolename })
+          return acc
+        }, [])
+      }
+      return [{title: "no data"}]
+    },
+
+    getMyLeaveItems() {
+      if (this.data && this.data.leaves_of_me && this.data.leaves_of_me.length > 0) {
+        return this.data.leaves_of_me.reduce((acc, cur) => {
+          acc.push({ title: cur.leaveReason, date: cur.dtFrom + ' ~ ' + cur.dtTo })
+          return acc
+        }, [])
+      }
+      return [{title: "no data"}]
+    },
+
+    getCollegueLeaveItems() {
+      if (this.data && this.data.leaves_of_mycolleagues && this.data.leaves_of_mycolleagues.length > 0) {
+        return this.data.leaves_of_mycolleagues.reduce((acc, cur) => {
+          acc.push({ title: cur.leaveReason, date: cur.dtFrom + ' ~ ' + cur.dtTo, name: cur.firstname + ' ' + cur.lastname })
+          return acc
+        }, [])
+      }
+      return [{title: "no data"}]
+    }
+  },
+
+  methods: {
+    getStyle(red) {
+      if (red == 1) {
+        return 'color: #E91E63'
+      }
+      return ''
+    }
   }
+}
 </script>

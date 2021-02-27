@@ -110,6 +110,25 @@ const changePassword = async function (current, newPassword) {
     return 0
 }
 
+const getDashBoardData = async function (fromDate, toDate) {
+    let jsonData = {
+        'periodFrom': fromDate,
+        'periodTo': toDate
+    }
+    try {
+        const response = await http.post("/reports/myDashboardAsUser", jsonData)
+
+        if (response.status == 200) {
+            const data = response.data
+            return data.response.allCarrierRecord.id[0][0]
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    return []
+}
+
 export default {
     login,
     getOwnId,
@@ -117,5 +136,6 @@ export default {
     getLocalprevilage,
     getRole,
     getInfo,
-    changePassword
+    changePassword,
+    getDashBoardData
 }
