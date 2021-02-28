@@ -1,5 +1,27 @@
 <template>
   <v-container> 
+    <v-progress-linear
+        class="mb-1"
+        indeterminate
+        color="green"
+        v-if="wait">
+    </v-progress-linear>
+
+    <v-card
+      id="settings"
+      class="py-2 px-4"
+      color="rgba(0, 0, 0, .3)"
+      dark
+      flat
+      link
+      min-width="100"
+      style="position: fixed; top: 245px; right: -35px; border-radius: 8px;"
+      @click="dateClick()"
+    >
+      <v-icon large>
+        mdi-clock-time-five-outline
+      </v-icon>
+    </v-card>
 
     <v-row>
       <v-col
@@ -58,98 +80,22 @@
         />
       </v-col>
     </v-row>
-    
-    <v-row>
-      <v-col class="py-0">
-        <v-menu
-          bottom
-          right
-          offset-y
-          origin="top left"
-          transition="scale-transition"
-        >
-          <template v-slot:activator="{ attrs, on }">
-            <v-btn
-              class="ml-2"
-              min-width="0"
-              text
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon>
-                mdi-account-star
-              </v-icon>
-            </v-btn>
-          </template>
 
-          <v-list>
-            <div>
-              <span class="px-3">
-                Grade Points: {{gradePoints}}
-              </span>
-            </div>
-          </v-list>
-        </v-menu>
+    <v-row>     
+      <v-col
+        cols="12"
+        sm="6"
+        lg="4"
+      >
+        <base-material-stats-card
+          color="pink"
+          icon="mdi-bell"
+          title="Notification"
+          :value="messageCount"
+          :items="messages"
+        />
       </v-col>
-      <v-col class="text-right py-0">
-        <v-menu
-          bottom
-          left
-          offset-y
-          origin="top left"
-          transition="scale-transition"
-        >
-          <template v-slot:activator="{ attrs, on }">
-            <v-btn
-              class="ml-2"
-              min-width="0"
-              text
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-badge color="pink" :content="messageCount" overlap>
-                <v-icon>
-                  mdi-bell
-                </v-icon>
-              </v-badge>
-            </v-btn>
-          </template>
-
-          <v-list
-            nav
-          >
-            <template v-for="(e, i) in messages">
-              <div  :key="i">
-                <v-list-item class="py-0">
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      <span class="body-1" :style="getStyle(e.markAsRead)">{{e.shortDesc}}</span>
-                    </v-list-item-title>
-                    <v-list-item-subtitle>
-                      {{`Published Date: ` + e.publishedDate.substring(0, 10)}}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-divider></v-divider>
-              </div>
-            </template>
-            <!--
-            <div>
-              <app-bar-item v-for="(e, i) in messages" :key="i">
-                <v-list-item-title>
-                  {{e.description}}
-                </v-list-item-title>
-              </app-bar-item>
-            </div>
-            -->
-          </v-list>
-        </v-menu>
-      </v-col>
-    </v-row>
-
-    
-    <v-row>
-      <v-spacer></v-spacer>
+      
       <v-col
         cols="12"
         sm="6"
@@ -163,7 +109,20 @@
           :detailDisable="true"
         />
       </v-col>
-      <v-spacer></v-spacer>
+
+      <v-col
+        cols="12"
+        sm="6"
+        lg="4"
+      >
+        <base-material-stats-card
+          color="primary"
+          icon="mdi-account-star"
+          title="Grade Points"
+          :value="gradePoints"
+          :items="getPersonalItems"
+        />
+      </v-col>
     </v-row>
     
     <v-row>      
@@ -228,14 +187,58 @@
         </base-material-card>
       </v-col>
     </v-row>
+
+    
+    <v-dialog v-model="dateDialog" max-width="500px">
+        <v-card>
+            <v-card-title>
+                <span class="headline">Change Date</span>
+            </v-card-title>
+            <v-card-text>
+                <v-container>
+                    <div>
+                        <DatePicker
+                            textName="Date From"
+                            :date="fromDate"
+                            :submit="(date) => fromDate = date"
+                            :endDate="toDate"
+                        ></DatePicker>
+                    </div>
+                    <div>
+                        <DatePicker
+                            textName="Date To"
+                            :date="toDate"
+                            :submit="(date) => toDate = date"
+                            :startDate="fromDate"
+                        ></DatePicker>
+                    </div>
+                </v-container>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="dateDialog = false"> Cancel </v-btn>
+                <v-btn color="blue darken-1" text @click="changeDate">
+                    Save
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
+import DatePicker from './pages/DatePicker'
 import auth_api from "@/apis/auth.js";
+import daily_api from "@/apis/daily.js";
 
 export default {
+  components: {
+      DatePicker
+  },
+
   data: () => ({
+    wait: false,
+
     hrId: 0,
     data: {},
     activeTask: [],
@@ -264,41 +267,15 @@ export default {
         value: 'date',
         align: 'center',
       }
-    ]
+    ],
+
+    toDate: null,
+    fromDate: null,
+    dateDialog: false
   }),
 
-  async created() {
-    this.data = await auth_api.getDashBoardData('2021-02-01', '2021-03-31')
-
-    if (this.data.my_tasks.length > 0) {
-      this.activeTask = this.data.my_tasks.reduce((acc, cur)=> {
-        if (cur.showThisLine_Category == "Active-and-allocated-task") {
-          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
-          cur.no = acc.length + 1
-          acc.push(cur)
-        }
-        return acc
-      }, [])
-    
-      this.dueTask = this.data.my_tasks.reduce((acc, cur)=> {
-        if (cur.showThisLine_Category == "Task.Due") {
-          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
-          cur.no = acc.length + 1
-          acc.push(cur)
-        }
-        return acc
-      }, [])
-    
-      this.futureTask = this.data.my_tasks.reduce((acc, cur)=> {
-        if (cur.showThisLine_Category == "My.futureTasks") {
-          cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
-          cur.no = acc.length + 1
-          acc.push(cur)
-        }
-        return acc
-      }, [])
-    }
-    console.log('data: ', this.data)
+  created() {
+    this.initialize()
   },
 
   computed: {
@@ -336,10 +313,9 @@ export default {
     messages() {
       let result = []
       if (this.data && this.data.notifications) {
-        // return this.data.notifications
         this.data.notifications.forEach(e => {
-          result.push(e)
-          result.push(e)
+          console.log('eee', e)
+          result.push({title: e.shortDesc, date: e.publishedDate.toString().substring(0, 10)})
         })
         return result
       }
@@ -354,8 +330,8 @@ export default {
 
     gradePoints() {
       if (this.data && this.data.PersonDetails)
-        return this.data.PersonDetails[0].gradePoints
-      return null
+        return this.data.PersonDetails[0].gradePoints.toString()
+      return ''
     },
 
     getProjectItems() {
@@ -396,15 +372,76 @@ export default {
         }, [])
       }
       return [{title: "no data"}]
+    },
+
+    getPersonalItems() {
+      if (this.data && this.data.PersonDetails) {
+        return this.data.PersonDetails.reduce((acc, cur) => {
+          acc.push({ title: cur.designationName})
+          acc.push({ title: cur.designationCode})
+          acc.push({ title: cur.designationScalecode})
+          return acc
+        }, [])
+      }
+      return [{title: "no data"}]
     }
   },
 
   methods: {
+    async initialize() {
+      this.wait = true
+      if (!this.toDate) {
+        this.toDate = daily_api.getToday()
+        this.fromDate = daily_api.getDayByDiff(this.toDate, -30)
+      }
+      this.data = await auth_api.getDashBoardData(this.fromDate, this.toDate)
+
+      if (this.data.my_tasks.length > 0) {
+        this.activeTask = this.data.my_tasks.reduce((acc, cur)=> {
+          if (cur.showThisLine_Category == "Active-and-allocated-task") {
+            cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+            cur.no = acc.length + 1
+            acc.push(cur)
+          }
+          return acc
+        }, [])
+      
+        this.dueTask = this.data.my_tasks.reduce((acc, cur)=> {
+          if (cur.showThisLine_Category == "Task.Due") {
+            cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+            cur.no = acc.length + 1
+            acc.push(cur)
+          }
+          return acc
+        }, [])
+      
+        this.futureTask = this.data.my_tasks.reduce((acc, cur)=> {
+          if (cur.showThisLine_Category == "My.futureTasks") {
+            cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
+            cur.no = acc.length + 1
+            acc.push(cur)
+          }
+          return acc
+        }, [])
+      }
+      console.log('data: ', this.data)
+      this.wait = false
+    },
+
     getStyle(red) {
       if (red == 1) {
         return 'color: #E91E63'
       }
       return ''
+    },
+
+    dateClick() {
+      this.dateDialog = true
+    },
+
+    changeDate() {
+      this.dateDialog = false
+      this.initialize()
     }
   }
 }

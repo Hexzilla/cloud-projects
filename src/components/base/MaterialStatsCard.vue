@@ -42,7 +42,6 @@
     <v-col
       cols="12"
       class="px-0"
-      v-show="!this.detailDisable"
     >
       <v-divider />
     </v-col>
@@ -83,6 +82,16 @@
       </v-menu>
     </div>
 
+    <div class="text-center" style="width:100%" v-if="this.detailDisable">
+      <v-btn
+        color="primary"
+        dark
+        text
+        style="padding: 10px 5px !important"
+      >
+        <v-icon class="ml-2">mdi-arrow-down-bold</v-icon>
+      </v-btn>
+    </div>
   </base-material-card>
 </template>
 
