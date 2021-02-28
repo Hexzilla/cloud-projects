@@ -329,7 +329,7 @@ export default {
     },
 
     gradePoints() {
-      if (this.data && this.data.PersonDetails)
+      if (this.data && this.data.PersonDetails && this.data.PersonDetails[0] && this.data.PersonDetails[0].gradePoints)
         return this.data.PersonDetails[0].gradePoints.toString()
       return ''
     },
@@ -396,7 +396,12 @@ export default {
       }
       this.data = await auth_api.getDashBoardData(this.fromDate, this.toDate)
 
-      if (this.data.my_tasks.length > 0) {
+      this.activeTask = []
+      this.dueTask = []
+      this.futureTask = []
+
+      if (this.data.my_tasks && this.data.my_tasks.length > 0) {
+
         this.activeTask = this.data.my_tasks.reduce((acc, cur)=> {
           if (cur.showThisLine_Category == "Active-and-allocated-task") {
             cur.date = cur.estimatedStartDate + ' ~ ' + cur.estimatedEndDate
